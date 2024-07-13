@@ -1,0 +1,4 @@
+chumpy @ git+https://github.com/mattloper/chumpy@51d5afd92a8ded3637553be8cef41f328a1c863a
+numpy==1.26.4+computecanada
+scipy==1.13.1+computecanada
+six==1.16.0+computecanada
