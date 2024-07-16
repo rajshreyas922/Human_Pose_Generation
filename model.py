@@ -9,11 +9,15 @@ class H_theta(nn.Module):
     def __init__(self, input_dim, output_dim):
         super(H_theta, self).__init__()
         self.fc = nn.Sequential(
-            nn.Linear(input_dim, 100),
+            nn.Linear(input_dim, 200),
             nn.ReLU(),
-            nn.Linear(100, 100),
+            nn.Linear(200, 500),
             nn.ReLU(),
-            nn.Linear(100, 100),
+            nn.Linear(500, 500),
+            nn.ReLU(),
+            nn.Linear(500, 200),
+            nn.ReLU(),
+            nn.Linear(200, 100),
             nn.ReLU(),
             nn.Linear(100, output_dim)
         )
@@ -61,12 +65,38 @@ def find_nns(Y, G):
         result[i] = diffs
     return torch.argmin(result).item()
 
-def f_loss(Y, G):
-    num_curves = Y.shape[0]
-    total_loss = 0.0
-    for i in range(num_curves):
-        diffs = torch.sum((G[i, :, :] - Y[i, :, :]) ** 2, dim=1)
-        total_loss += diffs.mean()
+# def f_loss(Y, G, pushing_weight=1.0, pushing_radius=1.0):
+#     num_curves = Y.shape[0]
+#     total_loss = 0.0
+#     pushing_loss = 0.0
+    
+#     for i in range(num_curves):
+#         diffs = (((G[i, :, 0] - Y[i, :, 0]) ** 2 + (G[i, :, 1] - Y[i, :, 1]) ** 2) + 3 * (G[i, :, 2] - Y[i, :, 2]) ** 2)
+#         total_loss += diffs.mean()
+        
+#         num_points = G.shape[1]
+#         for j in range(num_points - 1):
+#             z_distance = torch.abs(G[i, j, 2] - G[i, j + 1, 2])
+#             if z_distance < pushing_radius:
+#                 pushing_loss += pushing_weight * (pushing_radius - z_distance) ** 2
+    
+#     result = (total_loss / num_curves) + (pushing_loss / num_curves)
+#     return result
 
-    result = total_loss / num_curves
-    return result
+def f_loss(Y, G, pushing_weight=1.0, pushing_radius=1.0):
+    num_curves = Y.shape[0]
+    
+
+    diffs = ((G[:, :, 0] - Y[:, :, 0]) ** 2 + 
+             (G[:, :, 1] - Y[:, :, 1]) ** 2 + 
+             (G[:, :, 2] - Y[:, :, 2]) ** 2)
+    total_loss = diffs.mean()
+
+    # z_distances = torch.abs(G[:, :-1, 2] - G[:, 1:, 2])
+    # pushing_mask = z_distances < pushing_radius
+    # pushing_loss = pushing_weight * ((pushing_radius - z_distances[pushing_mask]) ** 2).sum()
+    
+    # result = total_loss + (pushing_loss / num_curves)
+    return total_loss
+
+

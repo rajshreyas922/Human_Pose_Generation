@@ -12,18 +12,17 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.manual_seed(0)
 np.random.seed(0)
 
-epochs = 1000
-staleness = 100
-num_Z_samples = 40
+epochs = 5000
+staleness = 10
+num_Z_samples = 15
 lr = 0.001
-num_points = 6890
-xdim = 2
-zdim = 6
+xdim = 3
+zdim = 100
+num_points = int(np.power(1000, 1/xdim))
 
-
-H_t = H_theta(input_dim=zdim+1, output_dim=3).to(device)
+H_t = H_theta(input_dim=zdim+xdim, output_dim=3).to(device)
 optimizer = optim.Adam(H_t.parameters(), lr=lr)
-scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=500, gamma=0.1)
+scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=1000, gamma=0.01)
 losses = []
 
 
@@ -41,20 +40,52 @@ def obj_to_tensor(file_path):
     vertex_tensor = torch.tensor(vertices)
     return vertex_tensor
 
+min_b = -1
+max_b = 1
+
+
+if xdim == 2:
+    t1 = torch.linspace(min_b, max_b, num_points)
+    t2 = torch.linspace(min_b, max_b, num_points)
+    grid_t1, grid_t2 = torch.meshgrid((t1, t2), indexing='ij')
+    t = torch.stack((grid_t1, grid_t2), dim=-1).reshape(-1, xdim).to(device)
+elif xdim == 3:
+    t1 = torch.linspace(min_b, max_b, num_points)
+    t2 = torch.linspace(min_b, max_b, num_points)
+    t3 = torch.linspace(min_b, max_b, num_points)
+    grid_t1, grid_t2, grid_t3 = torch.meshgrid((t1, t2, t3), indexing='ij')
+    t = torch.stack((grid_t1, grid_t2, grid_t3), dim=-1).reshape(-1, xdim).to(device)
+
 
 file_path = 'human_body_model.obj'
 vertex_tensor = obj_to_tensor(file_path)
-points = vertex_tensor.unsqueeze(0).to(device)
+points = vertex_tensor.unsqueeze(0)[:, :num_points**xdim,:].to(device)
+#points[:,:,2] = 2*points[:, :, 2]
+# mask = points[:,:,2] > 0
+# mask = mask.squeeze(0)
+# points = points[:,mask,:]
+# indices_curve1 = torch.randint(0, 2972, (num_points**2,))
+# points = points[:, indices_curve1, :]
 
-t1 = torch.linspace(-500, 500, num_points).to(device).unsqueeze(1)
-t2 = torch.linspace(-500, 500, num_points).to(device).unsqueeze(1)
+print("t", t.shape)
+print("Points", points.shape)
 
-grid_t1, grid_t2 = torch.meshgrid(t1, t2, indexing='ij')
-#print(t1.shape, t2.shape)
-#print(grid_t1.shape, grid_t2.shape)
+# x = points[0, 0:1000, 0].to('cpu')
+# y = points[0, 0:1000, 1].to('cpu')
+# z = points[0, 0:1000, 2].to('cpu')
 
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection='3d')
+# ax.scatter(x, y, z, c='b', marker='o')
 
-exit()
+# ax.set_xlabel('X Label')
+# ax.set_ylabel('Y Label')
+# ax.set_zlabel('Z Label')
+# ax.set_title('3D Scatter Plot')
+
+# plt.show()
+
+# exit()
 
 
 
@@ -62,7 +93,8 @@ for e in tqdm(range(epochs)):
     with torch.no_grad():
         if e % staleness == 0:
             Zs = generate_NN_latent_functions(num_Z_samples, xdim, zdim, lambda_value=1)
-            Zxs = torch.empty((num_Z_samples, num_points, zdim+1)).to(device)
+            Zxs = torch.empty((num_Z_samples, num_points**xdim, zdim+xdim)).to(device)
+            
             for i, model in enumerate(Zs):
                 model = model.to(device)
                 Zx = model(t)
@@ -73,7 +105,7 @@ for e in tqdm(range(epochs)):
             imle_nn_z = [Zs[idx] for idx in imle_nns]
 
     optimizer.zero_grad()
-    imle_transformed_points = torch.empty((points.shape[0], num_points, zdim+1)).to(device)
+    imle_transformed_points = torch.empty((points.shape[0], num_points**xdim, zdim+xdim)).to(device)
     for i, model in enumerate(imle_nn_z):
         model = model.to(device)
         Zx = model(t)  
@@ -81,7 +113,7 @@ for e in tqdm(range(epochs)):
         imle_transformed_points[i] = Zx
 
     outs = H_t(imle_transformed_points) 
-    loss = f_loss(outs, points)
+    loss = f_loss(outs, points, pushing_radius=0.5, pushing_weight=2.5)
     losses.append(loss.item())
     loss.backward()
     optimizer.step()
@@ -96,12 +128,20 @@ plt.show()
 print(losses.pop())
 
 
-t = torch.linspace(-500, 500, 6890)
-t = t.unsqueeze(1).to(device)
-print(t.shape)
 
+if xdim == 2:
+    t1 = torch.linspace(min_b, max_b, num_points)
+    t2 = torch.linspace(min_b, max_b, num_points)
+    grid_t1, grid_t2 = torch.meshgrid((t1, t2), indexing='ij')
+    t = torch.stack((grid_t1, grid_t2), dim=-1).reshape(-1, xdim).to(device)
+elif xdim == 3:
+    t1 = torch.linspace(min_b, max_b, num_points)
+    t2 = torch.linspace(min_b, max_b, num_points)
+    t3 = torch.linspace(min_b, max_b, num_points)
+    grid_t1, grid_t2, grid_t3 = torch.meshgrid((t1, t2, t3), indexing='ij')
+    t = torch.stack((grid_t1, grid_t2, grid_t3), dim=-1).reshape(-1, xdim).to(device)
 
-outputs = torch.empty((15, 6890, 3))
+outputs = torch.empty((15, num_points**3, 3))
 for i in range(15):
     Zs = generate_NN_latent_functions(1, xdim, zdim)[0].to(device)
     Z = Zs(t)
@@ -109,7 +149,7 @@ for i in range(15):
     out = H_t(Z)
     outputs[i] = out
 
-print(outputs.shape)
+print("Output shape", outputs.mean(dim=1))
 
 def save_obj_file(vertices, file_path):
     with open(file_path, 'w') as file:
@@ -132,6 +172,6 @@ base_file_path = 'cursed_humans/vertex_object'
 tensor_to_obj_files(outputs, base_file_path)
 
 mesh = Mesh("cursed_humans\\vertex_object_2.obj",)
-mesh.show()
+mesh.show(axes=True)
 
 
