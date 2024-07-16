@@ -21,7 +21,7 @@
 import sys
 
 #Change to your directory for this to work - raj
-sys.path.append('/project/6054857/rsp8/STAR')
+sys.path.append('STAR')
 import matplotlib
 
 from star.pytorch.star import STAR

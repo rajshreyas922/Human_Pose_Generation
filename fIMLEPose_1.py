@@ -12,13 +12,13 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.manual_seed(0)
 np.random.seed(0)
 
-epochs = 5000
+epochs = 2500
 staleness = 10
-num_Z_samples = 15
+num_Z_samples = 40
 lr = 0.001
-xdim = 3
-zdim = 100
-num_points = int(np.power(1000, 1/xdim))
+xdim = 2
+zdim = 20
+num_points = int(np.power(6890, 1/xdim))
 
 H_t = H_theta(input_dim=zdim+xdim, output_dim=3).to(device)
 optimizer = optim.Adam(H_t.parameters(), lr=lr)
@@ -57,9 +57,12 @@ elif xdim == 3:
     t = torch.stack((grid_t1, grid_t2, grid_t3), dim=-1).reshape(-1, xdim).to(device)
 
 
-file_path = 'human_body_model.obj'
-vertex_tensor = obj_to_tensor(file_path)
-points = vertex_tensor.unsqueeze(0)[:, :num_points**xdim,:].to(device)
+
+vertex_tensor = obj_to_tensor('not_Tpose_pointcloud.obj').unsqueeze(0)
+vertex_tensor_2 = obj_to_tensor('human_body_model.obj').unsqueeze(0)
+vertex_tensor_main = torch.concat((vertex_tensor, vertex_tensor_2), dim=0)
+points = vertex_tensor_main[:, :num_points**xdim,:].to(device)
+
 #points[:,:,2] = 2*points[:, :, 2]
 # mask = points[:,:,2] > 0
 # mask = mask.squeeze(0)
@@ -113,7 +116,7 @@ for e in tqdm(range(epochs)):
         imle_transformed_points[i] = Zx
 
     outs = H_t(imle_transformed_points) 
-    loss = f_loss(outs, points, pushing_radius=0.5, pushing_weight=2.5)
+    loss = f_loss(outs, points, pushing_radius=0.01, pushing_weight=3.5)
     losses.append(loss.item())
     loss.backward()
     optimizer.step()
@@ -141,7 +144,7 @@ elif xdim == 3:
     grid_t1, grid_t2, grid_t3 = torch.meshgrid((t1, t2, t3), indexing='ij')
     t = torch.stack((grid_t1, grid_t2, grid_t3), dim=-1).reshape(-1, xdim).to(device)
 
-outputs = torch.empty((15, num_points**3, 3))
+outputs = torch.empty((15, num_points**xdim, 3))
 for i in range(15):
     Zs = generate_NN_latent_functions(1, xdim, zdim)[0].to(device)
     Z = Zs(t)

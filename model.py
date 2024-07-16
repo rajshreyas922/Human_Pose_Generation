@@ -87,16 +87,16 @@ def f_loss(Y, G, pushing_weight=1.0, pushing_radius=1.0):
     num_curves = Y.shape[0]
     
 
-    diffs = ((G[:, :, 0] - Y[:, :, 0]) ** 2 + 
+    diffs = torch.sqrt((G[:, :, 0] - Y[:, :, 0]) ** 2 + 
              (G[:, :, 1] - Y[:, :, 1]) ** 2 + 
              (G[:, :, 2] - Y[:, :, 2]) ** 2)
     total_loss = diffs.mean()
 
-    # z_distances = torch.abs(G[:, :-1, 2] - G[:, 1:, 2])
+    # z_distances = torch.abs(G[:, :-1, :] - G[:, 1:, :])
     # pushing_mask = z_distances < pushing_radius
     # pushing_loss = pushing_weight * ((pushing_radius - z_distances[pushing_mask]) ** 2).sum()
     
-    # result = total_loss + (pushing_loss / num_curves)
+    #result = total_loss + (pushing_loss / num_curves)
     return total_loss
 
 
