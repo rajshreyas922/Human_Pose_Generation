@@ -15,9 +15,9 @@ class H_theta(nn.Module):
             nn.ReLU(),
             nn.Linear(500, 500),
             nn.ReLU(),
-            nn.Linear(500, 200),
+            nn.Linear(500, 500),
             nn.ReLU(),
-            nn.Linear(200, 100),
+            nn.Linear(500, 100),
             nn.ReLU(),
             nn.Linear(100, output_dim)
         )

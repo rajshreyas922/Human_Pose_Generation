@@ -58,9 +58,13 @@ elif xdim == 3:
 
 
 
-vertex_tensor = obj_to_tensor('not_Tpose_pointcloud.obj').unsqueeze(0)
-vertex_tensor_2 = obj_to_tensor('human_body_model.obj').unsqueeze(0)
-vertex_tensor_main = torch.concat((vertex_tensor, vertex_tensor_2), dim=0)
+# vertex_tensor = obj_to_tensor('STAR\\results\human_body_model_1.obj').unsqueeze(0)
+# vertex_tensor_2 = obj_to_tensor('STAR\\results\human_body_model_2.obj').unsqueeze(0)
+
+vertex_tensor = obj_to_tensor('ProvNERF Pose Generation\human_body_model_tf_1.obj').unsqueeze(0)
+vertex_tensor_2 = obj_to_tensor('ProvNERF Pose Generation\\not_Tpose_pointcloud.obj').unsqueeze(0)
+vertex_tensor_3 = obj_to_tensor('ProvNERF Pose Generation\\human_body_model.obj').unsqueeze(0)
+vertex_tensor_main = torch.concat((vertex_tensor, vertex_tensor_2, vertex_tensor_3), dim=0)
 points = vertex_tensor_main[:, :num_points**xdim,:].to(device)
 
 #points[:,:,2] = 2*points[:, :, 2]
@@ -169,12 +173,12 @@ def tensor_to_obj_files(tensor, base_file_path):
 
 
 # Define the base file path (without extension and index)
-base_file_path = 'cursed_humans/vertex_object'
+base_file_path = 'ProvNERF Pose Generation\ProvNERF results/vertex_object'
 
 # Convert tensor to .obj files
 tensor_to_obj_files(outputs, base_file_path)
 
-mesh = Mesh("cursed_humans\\vertex_object_2.obj",)
+mesh = Mesh("ProvNERF Pose Generation\ProvNERF results\\vertex_object_2.obj",)
 mesh.show(axes=True)
 
 

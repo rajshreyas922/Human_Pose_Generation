@@ -18,7 +18,9 @@
 #
 # Code Developed by:
 # Ahmed A. A. Osman
-
+import sys
+import tensorflow
+sys.path.append('STAR')
 from star.ch.star import STAR
 import numpy as np
 

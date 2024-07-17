@@ -18,14 +18,26 @@
 #
 # Code Developed by:
 # Ahmed A. A. Osman
-
+import sys
+sys.path.append('STAR')
 from star.tf.star import STAR
 import tensorflow as tf
 import numpy as np
+
 batch_size = 10
 gender = 'male'
 star = STAR()
-trans = tf.constant(np.zeros((1,3)),dtype=tf.float32)
-pose = tf.constant(np.zeros((1,72)),dtype=tf.float32)
-betas = tf.constant(np.zeros((1,10)),dtype=tf.float32)
-print(star(pose,betas,trans))
+trans = tf.constant(np.zeros((batch_size, 3)), dtype=tf.float32)
+pose = tf.constant(np.random.randn(batch_size, 72)*0.1, dtype=tf.float32)
+betas = tf.constant(np.random.randn(batch_size, 10)*3, dtype=tf.float32) 
+
+# Forward pass through the STAR model
+result = star(pose, betas, trans)
+print(result)
+
+# Create OBJ files
+for i in range(batch_size):
+    with open(f'STAR/results/human_body_model_tf_{i + 1}.obj', 'w') as f:
+        for vertex in result[0]:  # Assuming all results are identical for each batch in this example
+            f.write(f'v {vertex[0]} {vertex[1]} {vertex[2]}\n')
+
