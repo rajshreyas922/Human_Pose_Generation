@@ -27,7 +27,6 @@ import numpy as np
 
 
 def idx_to_theta(index):
-
     return [index*3 ,index*3 + 1,index*3 + 2]
 
 
@@ -39,18 +38,17 @@ trans = tf.convert_to_tensor(np.zeros((batch_size, 3)), dtype=tf.float32)
 pose = np.zeros((batch_size, 72), dtype= np.float32)
 
 
-#https://i.sstatic.net/0iuCT.png
 
-pose[0, 3] = 0 #Gamma
-pose[0, 4] = 0 #Alpha
-pose[0, 5] = 0 #Beta
+
+pose[0, 3] = 0 
+pose[0, 4] = 0 
+pose[0, 5] = 0 
 
 shoulder_left = idx_to_theta(16)
 shoulder_right = idx_to_theta(17)
 
 pose[0, shoulder_left[1]] = np.pi/4
 pose[0, shoulder_right[1]] = np.pi/4
-
 
 pose[0, shoulder_left[2]] = np.pi/4
 pose[0, shoulder_right[2]] = -np.pi/4
