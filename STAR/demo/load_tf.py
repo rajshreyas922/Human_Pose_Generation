@@ -24,12 +24,45 @@ from star.tf.star import STAR
 import tensorflow as tf
 import numpy as np
 
-batch_size = 10
+
+
+def idx_to_theta(index):
+
+    return [index*3 ,index*3 + 1,index*3 + 2]
+
+
+batch_size = 1
 gender = 'male'
 star = STAR()
-trans = tf.constant(np.zeros((batch_size, 3)), dtype=tf.float32)
-pose = tf.constant(np.random.randn(batch_size, 72)*0.1, dtype=tf.float32)
-betas = tf.constant(np.random.randn(batch_size, 10)*3, dtype=tf.float32) 
+trans = tf.convert_to_tensor(np.zeros((batch_size, 3)), dtype=tf.float32)
+
+pose = np.zeros((batch_size, 72), dtype= np.float32)
+
+
+#https://i.sstatic.net/0iuCT.png
+
+pose[0, 3] = 0 #Gamma
+pose[0, 4] = 0 #Alpha
+pose[0, 5] = 0 #Beta
+
+shoulder_left = idx_to_theta(16)
+shoulder_right = idx_to_theta(17)
+
+pose[0, shoulder_left[1]] = np.pi/4
+pose[0, shoulder_right[1]] = np.pi/4
+
+
+pose[0, shoulder_left[2]] = np.pi/4
+pose[0, shoulder_right[2]] = -np.pi/4
+
+leg_left = idx_to_theta(1)
+leg_right = idx_to_theta(2)
+
+pose[0, leg_left[0]] = np.pi/4
+pose[0, leg_right[0]] = -np.pi/4
+
+pose = tf.convert_to_tensor(pose)
+betas = tf.constant(np.random.randn(batch_size, 10)*0, dtype=tf.float32) 
 
 # Forward pass through the STAR model
 result = star(pose, betas, trans)

@@ -5,13 +5,18 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 import numpy as np
 
+
+import torch
+import torch.nn.functional as F
+from scipy.optimize import linear_sum_assignment
+
 class H_theta(nn.Module):
     def __init__(self, input_dim, output_dim):
         super(H_theta, self).__init__()
         self.fc = nn.Sequential(
-            nn.Linear(input_dim, 200),
+            nn.Linear(input_dim, 250),
             nn.ReLU(),
-            nn.Linear(200, 500),
+            nn.Linear(250, 500),
             nn.ReLU(),
             nn.Linear(500, 500),
             nn.ReLU(),
@@ -83,20 +88,26 @@ def find_nns(Y, G):
 #     result = (total_loss / num_curves) + (pushing_loss / num_curves)
 #     return result
 
-def f_loss(Y, G, pushing_weight=1.0, pushing_radius=1.0):
-    num_curves = Y.shape[0]
-    
-
+def f_loss(Y, G, pushing_weight=1.0, pushing_radius=1.0):  
     diffs = torch.sqrt((G[:, :, 0] - Y[:, :, 0]) ** 2 + 
              (G[:, :, 1] - Y[:, :, 1]) ** 2 + 
              (G[:, :, 2] - Y[:, :, 2]) ** 2)
     total_loss = diffs.mean()
 
-    # z_distances = torch.abs(G[:, :-1, :] - G[:, 1:, :])
-    # pushing_mask = z_distances < pushing_radius
-    # pushing_loss = pushing_weight * ((pushing_radius - z_distances[pushing_mask]) ** 2).sum()
-    
-    #result = total_loss + (pushing_loss / num_curves)
     return total_loss
 
 
+def chamfer_distance(Y, G):
+
+    batch_size, num_points_Y, _ = Y.shape
+    _, num_points_G, _ = G.shape
+
+    Y_expand = Y.unsqueeze(2).expand(batch_size, num_points_Y, num_points_G, 3)
+    G_expand = G.unsqueeze(1).expand(batch_size, num_points_Y, num_points_G, 3)
+    distances = torch.norm(Y_expand - G_expand, dim=3)
+
+    min_dist_Y_to_G = torch.min(distances, dim=2)[0]
+    min_dist_G_to_Y = torch.min(distances, dim=1)[0]
+
+    chamfer_dist = torch.mean(min_dist_Y_to_G) + torch.mean(min_dist_G_to_Y)
+    return chamfer_dist

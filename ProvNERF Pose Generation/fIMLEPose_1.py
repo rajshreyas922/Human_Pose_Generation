@@ -17,7 +17,7 @@ staleness = 10
 num_Z_samples = 40
 lr = 0.001
 xdim = 2
-zdim = 20
+zdim = 5
 num_points = int(np.power(6890, 1/xdim))
 
 H_t = H_theta(input_dim=zdim+xdim, output_dim=3).to(device)
@@ -43,12 +43,17 @@ def obj_to_tensor(file_path):
 min_b = -1
 max_b = 1
 
+if xdim == 1:
+    t = torch.linspace(-1, -1, num_points).to(device)
 
 if xdim == 2:
     t1 = torch.linspace(min_b, max_b, num_points)
     t2 = torch.linspace(min_b, max_b, num_points)
     grid_t1, grid_t2 = torch.meshgrid((t1, t2), indexing='ij')
     t = torch.stack((grid_t1, grid_t2), dim=-1).reshape(-1, xdim).to(device)
+    # new_point = torch.tensor([[max_b, max_b]], dtype=t.dtype, device=device)
+
+    # t = torch.cat((t, new_point), dim=0)
 elif xdim == 3:
     t1 = torch.linspace(min_b, max_b, num_points)
     t2 = torch.linspace(min_b, max_b, num_points)
@@ -61,11 +66,11 @@ elif xdim == 3:
 # vertex_tensor = obj_to_tensor('STAR\\results\human_body_model_1.obj').unsqueeze(0)
 # vertex_tensor_2 = obj_to_tensor('STAR\\results\human_body_model_2.obj').unsqueeze(0)
 
-vertex_tensor = obj_to_tensor('ProvNERF Pose Generation\human_body_model_tf_1.obj').unsqueeze(0)
-vertex_tensor_2 = obj_to_tensor('ProvNERF Pose Generation\\not_Tpose_pointcloud.obj').unsqueeze(0)
-vertex_tensor_3 = obj_to_tensor('ProvNERF Pose Generation\\human_body_model.obj').unsqueeze(0)
-vertex_tensor_main = torch.concat((vertex_tensor, vertex_tensor_2, vertex_tensor_3), dim=0)
-points = vertex_tensor_main[:, :num_points**xdim,:].to(device)
+vertex_tensor = obj_to_tensor('ProvNERF Pose Generation\walk_kinda.obj').unsqueeze(0)
+#vertex_tensor_2 = obj_to_tensor('ProvNERF Pose Generation\\not_Tpose_pointcloud.obj').unsqueeze(0)
+# vertex_tensor_3 = obj_to_tensor('ProvNERF Pose Generation\\human_body_model.obj').unsqueeze(0)
+#vertex_tensor_main = torch.concat((vertex_tensor, vertex_tensor_2), dim=0)
+points = vertex_tensor[:, :num_points**xdim,:].to(device)
 
 #points[:,:,2] = 2*points[:, :, 2]
 # mask = points[:,:,2] > 0
@@ -120,13 +125,13 @@ for e in tqdm(range(epochs)):
         imle_transformed_points[i] = Zx
 
     outs = H_t(imle_transformed_points) 
-    loss = f_loss(outs, points, pushing_radius=0.01, pushing_weight=3.5)
+    loss = chamfer_distance(outs, points)
     losses.append(loss.item())
     loss.backward()
     optimizer.step()
     scheduler.step()
 
-
+print(f_loss(outs, points))
 plt.plot(losses)
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
