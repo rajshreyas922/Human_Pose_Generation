@@ -59,7 +59,11 @@ leg_right = idx_to_theta(2)
 pose[0, leg_left[0]] = np.pi/4
 pose[0, leg_right[0]] = -np.pi/4
 
+
+
 pose = tf.convert_to_tensor(pose)
+
+
 betas = tf.constant(np.random.randn(batch_size, 10)*0, dtype=tf.float32) 
 
 # Forward pass through the STAR model

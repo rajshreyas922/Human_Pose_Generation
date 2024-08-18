@@ -12,9 +12,9 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.manual_seed(0)
 np.random.seed(0)
 
-epochs = 2500
-staleness = 10
-num_Z_samples = 40
+epochs = 5000
+staleness = 15
+num_Z_samples = 20
 lr = 0.001
 xdim = 2
 zdim = 5
@@ -22,7 +22,7 @@ num_points = int(np.power(6890, 1/xdim))
 
 H_t = H_theta(input_dim=zdim+xdim, output_dim=3).to(device)
 optimizer = optim.Adam(H_t.parameters(), lr=lr)
-scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=1000, gamma=0.01)
+#scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=1000, gamma=0.01)
 losses = []
 
 
@@ -45,15 +45,11 @@ max_b = 1
 
 if xdim == 1:
     t = torch.linspace(-1, -1, num_points).to(device)
-
 if xdim == 2:
     t1 = torch.linspace(min_b, max_b, num_points)
     t2 = torch.linspace(min_b, max_b, num_points)
     grid_t1, grid_t2 = torch.meshgrid((t1, t2), indexing='ij')
     t = torch.stack((grid_t1, grid_t2), dim=-1).reshape(-1, xdim).to(device)
-    # new_point = torch.tensor([[max_b, max_b]], dtype=t.dtype, device=device)
-
-    # t = torch.cat((t, new_point), dim=0)
 elif xdim == 3:
     t1 = torch.linspace(min_b, max_b, num_points)
     t2 = torch.linspace(min_b, max_b, num_points)
@@ -62,23 +58,11 @@ elif xdim == 3:
     t = torch.stack((grid_t1, grid_t2, grid_t3), dim=-1).reshape(-1, xdim).to(device)
 
 
-
-# vertex_tensor = obj_to_tensor('STAR\\results\human_body_model_1.obj').unsqueeze(0)
-# vertex_tensor_2 = obj_to_tensor('STAR\\results\human_body_model_2.obj').unsqueeze(0)
-
 vertex_tensor = obj_to_tensor('ProvNERF Pose Generation\walk_kinda.obj').unsqueeze(0)
 #vertex_tensor_2 = obj_to_tensor('ProvNERF Pose Generation\\not_Tpose_pointcloud.obj').unsqueeze(0)
-# vertex_tensor_3 = obj_to_tensor('ProvNERF Pose Generation\\human_body_model.obj').unsqueeze(0)
-#vertex_tensor_main = torch.concat((vertex_tensor, vertex_tensor_2), dim=0)
-points = vertex_tensor[:, :num_points**xdim,:].to(device)
-
-#points[:,:,2] = 2*points[:, :, 2]
-# mask = points[:,:,2] > 0
-# mask = mask.squeeze(0)
-# points = points[:,mask,:]
-# indices_curve1 = torch.randint(0, 2972, (num_points**2,))
-# points = points[:, indices_curve1, :]
-
+vertex_tensor_3 = obj_to_tensor('ProvNERF Pose Generation\\human_body_model.obj').unsqueeze(0)
+vertex_tensor_main = torch.concat((vertex_tensor, vertex_tensor_3), dim=0)
+points = vertex_tensor_main[:, :num_points**xdim,:].to(device)
 print("t", t.shape)
 print("Points", points.shape)
 
@@ -123,13 +107,13 @@ for e in tqdm(range(epochs)):
         Zx = model(t)  
         Zx = torch.cat((Zx, t), dim = 1)
         imle_transformed_points[i] = Zx
-
     outs = H_t(imle_transformed_points) 
-    loss = chamfer_distance(outs, points)
+
+    loss = f_loss(outs, points)
     losses.append(loss.item())
     loss.backward()
     optimizer.step()
-    scheduler.step()
+    #scheduler.step()
 
 print(f_loss(outs, points))
 plt.plot(losses)
@@ -161,7 +145,7 @@ for i in range(15):
     out = H_t(Z)
     outputs[i] = out
 
-print("Output shape", outputs.mean(dim=1))
+print("Output shape", outputs.shape)
 
 def save_obj_file(vertices, file_path):
     with open(file_path, 'w') as file:
@@ -177,13 +161,6 @@ def tensor_to_obj_files(tensor, base_file_path):
         save_obj_file(vertices, file_path)
 
 
-# Define the base file path (without extension and index)
-base_file_path = 'ProvNERF Pose Generation\ProvNERF results/vertex_object'
 
-# Convert tensor to .obj files
-tensor_to_obj_files(outputs, base_file_path)
-
-mesh = Mesh("ProvNERF Pose Generation\ProvNERF results\\vertex_object_2.obj",)
-mesh.show(axes=True)
 
 

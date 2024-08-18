@@ -8,21 +8,19 @@ import numpy as np
 
 import torch
 import torch.nn.functional as F
-from scipy.optimize import linear_sum_assignment
+
 
 class H_theta(nn.Module):
     def __init__(self, input_dim, output_dim):
         super(H_theta, self).__init__()
         self.fc = nn.Sequential(
-            nn.Linear(input_dim, 250),
+            nn.Linear(input_dim, 500),
             nn.ReLU(),
-            nn.Linear(250, 500),
+            nn.Linear(500, 400),
             nn.ReLU(),
-            nn.Linear(500, 500),
+            nn.Linear(400, 200),
             nn.ReLU(),
-            nn.Linear(500, 500),
-            nn.ReLU(),
-            nn.Linear(500, 100),
+            nn.Linear(200, 100),
             nn.ReLU(),
             nn.Linear(100, output_dim)
         )
@@ -31,29 +29,30 @@ class H_theta(nn.Module):
         return self.fc(x)
 
 def generate_NN_latent_functions(num_samples, xdim=1, zdim=2, lambda_value=1):
-    # Define the neural network class
     class NN(nn.Module):
         
         def __init__(self, input_dim, output_dim):
             super(NN, self).__init__()
-            self.fc1 = nn.Linear(input_dim, 50)
-            self.fc2 = nn.Linear(50, 100)
-            self.fc3 = nn.Linear(100, output_dim)
+            self.fc1 = nn.Linear(input_dim, 100)
+            self.fc2 = nn.Linear(100, 100)
+            self.fc3 = nn.Linear(100, 50)
+            self.fc4 = nn.Linear(50, output_dim)
         
         def forward(self, x):
             x = torch.relu(self.fc1(x))
             x = torch.relu(self.fc2(x))
-            x = self.fc3(x)
+            x = torch.relu(self.fc3(x))
+            x = self.fc4(x)*2.5
             return x
 
-    # Custom weight initialization function
+    #  weight initialization function
     def weights_init_normal(m):
         if isinstance(m, nn.Linear):
-            nn.init.xavier_normal_(m.weight, gain=1.0)
+            nn.init.xavier_normal_(m.weight, gain=0.5)
             if m.bias is not None:
                 nn.init.constant_(m.bias, 0)
 
-    # Generate and initialize the neural networks
+    #  neural networks
     networks = []
     for _ in range(num_samples):
         net = NN(xdim, zdim)
@@ -62,52 +61,58 @@ def generate_NN_latent_functions(num_samples, xdim=1, zdim=2, lambda_value=1):
     
     return networks
 
+# def find_nns(Y, G):
+#     Y_reshaped = Y.view(-1)
+#     G_reshaped = G.view(G.shape[0], -1)
+    
+#     min_idx = min(range(G_reshaped.shape[0]), key=lambda i: torch.sum((Y_reshaped - G_reshaped[i]) ** 2).item())
+    
+#     return min_idx
+
+
 def find_nns(Y, G):
-    Y = Y.unsqueeze(0)
-    result = torch.empty(G.shape[0])
-    for i in range(G.shape[0]):
-        diffs = (((G[i, :, 0] - Y[0, :, 0]) ** 2 + (G[i, :, 1] - Y[0, :, 1]) ** 2) + (G[i, :, 2] - Y[0, :, 2]) ** 2).sum()
-        result[i] = diffs
-    return torch.argmin(result).item()
+    Y_reshaped = Y.view(-1)
+    G_reshaped = G.view(G.shape[0], -1)
+    min_distance = float('inf')
+    min_idx = -1
+    for i in range(G_reshaped.shape[0]):
+        distance = torch.sum((Y_reshaped - G_reshaped[i]) ** 2).item()
+        if distance < min_distance:
+            min_distance = distance
+            min_idx = i
+    return min_idx
 
-# def f_loss(Y, G, pushing_weight=1.0, pushing_radius=1.0):
-#     num_curves = Y.shape[0]
-#     total_loss = 0.0
-#     pushing_loss = 0.0
-    
-#     for i in range(num_curves):
-#         diffs = (((G[i, :, 0] - Y[i, :, 0]) ** 2 + (G[i, :, 1] - Y[i, :, 1]) ** 2) + 3 * (G[i, :, 2] - Y[i, :, 2]) ** 2)
-#         total_loss += diffs.mean()
-        
-#         num_points = G.shape[1]
-#         for j in range(num_points - 1):
-#             z_distance = torch.abs(G[i, j, 2] - G[i, j + 1, 2])
-#             if z_distance < pushing_radius:
-#                 pushing_loss += pushing_weight * (pushing_radius - z_distance) ** 2
-    
-#     result = (total_loss / num_curves) + (pushing_loss / num_curves)
-#     return result
 
-def f_loss(Y, G, pushing_weight=1.0, pushing_radius=1.0):  
-    diffs = torch.sqrt((G[:, :, 0] - Y[:, :, 0]) ** 2 + 
-             (G[:, :, 1] - Y[:, :, 1]) ** 2 + 
-             (G[:, :, 2] - Y[:, :, 2]) ** 2)
-    total_loss = diffs.mean()
+
+def f_loss(Y, G):
+    weighted_diffs = (G - Y)**2
+
+    diffs = torch.sum(weighted_diffs, dim=2)
+    total_loss = diffs.mean(dim=1).mean(dim=0)
 
     return total_loss
 
 
-def chamfer_distance(Y, G):
+def chamfer_distance(G, Y):
+    # G: [num_clouds, num_points, 3]
+    # Y: [num_clouds, num_points, 3]
 
-    batch_size, num_points_Y, _ = Y.shape
-    _, num_points_G, _ = G.shape
+    # Compute pairwise squared distances between all points in each cloud
+    G_expanded = G[:, :, None, :]  # Shape: [num_clouds, num_points, 1, 3]
+    Y_expanded = Y[:, None, :, :]  # Shape: [num_clouds, 1, num_points, 3]
 
-    Y_expand = Y.unsqueeze(2).expand(batch_size, num_points_Y, num_points_G, 3)
-    G_expand = G.unsqueeze(1).expand(batch_size, num_points_Y, num_points_G, 3)
-    distances = torch.norm(Y_expand - G_expand, dim=3)
+    squared_distances = torch.sum((G_expanded - Y_expanded) ** 2, dim=-1)  # Shape: [num_clouds, num_points, num_points]
 
-    min_dist_Y_to_G = torch.min(distances, dim=2)[0]
-    min_dist_G_to_Y = torch.min(distances, dim=1)[0]
+    # Find the minimum distance from each point in G to Y
+    min_distances_G_to_Y = torch.min(squared_distances, dim=2)[0]  # Shape: [num_clouds, num_points]
 
-    chamfer_dist = torch.mean(min_dist_Y_to_G) + torch.mean(min_dist_G_to_Y)
+    # Find the minimum distance from each point in Y to G
+    min_distances_Y_to_G = torch.min(squared_distances, dim=1)[0]  # Shape: [num_clouds, num_points]
+
+    # Sum the minimum distances and average over all points in the clouds
+    chamfer_dist = min_distances_G_to_Y.mean(dim=1) + min_distances_Y_to_G.mean(dim=1)
+    chamfer_dist = chamfer_dist.mean(dim=0)  # Average over all clouds
+
     return chamfer_dist
+
+
