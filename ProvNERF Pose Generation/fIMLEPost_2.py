@@ -12,14 +12,14 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.manual_seed(0)
 np.random.seed(0)
 
-epochs = 30000
+epochs = 10000
 staleness = 15
 num_Z_samples = 40
-lr = 0.01
+lr = 0.001
 xdim = 2
-zdim = 10
+zdim = 15
 num_points = int(np.power(6890, 1/xdim))
-min_b = -1
+min_b = 0.5
 max_b = 1
 
 H_t = H_theta(input_dim=zdim+xdim, output_dim=3).to(device)
@@ -30,6 +30,7 @@ losses = []
 if xdim == 1:
     t = torch.linspace(-1, 1, num_points).to(device)
 if xdim == 2:
+    #(-2 to 2)
     t1 = torch.linspace(min_b, max_b, num_points)
     t2 = torch.linspace(min_b, max_b, num_points)
     grid_t1, grid_t2 = torch.meshgrid((t1, t2), indexing='ij')
@@ -42,7 +43,7 @@ elif xdim == 3:
     t = torch.stack((grid_t1, grid_t2, grid_t3), dim=-1).reshape(-1, xdim).to(device)
 
 vertex_tensor = obj_to_tensor('ProvNERF Pose Generation\walk_kinda.obj').unsqueeze(0)
-vertex_tensor_2 = obj_to_tensor('ProvNERF Pose Generation\\not_Tpose_pointcloud.obj').unsqueeze(0)
+#vertex_tensor_2 = obj_to_tensor('ProvNERF Pose Generation\\not_Tpose_pointcloud.obj').unsqueeze(0)
 vertex_tensor_3 = obj_to_tensor('ProvNERF Pose Generation\\human_body_model.obj').unsqueeze(0)
 vertex_tensor_main = torch.concat((vertex_tensor, vertex_tensor_3), dim=0)
 points = vertex_tensor_main[:, :num_points**xdim,:].to(device)
@@ -53,27 +54,28 @@ print("Points", points.shape)
 for e in tqdm(range(epochs)):
     with torch.no_grad():
         if e % staleness == 0:
-            Zs = generate_NN_latent_functions(num_Z_samples, xdim, zdim, lambda_value=1)
+            H_t.eval()
             Zxs = torch.empty((num_Z_samples, num_points**xdim, zdim+xdim)).to(device)
-            
+
+            Zs = generate_NN_latent_functions(num_samples=num_Z_samples, xdim=xdim,zdim=zdim, lambda_value=1)
             for i, model in enumerate(Zs):
                 model = model.to(device)
-                Zx = model(t)
-                Zx = torch.cat((Zx, t), dim = 1)
-                Zxs[i] = Zx
+                Zxs[i] = torch.cat((model(t), t), dim=1).to(device)
+            #print(Zxs.cpu().numpy())
+            #Zxs = matrices_transform_input(x, num_Z_samples, zdim, mean=0.0, std=1.0).to(device)
+
             generated = H_t(Zxs) 
-            imle_nns = torch.tensor([find_nns(d, generated) for d in points], dtype=torch.long)
-            imle_nn_z = [Zs[idx] for idx in imle_nns]
+            generated = generated.to(device)
+
+            imle_nns = torch.tensor([find_nns(d, generated) for d in points], dtype=torch.long)    
+
+            imle_transformed_points = torch.empty((points.shape[0], num_points, zdim+xdim)).to(device)
+            imle_transformed_points = Zxs[imle_nns]
+
+            H_t.train()
 
     optimizer.zero_grad()
-    imle_transformed_points = torch.empty((points.shape[0], num_points**xdim, zdim+xdim)).to(device)
-    for i, model in enumerate(imle_nn_z):
-        model = model
-        Zx = model(t).to(device)
-        Zx = torch.cat((Zx, t), dim = 1)
-        imle_transformed_points[i] = Zx
-    outs = H_t(imle_transformed_points) 
-
+    outs = H_t(imle_transformed_points)
     loss = f_loss(outs, points)
     losses.append(loss.item())
     loss.backward()
@@ -92,8 +94,8 @@ print(losses.pop())
 
 
 if xdim == 2:
-    t1 = torch.linspace(min_b, max_b, num_points)
-    t2 = torch.linspace(min_b, max_b, num_points)
+    t1 = torch.linspace(min_b,max_b, num_points)
+    t2 = torch.linspace(min_b,max_b, num_points)
     grid_t1, grid_t2 = torch.meshgrid((t1, t2), indexing='ij')
     t = torch.stack((grid_t1, grid_t2), dim=-1).reshape(-1, xdim).to(device)
 elif xdim == 3:

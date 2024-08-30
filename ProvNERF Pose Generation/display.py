@@ -1,14 +1,14 @@
 from vedo import *
 from utils import *
 from model import *
-epochs = 20000
+epochs = 1000
 staleness = 15
 num_Z_samples = 40
-lr = 0.01
+lr = 0.0005
 xdim = 2
-zdim = 10
+zdim = 15
 num_points = int(np.power(6890, 1/xdim))
-min_b = -1
+min_b = 0.5
 max_b = 1
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 t1 = torch.linspace(min_b, max_b, num_points)
@@ -26,7 +26,7 @@ colors = ["red", "green", "blue", "yellow", "cyan", "magenta", "orange", "purple
 specific_files = ["walk_kinda.obj", "human_body_model.obj"]
 
 H_t = H_theta(input_dim=zdim+xdim, output_dim=3).to(device)
-H_t.load_state_dict(torch.load('C:/Users/rajsh/Desktop/Human_Pose_Generation/H_t_30k_epochs.pth'))
+H_t.load_state_dict(torch.load('C:/Users/rajsh/Desktop/Human_Pose_Generation/H_t_last_epoch.pth'))
 H_t.eval()
 
 num_samples = 30
