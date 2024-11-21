@@ -1,3 +1,4 @@
 blender-downloadfiles/*
 blender/smpl/smpl_webuser/__pycache__/*
 blender/download_files/*
+plots/*
