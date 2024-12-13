@@ -218,9 +218,12 @@ if __name__ == '__main__':
     }
 
     print("Params")
+    try:
+        param_combinations = list(itertools.product(*param_grid.values()))
+        param_names = list(param_grid.keys())
+    except Exception as e:
+        print(e)   
 
-    param_combinations = list(itertools.product(*param_grid.values()))
-    param_names = list(param_grid.keys())
 
     torch.manual_seed(1)
     np.random.seed(1)
