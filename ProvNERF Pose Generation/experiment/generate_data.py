@@ -73,7 +73,8 @@ def generate_ellipse(n, r1 = 1, r2 = 0.5):
     y = (r2 * torch.sin(t)).view(-1, 1)[:-1]
     return torch.cat((x, y), dim=1).unsqueeze(0)
 
-def generate_data(n, num_curves = 10, sign = "+"):
+def generate_data(num_points, num_curves = 10, sign = "+"):
+    n = num_points
     line = generate_line(n, sign)
     line2 = generate_line_small(n, sign = '-')
     parabola = generate_parabola(n, sign)
