@@ -172,14 +172,14 @@ if __name__ == '__main__':
     param_grid = {
         #Training
         "epochs": [2500],
-        "staleness": [2, 10, 100],
-        "lr": [0.0001, 1e-4, 5e-4, 1e-5],
-        "b1": [0.85, 0.9, 0.99],
-        "b2": [0.99, 0.999],
-        "zdim": [5, 10, 30],
-        "pos_enc_L": [6, 15],
+        "staleness": [2, 50],
+        "lr": [8e-4],
+        "b1": [0.85, 0.99],
+        "b2": [0.999],
+        "zdim": [30],
+        "pos_enc_L": [6],
         "scheduler": [True, False],
-        "num_Z_samples": [30, 45, 150],
+        "num_Z_samples": [300],
 
         #If scheduler:
         "gamma": [0.9],
@@ -199,7 +199,7 @@ if __name__ == '__main__':
         #Data
         "num_points": [20],
         "t_range": [[-0.05, 0.05]],
-        "num_curves": [20, 50]
+        "num_curves": [50]
     }
 
     print("Params")
