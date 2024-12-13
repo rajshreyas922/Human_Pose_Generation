@@ -171,9 +171,9 @@ if __name__ == '__main__':
 
     param_grid = {
         #Training
-        "epochs": [4000],
+        "epochs": [2500],
         "staleness": [2, 10, 100],
-        "lr": [0.005, 0.0001, 1e-4, 5e-4, 1e-5, 1e-5],
+        "lr": [0.0001, 1e-4, 5e-4, 1e-5],
         "b1": [0.85, 0.9, 0.99],
         "b2": [0.99, 0.999],
         "zdim": [5, 10, 30],
@@ -188,18 +188,18 @@ if __name__ == '__main__':
 
         #Model
         "architecture": ['regular, inject'],
-        "depth": [4, 5, 6],
-        "width": [500, 1000, 2000],
+        "depth": [4, 6],
+        "width": [500, 2000],
 
         #If inject:
-        "injection_depth": [4, 5, 6],
-        "injection_width": [500, 1000, 2000],
-        "one_vec": [5, 20, 100],
+        "injection_depth": [4, 6],
+        "injection_width": [500, 2000],
+        "one_vec": [20, 100],
 
         #Data
         "num_points": [20],
         "t_range": [[-0.05, 0.05]],
-        "num_curves": [5, 20, 50]
+        "num_curves": [20, 50]
     }
 
     print("Params")
