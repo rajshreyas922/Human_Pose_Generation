@@ -218,13 +218,24 @@ if __name__ == '__main__':
             os.makedirs(f'plots/{param_name}/outputs/', exist_ok=True)
 
             data = generate_data(num_points=params["num_points"]).to(device)
-
-            H_t = H_theta_new(
-                input_dim=params["zdim"],
-                output_dim=2,  # Assuming fixed output dimension
-                num_layers=params["depth"],
-                num_neurons=params["width"]
-            ).to(device)
+            if params["architecture"] == 'regular':
+                H_t = H_theta_new(
+                    input_dim=params["zdim"],
+                    output_dim=2,  # Assuming fixed output dimension
+                    num_layers=params["depth"],
+                    num_neurons=params["width"],
+                    num_layers_inject=params["injection_depth"],
+                    num_neuron_inject=params["injection_width"]
+                ).to(device)
+            else:
+                H_t = H_theta(
+                    input_dim=params["zdim"],
+                    output_dim=2,  # Assuming fixed output dimension
+                    num_layers=params["depth"],
+                    num_neurons=params["width"],
+                    num_layers_inject=params["injection_depth"],
+                    num_neuron_inject=params["injection_width"]
+                ).to(device)
 
             optimizer = optim.AdamW(H_t.parameters(), lr=params["lr"], betas=(params["b1"], params["b2"]), eps=1e-8)
 
