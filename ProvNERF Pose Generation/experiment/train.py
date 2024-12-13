@@ -171,20 +171,20 @@ if __name__ == '__main__':
 
     param_grid = {
         #Training
-        "epochs": [2000, 3000, 4000],
-        "staleness": [2, 10, 50, 100],
-        "lr": [0.01, 0.005, 0.0001, 1e-4, 5e-4, 8e-4, 5e-5, 1e-5],
-        "b1": [0.85, 0.9, 0.95, 0.99],
-        "b2": [0.99, 0.999, 0.995],
+        "epochs": [4000],
+        "staleness": [2, 10, 100],
+        "lr": [0.005, 0.0001, 1e-4, 5e-4, 1e-5, 1e-5],
+        "b1": [0.85, 0.9, 0.99],
+        "b2": [0.99, 0.999],
         "zdim": [5, 10, 30],
         "pos_enc_L": [6, 15],
         "scheduler": [True, False],
         "num_Z_samples": [30, 45, 150],
 
         #If scheduler:
-        "gamma": [0.95, 0.9, 0.85],
-        "step": [50, 100, 1000],
-        "z_scale": [100, 500, 1000],
+        "gamma": [0.9],
+        "step": [1000],
+        "z_scale": [100, 1000],
 
         #Model
         "architecture": ['regular, inject'],
@@ -197,9 +197,9 @@ if __name__ == '__main__':
         "one_vec": [5, 20, 100],
 
         #Data
-        "num_points": [20, 50, 100],
-        "t_range": [[-0.01, 0.01], [-0.05, 0.05], [-0.01, 0.01]],
-        "num_curves": [2, 5, 20, 50]
+        "num_points": [20],
+        "t_range": [[-0.05, 0.05]],
+        "num_curves": [5, 20, 50]
     }
 
     print("Params")
