@@ -8,15 +8,13 @@ from tqdm import tqdm
 from models import *
 from generate_data import *
 
-import itertools
-
+from sklearn.model_selection import ParameterGrid  # Added import
 
 def generate_NN_latent_functions(num_samples, xdim=1, zdim=2, bias=0):
     class NN(nn.Module):
         def __init__(self, input_dim, output_dim):
             super(NN, self).__init__()
             self.fc1 = nn.Linear(input_dim, 500)
-            #self.fc2 = nn.Linear(100, 100)
             self.fc3 = nn.Linear(500, 500)
             self.fc4 = nn.Linear(500, output_dim)
 
@@ -26,28 +24,22 @@ def generate_NN_latent_functions(num_samples, xdim=1, zdim=2, bias=0):
         def forward(self, x):
             with torch.no_grad():
                 x = torch.relu(self.fc1(x))
-                #x = torch.relu(self.fc2(x))
                 x = torch.relu(self.fc3(x))
                 x = self.fc4(x)
             return x
 
-    #  weight initialization function
     def weights_init_normal(m):
         if isinstance(m, nn.Linear):
             nn.init.normal_(m.weight, mean=0, std=1)
-            #nn.init.xavier_normal_(m.weight, gain = 0.5)
             if m.bias is not None:
                 nn.init.constant_(m.bias, val=bias)
 
-    #  neural networks
     networks = []
     for _ in range(num_samples):
         net = NN(xdim, zdim)
         net.apply(weights_init_normal)
         networks.append(net)
-
     return networks
-
 
 def pos_encoder(x, L):
     _, n = x.shape
@@ -59,10 +51,8 @@ def pos_encoder(x, L):
     encoded_x = torch.cat(encoding, dim=-1)*5
     return encoded_x
 
-def find_nns(Y, G, disp = False):
-    #Y: [1, 1024, 3]
-    #G: [20, 1024, 3]
-    distances = torch.sum(((Y - G) ** 2), dim = 2).mean(dim = 1)
+def find_nns(Y, G, disp=False):
+    distances = torch.sum(((Y - G) ** 2), dim=2).mean(dim=1)
     min_, min_idx = torch.min(distances, dim=0)
     return min_idx.item()
 
@@ -76,7 +66,6 @@ def f_loss(Y, G):
     point_loss_mean = diff.mean(dim=1)
     curve_loss_mean = point_loss_mean.mean(dim=0)
     return curve_loss_mean
-
 
 def train_model(
     H_t, 
@@ -176,11 +165,9 @@ def train_model(
     return H_t
 
 
-
 if __name__ == '__main__':
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 
     param_grid = {
         #Training
@@ -209,28 +196,22 @@ if __name__ == '__main__':
         "injection_width": [500, 1000, 2000, 2500],
         "one_vec": [5, 20, 30, 100],
 
-
         #Data
         "num_points": [20, 50, 100],
         "t_range": [[-0.01, 0.01], [-0.05, 0.05], [-0.01, 0.01]],
-        "num_curves": [2, 5, 20, 50]       
-
+        "num_curves": [2, 5, 20, 50]
     }
 
     print("Params")
-    try:
-        param_combinations = list(itertools.product(*param_grid.values()))
-        param_names = list(param_grid.keys())
-    except Exception as e:
-        print(e)   
 
+    # Use ParameterGrid instead of itertools.product
+    param_combinations = ParameterGrid(param_grid)
 
     torch.manual_seed(1)
     np.random.seed(1)
 
     with tqdm(total=len(param_combinations), desc="Parameter Grid Search") as pbar:
-        for idx, param_values in enumerate(param_combinations):
-            params = dict(zip(param_names, param_values))
+        for idx, params in enumerate(param_combinations):
             plot_epoch = params["epochs"] // 10
             param_name = f"run_{idx + 1}"
             os.makedirs(f'plots/{param_name}', exist_ok=True)
@@ -268,8 +249,7 @@ if __name__ == '__main__':
                 data=data
             )
 
-            eval(model, data, num_samples = 50, ouput_dir = f"plots/{param_name}/outputs/")
+            eval(model, data, num_samples=50, ouput_dir=f"plots/{param_name}/outputs/")
 
             pbar.update(1)
             print(f"Completed training for parameter set {idx + 1}/{len(param_combinations)}")
-
