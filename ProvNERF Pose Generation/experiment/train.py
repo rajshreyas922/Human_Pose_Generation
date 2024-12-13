@@ -177,8 +177,6 @@ def train_model(
 
 
 
-
-
 if __name__ == '__main__':
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -218,6 +216,8 @@ if __name__ == '__main__':
         "num_curves": [2, 5, 20, 50]       
 
     }
+
+    print("Params")
 
     param_combinations = list(itertools.product(*param_grid.values()))
     param_names = list(param_grid.keys())
