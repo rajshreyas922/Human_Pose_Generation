@@ -179,7 +179,7 @@ if __name__ == '__main__':
         "zdim": [30],
         "pos_enc_L": [6],
         "scheduler": [True, False],
-        "num_Z_samples": [300],
+        "num_Z_samples": [100],
 
         #If scheduler:
         "gamma": [0.9],
@@ -199,7 +199,7 @@ if __name__ == '__main__':
         #Data
         "num_points": [20],
         "t_range": [[-0.05, 0.05]],
-        "num_curves": [50]
+        "num_curves": [20]
     }
 
     print("Params")
