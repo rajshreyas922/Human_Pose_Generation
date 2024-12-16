@@ -234,7 +234,7 @@ if __name__ == '__main__':
                     num_layers=params["depth"],
                     num_neurons=params["width"]
                 ).to(device)
-
+            print(H_t)
             optimizer = optim.AdamW(H_t.parameters(), lr=params["lr"], betas=(params["b1"], params["b2"]), eps=1e-8)
 
             scheduler = None
