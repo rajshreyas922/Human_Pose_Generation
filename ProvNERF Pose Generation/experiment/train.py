@@ -7,7 +7,7 @@ from torch import optim
 from tqdm import tqdm
 from models import *
 from generate_data import *
-
+import csv
 from sklearn.model_selection import ParameterGrid  # Added import
 
 def generate_NN_latent_functions(num_samples, xdim=1, zdim=2, bias=0):
@@ -201,10 +201,17 @@ if __name__ == '__main__':
         "num_curves": [20]
     }
 
-    print("Params")
 
+
+    csv_file_path = "parameter_combinations_during_training.csv"
+    with open(csv_file_path, mode='w', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=["Index"] + list(param_grid.keys()))
+        writer.writeheader()
+        
     # Use ParameterGrid instead of itertools.product
     param_combinations = ParameterGrid(param_grid)
+
+    
 
     torch.manual_seed(1)
     np.random.seed(1)
@@ -215,6 +222,12 @@ if __name__ == '__main__':
             param_name = f"run_{idx + 1}"
             os.makedirs(f'plots/{param_name}', exist_ok=True)
             os.makedirs(f'plots/{param_name}/outputs/', exist_ok=True)
+
+            # Save the current parameter combination to the CSV file
+            params_with_index = {"Index": idx + 1, **params}
+            with open(csv_file_path, mode='a', newline='') as file:
+                writer = csv.DictWriter(file, fieldnames=["Index"] + list(param_grid.keys()))
+                writer.writerow(params_with_index)
 
             data = generate_data(num_points=params["num_points"]).to(device)
             if params["architecture"] == 'regular':
@@ -256,8 +269,6 @@ if __name__ == '__main__':
                 param_name=param_name,
                 data=data
             )
-
-            #eval(model, data, num_samples=50, ouput_dir=f"plots/{param_name}/outputs/")
 
             pbar.update(1)
             print(f"Completed training for parameter set {idx + 1}/{len(param_combinations)}")
