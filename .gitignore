@@ -4,3 +4,4 @@ blender/download_files/*
 ProvNERF Pose Generation/plots/*
 plots/*
 *.csv
+*.png

@@ -186,7 +186,7 @@ if __name__ == '__main__':
         "z_scale": [100],
 
         #Model
-        "architecture": ['regular, inject'],
+        "architecture": ["regular", "inject"],
         "depth": [4, 6],
         "width": [500, 2000],
 
