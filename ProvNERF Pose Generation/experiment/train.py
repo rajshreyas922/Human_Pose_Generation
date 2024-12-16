@@ -192,7 +192,7 @@ if __name__ == '__main__':
         "width": [500, 2000],
 
         #If inject:
-        "injection_depth": [4, 6],
+        "injection_depth": [2, 4],
         "injection_width": [500, 2000],
         "one_vec": [20, 100],
 
