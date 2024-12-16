@@ -125,7 +125,7 @@ def train_model(
                 color = line1[0].get_color()
                 plt.plot(points_disp[i, :, 0], points_disp[i, :, 1], marker='o', color=color)
             plt.title(f'Epoch: {e}')
-            plt.savefig(f"plots/{param_name}/epoch_{e}.png")
+            plt.savefig(f"correct_plots/{param_name}/epoch_{e}.png")
             plt.close()
 
             # plt.figure(figsize=(15, 5))
@@ -158,7 +158,7 @@ def train_model(
     plt.ylabel('Loss')
     plt.title('Loss Curve')
     plt.legend()
-    plt.savefig(f'plots/{param_name}/Loss Curve.png')
+    plt.savefig(f'correct_plots/{param_name}/Loss Curve.png')
     plt.show()
 
     return H_t
@@ -203,7 +203,7 @@ if __name__ == '__main__':
 
 
 
-    csv_file_path = "parameter_combinations_during_training.csv"
+    csv_file_path = "parameter_combinations_during_training_correct.csv"
     with open(csv_file_path, mode='w', newline='') as file:
         writer = csv.DictWriter(file, fieldnames=["Index"] + list(param_grid.keys()))
         writer.writeheader()
@@ -220,8 +220,8 @@ if __name__ == '__main__':
         for idx, params in enumerate(param_combinations):
             plot_epoch = params["epochs"] // 10
             param_name = f"run_{idx + 1}"
-            os.makedirs(f'plots/{param_name}', exist_ok=True)
-            os.makedirs(f'plots/{param_name}/outputs/', exist_ok=True)
+            os.makedirs(f'correct_plots/{param_name}', exist_ok=True)
+            os.makedirs(f'correct_plots/{param_name}/outputs/', exist_ok=True)
 
             # Save the current parameter combination to the CSV file
             params_with_index = {"Index": idx + 1, **params}
