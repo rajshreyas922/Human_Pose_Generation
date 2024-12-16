@@ -56,7 +56,7 @@ class H_theta_new(nn.Module):
         self.model_after_inject = nn.Sequential(*layers_after_inject)
 
         # Layer normalization
-        self.layer_norm = nn.LayerNorm(normalized_shape=2)
+        self.layer_norm = nn.LayerNorm(normalized_shape=num_neurons)
 
     def forward(self, x, disp=False):
         # First half
