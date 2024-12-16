@@ -128,14 +128,13 @@ def train_model(
             plt.savefig(f"plots/{param_name}/epoch_{e}.png")
             plt.close()
 
-            plt.figure(figsize=(15, 5))
-            plt.plot(losses, label='Loss')
-            plt.ylim(0, 15)
-            plt.xlabel('Epochs')
-            plt.ylabel('Loss')
-            plt.title('Loss Curve')
-            plt.legend()
-            plt.show()
+            # plt.figure(figsize=(15, 5))
+            # plt.plot(losses, label='Loss')
+            # plt.ylim(0, 15)
+            # plt.xlabel('Epochs')
+            # plt.ylabel('Loss')
+            # plt.title('Loss Curve')
+            # plt.legend()
 
         loss.backward()
         grad_sum = 0
@@ -172,9 +171,9 @@ if __name__ == '__main__':
     param_grid = {
         #Training
         "epochs": [2500],
-        "staleness": [2, 50],
+        "staleness": [2],
         "lr": [8e-4],
-        "b1": [0.85, 0.99],
+        "b1": [0.85],
         "b2": [0.999],
         "zdim": [30],
         "pos_enc_L": [6],
@@ -184,7 +183,7 @@ if __name__ == '__main__':
         #If scheduler:
         "gamma": [0.9],
         "step": [1000],
-        "z_scale": [100, 1000],
+        "z_scale": [100],
 
         #Model
         "architecture": ['regular, inject'],
@@ -194,7 +193,7 @@ if __name__ == '__main__':
         #If inject:
         "injection_depth": [2, 4],
         "injection_width": [500, 2000],
-        "one_vec": [20, 100],
+        "one_vec": [20],
 
         #Data
         "num_points": [20],
