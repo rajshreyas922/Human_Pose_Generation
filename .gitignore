@@ -3,5 +3,6 @@ blender/smpl/smpl_webuser/__pycache__/*
 blender/download_files/*
 ProvNERF Pose Generation/plots/*
 plots/*
-*.csv
 *.png
+ProvNERF Pose Generation/ProvNERF results/*.obj
+ProvNERF Pose Generation/gif_frames/*
