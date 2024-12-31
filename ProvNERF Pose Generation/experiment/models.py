@@ -20,7 +20,7 @@ class H_theta(nn.Module):
 
 
 class H_theta_new(nn.Module):
-    def __init__(self, input_dim, output_dim, num_layers, num_layers_inject, num_neuron_inject, num_neurons):
+    def __init__(self, input_dim, output_dim, num_layers = 10, num_layers_inject = 4, num_neuron_inject = 500, num_neurons = 50):
         super(H_theta_new, self).__init__()
         assert num_layers % 2 == 0, "Number of layers must be even for injection to occur after half."
 
@@ -30,7 +30,7 @@ class H_theta_new(nn.Module):
         layers_before_inject = []
         for i in range(half_layers):
             if i == 0:
-                layers_before_inject.append(nn.Linear(30, num_neurons))
+                layers_before_inject.append(nn.Linear(5, num_neurons))
             else:
                 layers_before_inject.append(nn.Linear(num_neurons, num_neurons))
             layers_before_inject.append(nn.ReLU())
@@ -60,7 +60,7 @@ class H_theta_new(nn.Module):
 
     def forward(self, x, disp=False):
         # First half
-        y = self.model_before_inject(torch.ones((x.shape[0], x.shape[1], 30), device=x.device))
+        y = self.model_before_inject(torch.ones((x.shape[0], x.shape[1], 5), device=x.device))
 
         # Injection
         sc = self.inject(x)

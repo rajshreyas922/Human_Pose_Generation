@@ -116,7 +116,6 @@ def train_model(
         losses.append(loss.item())
 
         if e % plot_epoch == 0 or e == epochs - 1:
-            generated_disp = generated.to('cpu').detach().numpy()
             outs_disp = outs.to('cpu').detach().numpy()
             points_disp = data.to('cpu').detach().numpy()
             plt.figure(figsize=(15, 15))
@@ -137,20 +136,19 @@ def train_model(
             # plt.legend()
 
         loss.backward()
-        grad_sum = 0
-        param_sum = 0
-        for param in H_t.parameters():
-            param_sum += torch.norm(param) ** 2
-            grad_sum += torch.norm(param.grad) ** 2
+        # grad_sum = 0
+        # param_sum = 0
+        # for param in H_t.parameters():
+        #     param_sum += torch.norm(param) ** 2
+        #     grad_sum += torch.norm(param.grad) ** 2
 
-        grad_norm = torch.sqrt(grad_sum).item()
-        param_norm = torch.sqrt(param_sum).item()
-        grad_norms.append(grad_norm)
-        param_norms.append(param_norm)
+        # grad_norm = torch.sqrt(grad_sum).item()
+        # param_norm = torch.sqrt(param_sum).item()
+        # grad_norms.append(grad_norm)
+        # param_norms.append(param_norm)
 
         optimizer.step()
-        if scheduler is not None:
-            scheduler.step()
+
 
     plt.figure(figsize=(15, 5))
     plt.plot(losses, label='Loss')
@@ -159,7 +157,7 @@ def train_model(
     plt.title('Loss Curve')
     plt.legend()
     plt.savefig(f'correct_plots/{param_name}/Loss Curve.png')
-    plt.show()
+
 
     return H_t
 
@@ -168,102 +166,142 @@ if __name__ == '__main__':
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    param_grid = {
-        #Training
-        "epochs": [2500],
-        "staleness": [2],
-        "lr": [8e-4],
-        "b1": [0.85],
-        "b2": [0.999],
-        "zdim": [30],
-        "pos_enc_L": [6],
-        "scheduler": [True, False],
-        "num_Z_samples": [100],
+    # Common parameters for all runs (excluding architecture/depth/width/injection values).
+    common_params = {
+        # Training
+        "epochs": 5000,             # <-- updated to 5500
+        "staleness": 5,
+        "lr": 5e-5,
+        "b1": 0.85,
+        "b2": 0.999,
+        "zdim": 30,
+        "pos_enc_L": 6,
+        "scheduler": False,
+        "num_Z_samples": 100,
 
-        #If scheduler:
-        "gamma": [0.9],
-        "step": [1000],
-        "z_scale": [100],
+        # If scheduler:
+        "gamma": 0.9,
+        "step": 1000,
+        "z_scale": 100,
 
-        #Model
-        "architecture": ["regular", "inject"],
-        "depth": [4, 6],
-        "width": [500, 2000],
+        # Data
+        "num_points": 20,
+        "t_range": [-0.05, 0.05],
+        "num_curves": 20,
 
-        #If inject:
-        "injection_depth": [2, 4],
-        "injection_width": [500, 2000],
-        "one_vec": [20],
-
-        #Data
-        "num_points": [20],
-        "t_range": [[-0.05, 0.05]],
-        "num_curves": [20]
+        # This is used only if injection is needed
+        "one_vec": 5,
     }
 
+    # Manually specify the model architectures we want to test:
+    architecture_combos = [
+        # Regular
+        {"architecture": "regular", "depth": 4,  "width": 2000, "injection_depth": None, "injection_width": None},
 
+        {"architecture": "regular", "depth": 6, "width": 2000,  "injection_depth": None, "injection_width": None},
+        {"architecture": "regular", "depth": 4, "width": 1000,  "injection_depth": None, "injection_width": None},
 
+# ========================================================================================================================
+
+        # Inject
+        {"architecture": "inject",  "depth": 4,  "width": 2000, "injection_depth": 3,  "injection_width": 1000},
+
+        {"architecture": "inject",  "depth": 6, "width": 2000,  "injection_depth": 3,  "injection_width": 1000},
+        {"architecture": "inject",  "depth": 4, "width": 1000,  "injection_depth": 3,  "injection_width": 1000},
+
+# ========================================================================================================================
+
+        {"architecture": "inject",  "depth": 4,  "width": 2000, "injection_depth": 5,  "injection_width": 1000},
+
+        {"architecture": "inject",  "depth": 6, "width": 2000,  "injection_depth": 5,  "injection_width": 1000},
+        {"architecture": "inject",  "depth": 4, "width": 1000,  "injection_depth": 5,  "injection_width": 1000},
+    ]
+
+    # Build the final list of parameter combos by merging common_params with each architecture combo
+    param_combinations = []
+    for arch_conf in architecture_combos:
+        # Make a copy of common_params for each combo
+        combo = dict(common_params)
+        # Update the copy with our architecture/dim specifics
+        combo.update(arch_conf)
+        param_combinations.append(combo)
+
+    # CSV header
     csv_file_path = "parameter_combinations_during_training_correct.csv"
     with open(csv_file_path, mode='w', newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=["Index"] + list(param_grid.keys()))
+        writer = csv.DictWriter(file, fieldnames=["Index"] + list(param_combinations[0].keys()))
         writer.writeheader()
-        
-    # Use ParameterGrid instead of itertools.product
-    param_combinations = ParameterGrid(param_grid)
-
-    
 
     torch.manual_seed(1)
     np.random.seed(1)
 
     with tqdm(total=len(param_combinations), desc="Parameter Grid Search") as pbar:
-        for idx, params in enumerate(param_combinations):
+        for idx, params in enumerate(param_combinations, start=1):
             plot_epoch = params["epochs"] // 10
-            param_name = f"run_{idx + 1}"
+            param_name = f"run_{idx}"
             os.makedirs(f'correct_plots/{param_name}', exist_ok=True)
-            os.makedirs(f'correct_plots/{param_name}/outputs/', exist_ok=True)
 
-            # Save the current parameter combination to the CSV file
-            params_with_index = {"Index": idx + 1, **params}
+            # Save current parameter combination to CSV
+            params_with_index = {"Index": idx}
+            params_with_index.update(params)
             with open(csv_file_path, mode='a', newline='') as file:
-                writer = csv.DictWriter(file, fieldnames=["Index"] + list(param_grid.keys()))
+                writer = csv.DictWriter(file, fieldnames=["Index"] + list(params.keys()))
                 writer.writerow(params_with_index)
 
-            data = generate_data(num_points=params["num_points"]).to(device)
+            # Generate data
+            data = generate_data(num_points=params["num_points"], num_curves=params["num_curves"]).to(device)
+
+            # Construct the model
             if params["architecture"] == 'regular':
+                # injection_* parameters won't matter here
                 H_t = H_theta_new(
                     input_dim=params["zdim"],
-                    output_dim=2,  # Assuming fixed output dimension
+                    output_dim=2,  # fixed output dimension
                     num_layers=params["depth"],
                     num_neurons=params["width"],
-                    num_layers_inject=params["injection_depth"],
-                    num_neuron_inject=params["injection_width"]
+                    # Provide valid injection placeholders (they won't be used)
+                    num_layers_inject=2,
+                    num_neuron_inject=500
                 ).to(device)
             else:
+                # 'inject' architecture
                 H_t = H_theta(
                     input_dim=params["zdim"],
-                    output_dim=2,  # Assuming fixed output dimension
+                    output_dim=2,  # fixed output dimension
                     num_layers=params["depth"],
-                    num_neurons=params["width"]
+                    num_neurons=params["width"],
                 ).to(device)
-            print(H_t)
-            optimizer = optim.AdamW(H_t.parameters(), lr=params["lr"], betas=(params["b1"], params["b2"]), eps=1e-8)
 
+            print(H_t)
+
+            optimizer = optim.AdamW(
+                H_t.parameters(),
+                lr=params["lr"],
+                betas=(params["b1"], params["b2"]),
+                eps=1e-8
+            )
+
+            # Optional scheduler
             scheduler = None
             if params["scheduler"]:
-                scheduler = optim.lr_scheduler.StepLR(optimizer, gamma=params["gamma"], step_size=params["step"])
+                scheduler = optim.lr_scheduler.StepLR(
+                    optimizer,
+                    gamma=params["gamma"],
+                    step_size=params["step"]
+                )
 
-            model = train_model(
+            # Train the model
+            trained_model = train_model(
                 H_t=H_t,
                 optimizer=optimizer,
                 scheduler=scheduler,
                 epochs=params["epochs"],
                 staleness=params["staleness"],
-                num_Z_samples=params["num_Z_samples"],  
+                num_Z_samples=params["num_Z_samples"],
                 num_points=params["num_points"],
                 zdim=params["zdim"],
-                z_scale=params["z_scale"],  
-                plot_epoch=plot_epoch,  
+                z_scale=params["z_scale"],
+                plot_epoch=plot_epoch,
                 pos_enc_L=params["pos_enc_L"],
                 device=device,
                 param_name=param_name,
@@ -271,4 +309,4 @@ if __name__ == '__main__':
             )
 
             pbar.update(1)
-            print(f"Completed training for parameter set {idx + 1}/{len(param_combinations)}")
+            print(f"Completed training for parameter set {idx}/{len(param_combinations)}")

@@ -85,7 +85,7 @@ def generate_data(num_points, num_curves = 10, sign = "+"):
     e2 = generate_ellipse(n, r1 = 4, r2 = 2)
     curves =  generate_ellipse(n, r1 = 2.5, r2 = 2.5)
     start = 10
-    for i in range(start, start + num_curves + 1):
+    for i in range(start, start + num_curves):
         # for j in range(1,5):
         e1 = generate_ellipse(n, r1 = i/4, r2 = i/4)
         curves = torch.concat((curves, e1))
