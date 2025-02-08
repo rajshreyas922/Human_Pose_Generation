@@ -42,9 +42,9 @@ elif xdim == 3:
     grid_t1, grid_t2, grid_t3 = torch.meshgrid((t1, t2, t3), indexing='ij')
     t = torch.stack((grid_t1, grid_t2, grid_t3), dim=-1).reshape(-1, xdim).to(device)
 
-vertex_tensor = obj_to_tensor('ProvNERF Pose Generation\walk_kinda.obj').unsqueeze(0)
+vertex_tensor = obj_to_tensor('walk_kinda.obj').unsqueeze(0)
 #vertex_tensor_2 = obj_to_tensor('ProvNERF Pose Generation\\not_Tpose_pointcloud.obj').unsqueeze(0)
-vertex_tensor_3 = obj_to_tensor('ProvNERF Pose Generation\\human_body_model.obj').unsqueeze(0)
+vertex_tensor_3 = obj_to_tensor('human_body_model.obj').unsqueeze(0)
 vertex_tensor_main = torch.concat((vertex_tensor, vertex_tensor_3), dim=0)
 points = vertex_tensor_main[:, :num_points**xdim,:].to(device)
 print("t", t.shape)
