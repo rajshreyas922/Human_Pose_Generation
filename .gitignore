@@ -6,4 +6,4 @@ plots/*
 *.png
 ProvNERF Pose Generation/ProvNERF results/*.obj
 ProvNERF Pose Generation/gif_frames/*
-ProvNERF Pose Generation/3D_Early_testing_Not_Using/*
+3D_Early_testing_Not_Using/*
