@@ -1,0 +1,32 @@
+index: "Family"
+dataset:
+  coord_scale: 40.0
+  type: "t2"
+  path: "./data/tanks_temples/Family/"
+  factor: 2
+geoms:
+  points:
+    init_scale: [0.3, 0.3, 0.3]
+    init_num: 5000
+models:
+  attn:
+    embed:
+      value:
+        skip_layers: [5]
+training:
+  add_start: 10000
+  add_stop: 80000
+  add_num: 500
+eval:
+  dataset:
+    type: "t2"
+    path: "./data/tanks_temples/Family/"
+    factor: 2
+  img_idx: 0
+test:
+  # load_path: "checkpoints/Family.pth"
+  datasets:
+    - name: "testset"
+      type: "t2"
+      path: "./data/tanks_temples/Family/"
+      factor: 2

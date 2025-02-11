@@ -1,0 +1,21 @@
+index: "ship"
+dataset:
+  path: "./data/nerf_synthetic/ship/"
+geoms:
+  points:
+    init_num: 10000
+training:
+  add_start: 10000
+  add_stop: 80000
+  add_num: 500
+  lr:
+    points:
+      base_lr: 3.0e-3
+eval:
+  dataset:
+    path: "./data/nerf_synthetic/ship/"
+test:
+  # load_path: "checkpoints/ship.pth"
+  datasets:
+    - name: "testset"
+      path: "./data/nerf_synthetic/ship/"

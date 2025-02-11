@@ -1,0 +1,31 @@
+index: "lego"
+dataset:
+  path: "./data/nerf_synthetic/lego/"
+geoms:
+  background:
+    constant: 3.0
+models:
+  attn:
+    embed:
+      key:
+        ff_act: "leakyrelu"
+      query:
+        ff_act: "leakyrelu"
+      value:
+        ff_act: "leakyrelu"
+        skip_layers: [5]
+training:
+  prune_thresh_list: [0.0, 0.2]
+  prune_steps_list: [40000]
+  add_start: 20000
+  lr:
+    points:
+      base_lr: 3.0e-3
+eval:
+  dataset:
+    path: "./data/nerf_synthetic/lego/"
+test:
+  # load_path: "checkpoints/lego.pth"
+  datasets:
+    - name: "testset"
+      path: "./data/nerf_synthetic/lego/"

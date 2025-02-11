@@ -1,0 +1,15 @@
+index: "ficus"
+dataset:
+  path: "./data/nerf_synthetic/ficus/"
+training:
+  add_start: 10000
+  add_stop: 90000
+  add_num: 500
+eval:
+  dataset:
+    path: "./data/nerf_synthetic/ficus/"
+test:
+  # load_path: "checkpoints/ficus.pth"
+  datasets:
+    - name: "testset"
+      path: "./data/nerf_synthetic/ficus/"

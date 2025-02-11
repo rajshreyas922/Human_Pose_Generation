@@ -1,0 +1,30 @@
+index: "Truck"
+dataset:
+  coord_scale: 40.0
+  type: "t2"
+  path: "./data/tanks_temples/Truck/"
+  factor: 2
+geoms:
+  points:
+    init_scale: [1.0, 1.0, 1.0]
+    num: 5000
+    constant: 4.0
+training:
+  add_start: 20000
+  add_stop: 60000
+  lr:
+    points:
+      base_lr: 8.0e-3
+eval:
+  dataset:
+    type: "t2"
+    path: "./data/tanks_temples/Truck/"
+    factor: 2
+  img_idx: 0
+test:
+  # load_path: "checkpoints/Truck.pth"\
+  datasets:
+    - name: "testset"
+      type: "t2"
+      path: "./data/tanks_temples/Truck/"
+      factor: 2
