@@ -2,47 +2,20 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-# A fully connected neural network with many layers.
 class H_theta(nn.Module):
     def __init__(self, input_dim, output_dim, num_layers=70, num_neurons=20):
-        """
-        Args:
-            input_dim (int): Dimensionality of input features.
-            output_dim (int): Dimensionality of output.
-            num_layers (int): Total number of linear layers (excluding final layer).
-            num_neurons (int): Number of neurons in each hidden layer.
-        """
         super(H_theta, self).__init__()
-        layers = []  # List to store layers sequentially
-
-        # Create a stack of linear layers with ReLU activation
+        layers = []
         for i in range(num_layers):
             if i == 0:
-                # First layer maps input_dim -> num_neurons
                 layers.append(nn.Linear(input_dim, num_neurons))
             else:
-                # Subsequent layers: num_neurons -> num_neurons
                 layers.append(nn.Linear(num_neurons, num_neurons))
-            # Add ReLU activation after each linear layer
             layers.append(nn.ReLU())
-        
-        # Final output layer maps from num_neurons to output_dim
         layers.append(nn.Linear(num_neurons, output_dim))
-        
-        # Combine all layers into a sequential model
         self.model = nn.Sequential(*layers)
 
     def forward(self, x, disp=False):
-        """
-        Forward pass through the network.
-        
-        Args:
-            x (Tensor): Input tensor.
-            disp (bool): Optional flag for display/debug (currently unused).
-        
-        Returns:
-            Tensor: Output of the network.
-        """
         out = self.model(x)
         return out
 
