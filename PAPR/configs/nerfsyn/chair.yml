@@ -1,0 +1,17 @@
+index: "chair"
+dataset:
+  path: "./data/nerf_synthetic/chair/"
+geoms:
+  points:
+    init_num: 10000
+training:
+  add_start: 10000
+  add_stop: 50000
+eval:
+  dataset:
+    path: "./data/nerf_synthetic/chair/"
+test:
+  # load_path: "checkpoints/chair.pth"
+  datasets:
+    - name: "testset"
+      path: "./data/nerf_synthetic/chair/"

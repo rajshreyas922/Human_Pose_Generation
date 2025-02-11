@@ -1,0 +1,22 @@
+index: "drums"
+dataset:
+  path: "./data/nerf_synthetic/drums/"
+models:
+  attn:
+    embed:
+      value:
+        skip_layers: [5]
+training:
+  add_start: 10000
+  add_stop: 40000
+  lr:
+    generator:
+      base_lr: 2.0e-4
+eval:
+  dataset:
+    path: "./data/nerf_synthetic/drums/"
+test:
+  # load_path: "checkpoints/drums.pth"
+  datasets:
+    - name: "testset"
+      path: "./data/nerf_synthetic/drums/"

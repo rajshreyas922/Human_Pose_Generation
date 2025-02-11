@@ -1,0 +1,15 @@
+index: "mic"
+dataset:
+  path: "./data/nerf_synthetic/mic/"
+training:
+  add_start: 10000
+  add_stop: 80000
+  add_num: 500
+eval:
+  dataset:
+    path: "./data/nerf_synthetic/mic/"
+test:
+  # load_path: "checkpoints/mic.pth"
+  datasets:
+    - name: "testset"
+      path: "./data/nerf_synthetic/mic/"

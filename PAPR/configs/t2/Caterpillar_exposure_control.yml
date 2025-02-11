@@ -1,0 +1,54 @@
+index: "Caterpillar_exposure_control3"
+load_path: "./checkpoints_new/Caterpillar.pth"
+use_amp: false
+dataset:
+  coord_scale: 30.0
+  type: "t2"
+  path: "./data/tanks_temples/Caterpillar/"
+  factor: 2
+geoms:
+  background:
+    constant: 4.0
+exposure_control:
+  use: true
+models:
+  attn:
+    embed:
+      k_L: [4, 4, 4]
+      q_L: [4]
+      v_L: [4, 4]
+  renderer:
+    generator:
+      small_unet:
+        affine_layer: -1
+training:
+  steps: 100000
+  lr:
+    lr_factor: 0.2
+    attn:
+      type: "none"
+      warmup: 0
+    points:
+      base_lr: 0.0
+    points_influ_scores:
+      type: "none"
+      warmup: 0
+    feats: 
+      type: "none"
+      warmup: 0
+    generator:
+      type: "none"
+      warmup: 0
+eval:
+  dataset:
+    type: "t2"
+    path: "./data/tanks_temples/Caterpillar/"
+    factor: 2
+  img_idx: 0
+test:
+  load_path: "checkpoints/Caterpillar_exposure_control.pth"
+  datasets:
+    - name: "testset"
+      type: "t2"
+      path: "./data/tanks_temples/Caterpillar/"
+      factor: 2
