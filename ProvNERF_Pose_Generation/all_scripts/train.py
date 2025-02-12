@@ -38,12 +38,13 @@ def train(
         x = torch.linspace(-0.05, 0.05, num_points).to(device).unsqueeze(1)
         data = (generate_data(num_points)).to(device)
     else:
-        x1 = torch.linspace(-0.05, 0.05, 10)
-        x2 = torch.linspace(-0.05, 0.05, 10)
+        x1 = torch.linspace(-0.05, 0.05, int(np.sqrt(num_points)))
+        x2 = torch.linspace(-0.05, 0.05, int(np.sqrt(num_points)))
         grid_x1, grid_x2 = torch.meshgrid((x1, x2), indexing='ij')
+        data = (generate_3D_data(np.sqrt(num_points).astype(int))).to(device)[:,0:num_points,:]
         x = torch.stack((grid_x1, grid_x2), dim=-1).reshape(-1, 2).to(device)
-        data = (generate_3D_data(num_points)).to(device)
-    Zxs = torch.empty((num_Z_samples, num_points, zdim + int(pos_enc_L * 2))).to(device)
+
+    Zxs = torch.empty((num_Z_samples, num_points, zdim + int(pos_enc_L * 2 * xdim))).to(device)
     z_in = pos_encoder(x, L=pos_enc_L).to(device)
     for e in tqdm(range(epochs)):
         # Check if we need to update the stored model parameters
@@ -55,7 +56,7 @@ def train(
                 Zxs[i] = z.to(device)
             generated = H_t(Zxs).to(device)
             imle_nns = [find_nns(d, generated, threshold=threshold, disp=False) for d in data]
-            imle_transformed_points = torch.empty((data.shape[0], num_points, zdim + int(pos_enc_L * 2))).to(device)
+            imle_transformed_points = torch.empty((data.shape[0], num_points, zdim + int(pos_enc_L * 2 * xdim))).to(device)
             perturbed_Zs = []
             for i, (idx, _) in enumerate(imle_nns):
                 model = Zs[idx]
