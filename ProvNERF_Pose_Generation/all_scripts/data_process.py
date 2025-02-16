@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 import matplotlib.pyplot as plt
-
+import math
 def pos_encoder(x, L):
 
     _, n = x.shape
@@ -236,15 +236,79 @@ def generate_data(n, sign = "+"):
     #     curves = torch.concat((curves, e1))
     return curves
 
+def generate_cube(n, a):
+    n = n**2
+    R = int(round(math.sqrt(n / 6.0)))
+    R = max(R, 1)  # ensure at least 1
+
+    half = a / 2
+    coords = torch.linspace(-half, half, R)  # shape: (R,)
+
+    Y, Z = torch.meshgrid(coords, coords, indexing='ij')  # (R, R)
+    face_x_min = torch.stack([
+        torch.full_like(Y, -half),  # x = -half
+        Y,
+        Z
+    ], dim=-1).reshape(-1, 3)  # (R*R, 3)
+    face_x_max = torch.stack([
+        torch.full_like(Y, half),   # x = +half
+        Y,
+        Z
+    ], dim=-1).reshape(-1, 3)
+
+    # Face y = -half and y = +half (vary x, z)
+    X, Z = torch.meshgrid(coords, coords, indexing='ij')
+    face_y_min = torch.stack([
+        X,
+        torch.full_like(X, -half),  # y = -half
+        Z
+    ], dim=-1).reshape(-1, 3)
+    face_y_max = torch.stack([
+        X,
+        torch.full_like(X, half),   # y = +half
+        Z
+    ], dim=-1).reshape(-1, 3)
+
+    # Face z = -half and z = +half (vary x, y)
+    X, Y = torch.meshgrid(coords, coords, indexing='ij')
+    face_z_min = torch.stack([
+        X,
+        Y,
+        torch.full_like(X, -half)   # z = -half
+    ], dim=-1).reshape(-1, 3)
+    face_z_max = torch.stack([
+        X,
+        Y,
+        torch.full_like(X, half)    # z = +half
+    ], dim=-1).reshape(-1, 3)
+
+    # Concatenate all faces
+    faces = torch.cat([
+        face_x_min, face_x_max,
+        face_y_min, face_y_max,
+        face_z_min, face_z_max
+    ], dim=0)  # shape: (6*R^2, 3)
+
+    # Add batch dimension
+    return faces.unsqueeze(0)
+
 def generate_3D_data(n, sign = "+"):
     #e1 = generate_ellipse(n, r1 = 1.5, r2 = 3)
 
-    curves =  generate_sphere(n, a = 5, b = 2.5, c = 10)
-    for i in range(11,20):
-        # for j in range(1,5):
-        e1 = generate_sphere(n, a = i/2, b = i/4, c = i)
-        curves = torch.concat((curves, e1))
-    return curves 
+    curves =  generate_cube(n, a = 4)[:,0:int(n**2),:]
+    e1 = generate_sphere(n, a = 2, b = 2, c=2)
+
+    e2 = generate_sphere(n, a = 5, b = 5, c=5)
+    # for i in range(11,30):
+    #     # for j in range(1,5):
+    #     e1 = get_cube_face_points_fixed_spacing(n**2, a = i/2)[:,0:int(n**2),:]
+    #     curves = torch.concat((curves, e1))
+    # for i in range(10,30):
+    #     # for j in range(1,5):
+    #     e1 = generate_sphere(n, a = i/4, b = i/4, c=i/4)
+    curves = torch.concat((curves, e1))
+
+    return curves
 
 def plot_data(data, mode = '3D'):
     data = data.to("cpu").detach().numpy()

@@ -5,13 +5,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import copy
 from tqdm import tqdm
+import os
+import argparse
+
+from generate import plot_generated_curves_3D, plot_generated_curves_grid_2D
 from imle import generate_NN_latent_functions, find_nns, f_loss
 from models import *
 from data_process import *
 from misc import *
-import os
-from test import plot_generated_curves_grid
-import argparse
+
 
 def train(
         H_t,
@@ -45,6 +47,7 @@ def train(
         x = torch.stack((grid_x1, grid_x2), dim=-1).reshape(-1, 2).to(device)
 
     Zxs = torch.empty((num_Z_samples, num_points, zdim + int(pos_enc_L * 2 * xdim))).to(device)
+    
     z_in = pos_encoder(x, L=pos_enc_L).to(device)
     for e in tqdm(range(epochs)):
         # Check if we need to update the stored model parameters
@@ -53,6 +56,7 @@ def train(
             for i, model in enumerate(Zs):
                 model = model.to(device)
                 z = model(z_in)
+                
                 Zxs[i] = z.to(device)
             generated = H_t(Zxs).to(device)
             imle_nns = [find_nns(d, generated, threshold=threshold, disp=False) for d in data]
@@ -115,19 +119,25 @@ def train(
 def main():
     parser = argparse.ArgumentParser(description="Train a model with configurable parameters.")
     parser.add_argument("--filename", type=str, default="try", help="Output directory name")
-    parser.add_argument("--zdim", type=int, default=30, help="Latent dimension size")
-    parser.add_argument("--epochs", type=int, default=3000, help="Number of training epochs")
-    parser.add_argument("--perturb_scale", type=float, default=0.8, help="Perturbation scale for latent functions")
-    parser.add_argument("--threshold", type=float, default=0.4, help="Threshold for nearest neighbor search")
-    parser.add_argument("--pos_enc_L", type=int, default=5, help="Positional encoding parameter L")
+    parser.add_argument("--zdim", type=int, default=100, help="Latent dimension size")
+    parser.add_argument("--epochs", type=int, default=50, help="Number of training epochs")
+    parser.add_argument("--perturb_scale", type=float, default=1.0, help="Perturbation scale for latent functions")
+    parser.add_argument("--threshold", type=float, default=0.1, help="Threshold for nearest neighbor search")
+    parser.add_argument("--pos_enc_L", type=int, default=20, help="Positional encoding parameter L")
     parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate for the optimizer")
     parser.add_argument("--num_Z_samples", type=int, default=70, help="Number of latent function samples")
+    parser.add_argument("--xdim", type=int, default=2, help="Number of latent function samples")
+    parser.add_argument("--num_points", type=int, default=40, help="Number of points")
+
+
+    
 
     args = parser.parse_args()
-
-    output_dim = 2
+    num_points = int(int(np.sqrt(args.num_points))**2)
+    output_dim = 3
+    xdim = args.xdim
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    H_t = H_theta(input_dim=args.zdim + int(args.pos_enc_L * 2), output_dim=output_dim, num_layers=4, num_neurons=2000).to(device)
+    H_t = H_theta(input_dim=args.zdim + int(args.pos_enc_L * 2 * args.xdim), output_dim=output_dim, num_layers=4, num_neurons=2000).to(device)
     optimizer = torch.optim.AdamW(H_t.parameters(), lr=args.lr)
     save_path = f'Out_plots_{args.filename}/'
     H_t, grad_norms, param_norms, losses = train(
@@ -140,30 +150,53 @@ def main():
         threshold=args.threshold,
         pos_enc_L=args.pos_enc_L,
         num_Z_samples=args.num_Z_samples,
-        zdim=args.zdim
+        zdim=args.zdim,
+        xdim=args.xdim,
+        num_points = num_points
     )
 
-    x = torch.linspace(-0.05, 0.05, 40).to(device).unsqueeze(1)
-    data = (generate_data(40)).to(device)
+    if xdim == 1:
+        x = torch.linspace(-0.05, 0.05, num_points).to(device).unsqueeze(1)
+        data = (generate_data(num_points)).to(device)
+    else:
+        x1 = torch.linspace(-0.05, 0.05, int(np.sqrt(num_points)))
+        x2 = torch.linspace(-0.05, 0.05, int(np.sqrt(num_points)))
+        grid_x1, grid_x2 = torch.meshgrid((x1, x2), indexing='ij')
+        data = (generate_3D_data(np.sqrt(num_points).astype(int))).to(device)[:,0:num_points,:]
+        x = torch.stack((grid_x1, grid_x2), dim=-1).reshape(-1, 2).to(device)
     z_in = pos_encoder(x, L=args.pos_enc_L).to(device)
-    plot_generated_curves_grid(
-        model=H_t,
-        z_in=z_in,
-        num_samps=40,
-        data=data,
-        out_dir=save_path,
-        device=device,
-        num_points=40,
-        zdim=args.zdim,
-        pos_enc_L=args.pos_enc_L,
-        xdim=1,
-        n_rows=10,
-        n_cols=4,
-        xlim=(-2.5, 2.5),
-        ylim=(-2.5, 2.5),
-        figsize=(20, 50),
-        save_dir=f'Generations_{args.filename}',
-    )
+    if output_dim == 2:
+        plot_generated_curves_grid_2D(
+            model=H_t,
+            z_in=z_in,
+            num_samps=40,
+            data=data,
+            out_dir=save_path,
+            device=device,
+            num_points=40,
+            zdim=args.zdim,
+            pos_enc_L=args.pos_enc_L,
+            xdim=1,
+            n_rows=10,
+            n_cols=4,
+            xlim=(-2.5, 2.5),
+            ylim=(-2.5, 2.5),
+            figsize=(20, 50),
+            save_dir=f'Generations_{args.filename}',
+        )
+    else:
+        plot_generated_curves_3D(
+            H_t=H_t,
+            z_in=z_in,
+            num_points=num_points,
+            num_samples=40,
+            device=device,
+            zdim=args.zdim,
+            pos_enc_L=args.pos_enc_L,
+            save_dir=f'Generations_{args.filename}',
+            data=data,
+
+        )
 
 
 if __name__ == "__main__":

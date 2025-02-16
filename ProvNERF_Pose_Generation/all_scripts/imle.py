@@ -23,7 +23,7 @@ def generate_NN_latent_functions(num_samples, xdim=1, zdim=2, bias=0):
                 x3 = torch.relu(self.fc3(x2))
                 #print("x3:", x3.norm(p = 2, dim = 1))
                 #print("--"*100)
-                x4 = (self.fc4(x3))
+                x4 = self.fc4(x3+x2+x1)
                 x = torch.cat((x4/100, inp), dim = 1)
             return x
 

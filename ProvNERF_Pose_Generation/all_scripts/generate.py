@@ -4,7 +4,7 @@ import torch
 import os
 from imle import *
 
-def plot_generated_curves_grid(
+def plot_generated_curves_grid_2D(
     model, z_in, num_samps, data, out_dir, device, num_points=40, zdim=30, pos_enc_L=4, xdim=1,
     n_rows=10, n_cols=4, xlim=(-7, 7), ylim=(-7, 7), 
     figsize=(20, 50), save_dir='notebook_plots', 
@@ -85,4 +85,48 @@ def plot_generated_curves_grid(
     # Save the figure
     plt.savefig(save_path, bbox_inches='tight')
     plt.close()
+
+def plot_generated_curves_3D(H_t, data, z_in, num_samples=15, num_points=576, zdim=3, pos_enc_L=0, device='cpu', save_dir='default'):
+    xdim = 2
+    # Initialize storage for latent representations
+    latent_dim = zdim + int(pos_enc_L * 2 * xdim)
+    Zxs = torch.empty((num_samples, num_points, latent_dim), device=device)
+    
+    # Generate latent representations
+    Zs = generate_NN_latent_functions(num_samples, xdim=z_in.shape[1], zdim=zdim, bias=1)
+    
+    # Ensure the save directory exists
+    save_path = f"testing_out/{save_dir}/"
+    os.makedirs(save_path, exist_ok=True)
+    
+    for i, model in enumerate(Zs):
+        model = model.to(device)
+        Zxs[i] = model(z_in).to(device)
+        generated = H_t(Zxs[i]).to(device)
+        
+        # Convert tensors to numpy for plotting
+        generated_np = generated.cpu().detach().numpy()
+        real_np = data.cpu().detach().numpy()
+        
+        xg, yg, zg = generated_np[:, 0], generated_np[:, 1], generated_np[:, 2]
+        x_real, y_real, z_real = real_np[:, :, 0], real_np[:, :, 1], real_np[:, :, 2]
+        
+        # Create figure for each row (single sample)
+        fig, axs = plt.subplots(1, 3, figsize=(18, 6), subplot_kw={'projection': '3d'})
+        
+        for j, (elev, azim) in enumerate([(20, 30), (40, -60), (60, 120)]):
+            ax = axs[j]
+            ax.scatter(xg, yg, zg, marker='o', label='Generated')
+            ax.scatter(x_real, y_real, z_real, marker='x', alpha=0.5, label='Real data')
+            ax.set_title(f'Sample {i + 1} - View {j + 1}')
+            ax.view_init(elev=elev, azim=azim)
+            ax.set_xlabel('X')
+            ax.set_ylabel('Y')
+            ax.set_zlabel('Z')
+        
+        plt.tight_layout()
+        plt.savefig(f"{save_path}/Generated_Curve_Sample_{i + 1}.png", dpi=300, bbox_inches="tight")
+        plt.close(fig)  # Close the figure to free memory
+
+    print(f"Saved {num_samples} images in {save_path}")
 
