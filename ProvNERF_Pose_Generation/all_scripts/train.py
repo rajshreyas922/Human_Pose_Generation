@@ -120,14 +120,14 @@ def main():
     parser = argparse.ArgumentParser(description="Train a model with configurable parameters.")
     parser.add_argument("--filename", type=str, default="try", help="Output directory name")
     parser.add_argument("--zdim", type=int, default=100, help="Latent dimension size")
-    parser.add_argument("--epochs", type=int, default=50, help="Number of training epochs")
+    parser.add_argument("--epochs", type=int, default=10, help="Number of training epochs")
     parser.add_argument("--perturb_scale", type=float, default=1.0, help="Perturbation scale for latent functions")
-    parser.add_argument("--threshold", type=float, default=0.1, help="Threshold for nearest neighbor search")
-    parser.add_argument("--pos_enc_L", type=int, default=20, help="Positional encoding parameter L")
+    parser.add_argument("--threshold", type=float, default=0.0, help="Threshold for nearest neighbor search")
+    parser.add_argument("--pos_enc_L", type=int, default=30, help="Positional encoding parameter L")
     parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate for the optimizer")
     parser.add_argument("--num_Z_samples", type=int, default=70, help="Number of latent function samples")
     parser.add_argument("--xdim", type=int, default=2, help="Number of latent function samples")
-    parser.add_argument("--num_points", type=int, default=40, help="Number of points")
+    parser.add_argument("--num_points", type=int, default=484, help="Number of points")
 
 
     
@@ -139,7 +139,7 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     H_t = H_theta(input_dim=args.zdim + int(args.pos_enc_L * 2 * args.xdim), output_dim=output_dim, num_layers=4, num_neurons=2000).to(device)
     optimizer = torch.optim.AdamW(H_t.parameters(), lr=args.lr)
-    save_path = f'Out_plots_{args.filename}/'
+    save_path = f'Out_{args.filename}/'
     H_t, grad_norms, param_norms, losses = train(
         H_t,
         optimizer,
@@ -154,7 +154,8 @@ def main():
         xdim=args.xdim,
         num_points = num_points
     )
-
+    os.makedirs(f"Out_{args.filename}", exist_ok=True)
+    torch.save(H_t.state_dict(), f"Out_{args.filename}/H_t_weights.pth")
     if xdim == 1:
         x = torch.linspace(-0.05, 0.05, num_points).to(device).unsqueeze(1)
         data = (generate_data(num_points)).to(device)

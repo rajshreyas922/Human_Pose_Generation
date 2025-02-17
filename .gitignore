@@ -7,3 +7,5 @@ plots/*
 ProvNERF Pose Generation/ProvNERF results/*.obj
 ProvNERF Pose Generation/gif_frames/*
 3D_Early_testing_Not_Using/*
+*.pth
+*.obj
