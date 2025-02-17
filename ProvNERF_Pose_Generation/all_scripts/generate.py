@@ -134,7 +134,7 @@ def plot_generated_curves_3D(H_t, data, z_in, num_samples=15, num_points=576, zd
     Zxs = torch.empty((num_samps, num_points, zdim + int(pos_enc_L*2*xdim))).to(device)
     Zs = generate_NN_latent_functions(num_samples=num_samps, xdim=z_in.shape[1], zdim=zdim, bias=1)
     # Create a directory to store the .obj files
-    output_dir = f"generated_objs"
+    output_dir = f"{save_path}/generated_objs"
     os.makedirs(output_dir, exist_ok=True)
 
     for i, model in enumerate(Zs):
@@ -147,7 +147,7 @@ def plot_generated_curves_3D(H_t, data, z_in, num_samples=15, num_points=576, zd
         points = generated.detach().cpu().numpy()
 
         # Define the filename for the .obj file
-        obj_filename = os.path.join(output_dir, f"generated_points_{i}.obj")
+        obj_filename = f"{save_path}/generated_objs/generated_points_{i}.obj"
 
         # Write the points to the .obj file
         with open(obj_filename, "w") as f:

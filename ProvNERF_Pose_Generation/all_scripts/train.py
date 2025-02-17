@@ -120,7 +120,7 @@ def main():
     parser = argparse.ArgumentParser(description="Train a model with configurable parameters.")
     parser.add_argument("--filename", type=str, default="try", help="Output directory name")
     parser.add_argument("--zdim", type=int, default=100, help="Latent dimension size")
-    parser.add_argument("--epochs", type=int, default=10, help="Number of training epochs")
+    parser.add_argument("--epochs", type=int, default=15000, help="Number of training epochs")
     parser.add_argument("--perturb_scale", type=float, default=1.0, help="Perturbation scale for latent functions")
     parser.add_argument("--threshold", type=float, default=0.0, help="Threshold for nearest neighbor search")
     parser.add_argument("--pos_enc_L", type=int, default=30, help="Positional encoding parameter L")
@@ -155,7 +155,7 @@ def main():
         num_points = num_points
     )
     os.makedirs(f"Out_{args.filename}", exist_ok=True)
-    torch.save(H_t.state_dict(), f"Out_{args.filename}/H_t_weights.pth")
+    torch.save(H_t.state_dict(), f"training_out/Out_{args.filename}/H_t_weights.pth")
     if xdim == 1:
         x = torch.linspace(-0.05, 0.05, num_points).to(device).unsqueeze(1)
         data = (generate_data(num_points)).to(device)
