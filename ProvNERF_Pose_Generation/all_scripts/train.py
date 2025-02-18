@@ -118,12 +118,12 @@ def train(
 
 def main():
     parser = argparse.ArgumentParser(description="Train a model with configurable parameters.")
-    parser.add_argument("--filename", type=str, default="try", help="Output directory name")
-    parser.add_argument("--zdim", type=int, default=100, help="Latent dimension size")
+    parser.add_argument("--filename", type=str, default="try_0", help="Output directory name")
+    parser.add_argument("--zdim", type=int, default=10, help="Latent dimension size")
     parser.add_argument("--epochs", type=int, default=15000, help="Number of training epochs")
-    parser.add_argument("--perturb_scale", type=float, default=1.0, help="Perturbation scale for latent functions")
+    parser.add_argument("--perturb_scale", type=float, default=0.5, help="Perturbation scale for latent functions")
     parser.add_argument("--threshold", type=float, default=0.0, help="Threshold for nearest neighbor search")
-    parser.add_argument("--pos_enc_L", type=int, default=30, help="Positional encoding parameter L")
+    parser.add_argument("--pos_enc_L", type=int, default=15, help="Positional encoding parameter L")
     parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate for the optimizer")
     parser.add_argument("--num_Z_samples", type=int, default=70, help="Number of latent function samples")
     parser.add_argument("--xdim", type=int, default=2, help="Number of latent function samples")
