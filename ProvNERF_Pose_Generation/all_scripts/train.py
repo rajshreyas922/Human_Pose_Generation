@@ -44,6 +44,7 @@ def train(
         x2 = torch.linspace(-0.05, 0.05, int(np.sqrt(num_points)))
         grid_x1, grid_x2 = torch.meshgrid((x1, x2), indexing='ij')
         data = (generate_3D_data(np.sqrt(num_points).astype(int))).to(device)[:,0:num_points,:]
+        
         x = torch.stack((grid_x1, grid_x2), dim=-1).reshape(-1, 2).to(device)
 
     Zxs = torch.empty((num_Z_samples, num_points, zdim + int(pos_enc_L * 2 * xdim))).to(device)
@@ -55,8 +56,8 @@ def train(
             Zs = generate_NN_latent_functions(num_samples=num_Z_samples, xdim=z_in.shape[1], zdim=zdim, bias=1)
             for i, model in enumerate(Zs):
                 model = model.to(device)
-                z = model(z_in)
-                
+                z = model(z_in) #NOrmalize this
+                #z = F.normalize(z, p=2, dim=0)
                 Zxs[i] = z.to(device)
             generated = H_t(Zxs).to(device)
             imle_nns = [find_nns(d, generated, threshold=threshold, disp=False) for d in data]
@@ -118,12 +119,12 @@ def train(
 
 def main():
     parser = argparse.ArgumentParser(description="Train a model with configurable parameters.")
-    parser.add_argument("--filename", type=str, default="try_0", help="Output directory name")
-    parser.add_argument("--zdim", type=int, default=10, help="Latent dimension size")
-    parser.add_argument("--epochs", type=int, default=15000, help="Number of training epochs")
+    parser.add_argument("--filename", type=str, default="try", help="Output directory name")
+    parser.add_argument("--zdim", type=int, default=20, help="Latent dimension size")
+    parser.add_argument("--epochs", type=int, default=10000, help="Number of training epochs")
     parser.add_argument("--perturb_scale", type=float, default=0.5, help="Perturbation scale for latent functions")
     parser.add_argument("--threshold", type=float, default=0.0, help="Threshold for nearest neighbor search")
-    parser.add_argument("--pos_enc_L", type=int, default=15, help="Positional encoding parameter L")
+    parser.add_argument("--pos_enc_L", type=int, default=5, help="Positional encoding parameter L")
     parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate for the optimizer")
     parser.add_argument("--num_Z_samples", type=int, default=70, help="Number of latent function samples")
     parser.add_argument("--xdim", type=int, default=2, help="Number of latent function samples")
