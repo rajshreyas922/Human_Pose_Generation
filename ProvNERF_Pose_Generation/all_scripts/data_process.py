@@ -296,8 +296,9 @@ def generate_3D_data(n, sign = "+"):
     #e1 = generate_ellipse(n, r1 = 1.5, r2 = 3)
 
     curves =  generate_cube(n, a = 4)[:,0:int(n**2),:]
-    e1 = generate_sphere(n, a = 2, b = 2, c=2)
-
+    e1 = generate_sphere(n, a = 2, b = 2, c=2)[:,0:int(n**2),:]
+    print(e1.shape)
+    print(curves.shape)
     e2 = generate_sphere(n, a = 5, b = 5, c=5)
     # for i in range(11,30):
     #     # for j in range(1,5):

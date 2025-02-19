@@ -2,8 +2,8 @@ import trimesh
 import os
 
 # Define the input and output directories
-input_dir = "testing_out/Generations_try_5/generated_objs"
-output_dir = "testing_out/Generations_try_5/generated_meshes"
+input_dir = "testing_out/Generations_try_11/generated_objs"
+output_dir = "testing_out/Generations_try_11/generated_meshes"
 
 # Create the output directory if it doesn't exist
 os.makedirs(output_dir, exist_ok=True)
