@@ -21,13 +21,13 @@ def train(
         out_dir,
         device,
         epochs=10000,
-        staleness=2,
+        staleness=5,
         num_Z_samples=70,
         num_points=40,
         xdim=1,
         zdim=30,
         pos_enc_L=4,
-        plot_epoch=500,
+        plot_epoch=2500,
         perturb_scale=0.97,
         threshold=0.0
 ):
@@ -44,6 +44,7 @@ def train(
         x2 = torch.linspace(-0.05, 0.05, int(np.sqrt(num_points)))
         grid_x1, grid_x2 = torch.meshgrid((x1, x2), indexing='ij')
         data = (generate_3D_data(np.sqrt(num_points).astype(int))).to(device)[:,0:num_points,:]
+        
         x = torch.stack((grid_x1, grid_x2), dim=-1).reshape(-1, 2).to(device)
 
     Zxs = torch.empty((num_Z_samples, num_points, zdim + int(pos_enc_L * 2 * xdim))).to(device)
@@ -56,7 +57,7 @@ def train(
             for i, model in enumerate(Zs):
                 model = model.to(device)
                 z = model(z_in)
-                
+                #z = F.normalize(z, p=2, dim=0)
                 Zxs[i] = z.to(device)
             generated = H_t(Zxs).to(device)
             imle_nns = [find_nns(d, generated, threshold=threshold, disp=False) for d in data]
@@ -101,16 +102,16 @@ def train(
             plt.savefig(f"training_out/{out_dir}/loss_curve.png")
 
         loss.backward()
-        grad_sum = 0
-        param_sum = 0
-        for param in H_t.parameters():
-            param_sum += torch.norm(param) ** 2
-            grad_sum += torch.norm(param.grad) ** 2
+        # grad_sum = 0
+        # param_sum = 0
+        # for param in H_t.parameters():
+        #     param_sum += torch.norm(param) ** 2
+        #     grad_sum += torch.norm(param.grad) ** 2
 
-        grad_norm = torch.sqrt(grad_sum).item()
-        param_norm = torch.sqrt(param_sum).item()
-        grad_norms.append(grad_norm)
-        param_norms.append(param_norm)
+        # grad_norm = torch.sqrt(grad_sum).item()
+        # param_norm = torch.sqrt(param_sum).item()
+        # grad_norms.append(grad_norm)
+        # param_norms.append(param_norm)
         optimizer.step()
 
     return H_t, grad_norms, param_norms, losses
@@ -118,16 +119,16 @@ def train(
 
 def main():
     parser = argparse.ArgumentParser(description="Train a model with configurable parameters.")
-    parser.add_argument("--filename", type=str, default="try", help="Output directory name")
-    parser.add_argument("--zdim", type=int, default=100, help="Latent dimension size")
-    parser.add_argument("--epochs", type=int, default=50, help="Number of training epochs")
-    parser.add_argument("--perturb_scale", type=float, default=1.0, help="Perturbation scale for latent functions")
-    parser.add_argument("--threshold", type=float, default=0.1, help="Threshold for nearest neighbor search")
-    parser.add_argument("--pos_enc_L", type=int, default=20, help="Positional encoding parameter L")
+    parser.add_argument("--filename", type=str, default="try_12", help="Output directory name")
+    parser.add_argument("--zdim", type=int, default=10, help="Latent dimension size")
+    parser.add_argument("--epochs", type=int, default=15000, help="Number of training epochs")
+    parser.add_argument("--perturb_scale", type=float, default=0.4, help="Perturbation scale for latent functions")
+    parser.add_argument("--threshold", type=float, default=0.0, help="Threshold for nearest neighbor search")
+    parser.add_argument("--pos_enc_L", type=int, default=5, help="Positional encoding parameter L")
     parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate for the optimizer")
     parser.add_argument("--num_Z_samples", type=int, default=70, help="Number of latent function samples")
     parser.add_argument("--xdim", type=int, default=2, help="Number of latent function samples")
-    parser.add_argument("--num_points", type=int, default=40, help="Number of points")
+    parser.add_argument("--num_points", type=int, default=484, help="Number of points")
 
 
     
@@ -137,9 +138,10 @@ def main():
     output_dim = 3
     xdim = args.xdim
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    H_t = H_theta(input_dim=args.zdim + int(args.pos_enc_L * 2 * args.xdim), output_dim=output_dim, num_layers=4, num_neurons=2000).to(device)
+    H_t = H_theta(input_dim=args.zdim + int(args.pos_enc_L * 2 * args.xdim), output_dim=output_dim, num_layers=6, num_neurons=1500).to(device)
+    #H_t = H_theta_skip(input_dim=args.zdim + int(args.pos_enc_L * 2 * args.xdim), output_dim=output_dim).to(device)
     optimizer = torch.optim.AdamW(H_t.parameters(), lr=args.lr)
-    save_path = f'Out_plots_{args.filename}/'
+    save_path = f'Out_{args.filename}/'
     H_t, grad_norms, param_norms, losses = train(
         H_t,
         optimizer,
@@ -154,7 +156,8 @@ def main():
         xdim=args.xdim,
         num_points = num_points
     )
-
+    
+    torch.save(H_t.state_dict(), f"training_out/Out_{args.filename}/H_t_weights.pth")
     if xdim == 1:
         x = torch.linspace(-0.05, 0.05, num_points).to(device).unsqueeze(1)
         data = (generate_data(num_points)).to(device)

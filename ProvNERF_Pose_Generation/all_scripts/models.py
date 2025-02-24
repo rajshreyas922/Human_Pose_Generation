@@ -20,7 +20,6 @@ class H_theta(nn.Module):
         return out
 
 
-# A neural network with a skip connection that concatenates the input
 class H_theta_skip(nn.Module):
     def __init__(self, input_dim, output_dim):
         """
@@ -31,25 +30,28 @@ class H_theta_skip(nn.Module):
         super(H_theta_skip, self).__init__()
         self.input_dim = input_dim
         
-        # First three layers: expand and process the input with 2000 neurons each.
+        # Define six layers with skip connections every 2 layers.
         self.layer1 = nn.Linear(input_dim, 2000)
         self.relu1 = nn.ReLU()
         self.layer2 = nn.Linear(2000, 2000)
         self.relu2 = nn.ReLU()
+        
         self.layer3 = nn.Linear(2000, 2000)
         self.relu3 = nn.ReLU()
-        
-        # Fourth layer: takes concatenated features (skip connection) as input.
-        # Concatenation is along dimension 2, so the input size becomes 2000 + input_dim.
-        self.layer4 = nn.Linear(2000 + input_dim, 2000)
+        self.layer4 = nn.Linear(2000, 2000)
         self.relu4 = nn.ReLU()
+        
+        self.layer5 = nn.Linear(2000, 2000)
+        self.relu5 = nn.ReLU()
+        self.layer6 = nn.Linear(2000, 2000)
+        self.relu6 = nn.ReLU()
         
         # Output layer: maps processed features to the desired output dimension.
         self.output_layer = nn.Linear(2000, output_dim)
 
     def forward(self, x, disp=False):
         """
-        Forward pass through the network with skip connection.
+        Forward pass through the network with skip connections every 2 layers.
         
         Args:
             x (Tensor): Input tensor of shape [batch, sequence, features] (or similar).
@@ -58,19 +60,32 @@ class H_theta_skip(nn.Module):
         Returns:
             Tensor: Output of the network.
         """
-        # Save original input for skip connection
+        # Save original input for the first skip connection
         input_skip = x
         
-        # Process input through first three layers
+        # First two layers
         x = self.relu1(self.layer1(x))
         x = self.relu2(self.layer2(x))
+        
+        # Add skip connection after the first two layers
+        if x.shape == input_skip.shape:
+            x = x + input_skip  # Skip connection by addition
+        
+        # Next two layers
         x = self.relu3(self.layer3(x))
-        
-        # Concatenate the skip connection along the feature dimension (assumed dim=2)
-        x = torch.cat((x, input_skip), dim=2)
-        
-        # Process concatenated tensor through the next layer
         x = self.relu4(self.layer4(x))
+        
+        # Add skip connection after the next two layers
+        if x.shape == input_skip.shape:
+            x = x + input_skip  # Skip connection by addition
+        
+        # Final two layers
+        x = self.relu5(self.layer5(x))
+        x = self.relu6(self.layer6(x))
+        
+        # Add skip connection after the final two layers
+        if x.shape == input_skip.shape:
+            x = x + input_skip  # Skip connection by addition
         
         # Final output layer
         out = self.output_layer(x)
