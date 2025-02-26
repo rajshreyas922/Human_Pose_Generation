@@ -21,7 +21,7 @@ def train(
         out_dir,
         device,
         epochs=10000,
-        staleness=5,
+        staleness=2,
         num_Z_samples=70,
         num_points=40,
         xdim=1,
@@ -44,7 +44,7 @@ def train(
         x2 = torch.linspace(-0.05, 0.05, int(np.sqrt(num_points)))
         grid_x1, grid_x2 = torch.meshgrid((x1, x2), indexing='ij')
         data = (generate_3D_data(np.sqrt(num_points).astype(int))).to(device)[:,0:num_points,:]
-        
+        data = torch.stack([data[i, torch.randperm(data.shape[1]), :] for i in range(data.shape[0])])
         x = torch.stack((grid_x1, grid_x2), dim=-1).reshape(-1, 2).to(device)
 
     Zxs = torch.empty((num_Z_samples, num_points, zdim + int(pos_enc_L * 2 * xdim))).to(device)
@@ -119,13 +119,13 @@ def train(
 
 def main():
     parser = argparse.ArgumentParser(description="Train a model with configurable parameters.")
-    parser.add_argument("--filename", type=str, default="try_12", help="Output directory name")
-    parser.add_argument("--zdim", type=int, default=10, help="Latent dimension size")
+    parser.add_argument("--filename", type=str, default="try_14", help="Output directory name")
+    parser.add_argument("--zdim", type=int, default=50, help="Latent dimension size")
     parser.add_argument("--epochs", type=int, default=15000, help="Number of training epochs")
-    parser.add_argument("--perturb_scale", type=float, default=0.4, help="Perturbation scale for latent functions")
+    parser.add_argument("--perturb_scale", type=float, default=0.6, help="Perturbation scale for latent functions")
     parser.add_argument("--threshold", type=float, default=0.0, help="Threshold for nearest neighbor search")
-    parser.add_argument("--pos_enc_L", type=int, default=5, help="Positional encoding parameter L")
-    parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate for the optimizer")
+    parser.add_argument("--pos_enc_L", type=int, default=15, help="Positional encoding parameter L")
+    parser.add_argument("--lr", type=float, default=5e-4, help="Learning rate for the optimizer")
     parser.add_argument("--num_Z_samples", type=int, default=70, help="Number of latent function samples")
     parser.add_argument("--xdim", type=int, default=2, help="Number of latent function samples")
     parser.add_argument("--num_points", type=int, default=484, help="Number of points")
@@ -138,7 +138,7 @@ def main():
     output_dim = 3
     xdim = args.xdim
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    H_t = H_theta(input_dim=args.zdim + int(args.pos_enc_L * 2 * args.xdim), output_dim=output_dim, num_layers=6, num_neurons=1500).to(device)
+    H_t = H_theta(input_dim=args.zdim + int(args.pos_enc_L * 2 * args.xdim), output_dim=output_dim, num_layers=4, num_neurons=1500).to(device)
     #H_t = H_theta_skip(input_dim=args.zdim + int(args.pos_enc_L * 2 * args.xdim), output_dim=output_dim).to(device)
     optimizer = torch.optim.AdamW(H_t.parameters(), lr=args.lr)
     save_path = f'Out_{args.filename}/'

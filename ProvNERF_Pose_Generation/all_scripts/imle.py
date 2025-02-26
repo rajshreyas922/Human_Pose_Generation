@@ -5,10 +5,10 @@ def generate_NN_latent_functions(num_samples, xdim=1, zdim=2, bias=0):
     class NN(nn.Module):
         def __init__(self, input_dim, output_dim):
             super(NN, self).__init__()
-            self.fc1 = nn.Linear(input_dim, 10)
-            self.fc2 = nn.Linear(10, 10)
-            self.fc3 = nn.Linear(10, 10)
-            self.fc4 = nn.Linear(10, output_dim)
+            self.fc1 = nn.Linear(input_dim, 5)
+            self.fc2 = nn.Linear(5, 5)
+            self.fc3 = nn.Linear(5, 5)
+            self.fc4 = nn.Linear(5, output_dim)
 
             for param in self.parameters():
                 param.requires_grad = False
