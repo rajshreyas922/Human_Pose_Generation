@@ -27,7 +27,7 @@ def train(
         xdim=1,
         zdim=30,
         pos_enc_L=4,
-        plot_epoch=2500,
+        plot_epoch=25,
         perturb_scale=0.97,
         threshold=0.0
 ):
@@ -35,7 +35,9 @@ def train(
     param_norms = []
     losses = []
     os.makedirs('training_out/' + out_dir, exist_ok=True)
-
+    batch_size = 83
+    indices = torch.randperm(num_points)
+    batches = torch.split(indices, batch_size)
     if xdim == 1:
         x = torch.linspace(-0.05, 0.05, num_points).to(device).unsqueeze(1)
         data = (generate_data(num_points)).to(device)
@@ -47,38 +49,49 @@ def train(
         data = torch.stack([data[i, torch.randperm(data.shape[1]), :] for i in range(data.shape[0])])
         x = torch.stack((grid_x1, grid_x2), dim=-1).reshape(-1, 2).to(device)
 
-    Zxs = torch.empty((num_Z_samples, num_points, zdim + int(pos_enc_L * 2 * xdim))).to(device)
+    Zxs = torch.empty((num_Z_samples, batch_size, zdim + int(pos_enc_L * 2 * xdim))).to(device)
     
     z_in = pos_encoder(x, L=pos_enc_L).to(device)
+    batch_num = 1
     for e in tqdm(range(epochs)):
-        # Check if we need to update the stored model parameters
-        if e % staleness == 0:
-            Zs = generate_NN_latent_functions(num_samples=num_Z_samples, xdim=z_in.shape[1], zdim=zdim, bias=1)
-            for i, model in enumerate(Zs):
-                model = model.to(device)
-                z = model(z_in)
-                #z = F.normalize(z, p=2, dim=0)
-                Zxs[i] = z.to(device)
-            generated = H_t(Zxs).to(device)
-            imle_nns = [find_nns(d, generated, threshold=threshold, disp=False) for d in data]
-            imle_transformed_points = torch.empty((data.shape[0], num_points, zdim + int(pos_enc_L * 2 * xdim))).to(device)
-            perturbed_Zs = []
-            for i, (idx, _) in enumerate(imle_nns):
-                model = Zs[idx]
-                perturbed_model = copy.deepcopy(model)
-                with torch.no_grad():
-                    for param in perturbed_model.parameters():
-                        param.add_(torch.randn_like(param) * perturb_scale)
-                perturbed_Zs.append(perturbed_model)
-                perturbed_model = perturbed_model.to(device)
-                z = perturbed_model(z_in)
-                imle_transformed_points[i] = z.to(device)
+        print(f"Batch: {batch_num}")
+        batch_num += 1
+        loss_sum = 0
+        for batch_indices in batches:
+            data_batch = data[:, batch_indices, :]
+            if e % staleness == 0:
+                Zs = generate_NN_latent_functions(num_samples=num_Z_samples, xdim=z_in.shape[1], zdim=zdim, bias=1)
+                for i, model in enumerate(Zs):
+                    model = model.to(device)
+                    z = model(z_in[batch_indices, :])
+                    #z = F.normalize(z, p=2, dim=0)
+                    Zxs[i] = z.to(device)
+                generated = H_t(Zxs).to(device)
+                imle_nns = [find_nns(d, generated, threshold=threshold, disp=False) for d in data_batch]
+                imle_transformed_points = torch.empty((data.shape[0], batch_size, zdim + int(pos_enc_L * 2 * xdim))).to(device)
+                perturbed_Zs = []
+                for i, (idx, _) in enumerate(imle_nns):
+                    model = Zs[idx]
+                    perturbed_model = copy.deepcopy(model)
+                    with torch.no_grad():
+                        for param in perturbed_model.parameters():
+                            param.add_(torch.randn_like(param) * perturb_scale)
+                    perturbed_Zs.append(perturbed_model)
+                    perturbed_model = perturbed_model.to(device)
+                    z = perturbed_model(z_in[batch_indices, :])
+                    imle_transformed_points[i] = z.to(device)
 
-        # Zero gradients, calculate loss, backpropagate, and update weights
-        optimizer.zero_grad()
-        outs = H_t(imle_transformed_points)
-        loss = f_loss(data, outs)
-        losses.append(loss.item())
+            # Zero gradients, calculate loss, backpropagate, and update weights
+            optimizer.zero_grad()
+            outs = H_t(imle_transformed_points)
+            loss = f_loss(data_batch, outs)
+            loss_sum += loss
+            loss.backward()
+            optimizer.step()
+        avg_loss = (loss_sum/batch_size).item()
+
+        losses.append(avg_loss)
+
         if e % plot_epoch == 0 or e == epochs - 1:
             generated_disp = generated.to(device='cpu').detach().numpy()
             outs_disp = outs.to(device='cpu').detach().numpy()
@@ -101,7 +114,7 @@ def train(
             plt.legend()
             plt.savefig(f"training_out/{out_dir}/loss_curve.png")
 
-        loss.backward()
+        
         # grad_sum = 0
         # param_sum = 0
         # for param in H_t.parameters():
@@ -112,23 +125,23 @@ def train(
         # param_norm = torch.sqrt(param_sum).item()
         # grad_norms.append(grad_norm)
         # param_norms.append(param_norm)
-        optimizer.step()
+        
 
     return H_t, grad_norms, param_norms, losses
 
 
 def main():
     parser = argparse.ArgumentParser(description="Train a model with configurable parameters.")
-    parser.add_argument("--filename", type=str, default="try_14", help="Output directory name")
-    parser.add_argument("--zdim", type=int, default=50, help="Latent dimension size")
-    parser.add_argument("--epochs", type=int, default=15000, help="Number of training epochs")
-    parser.add_argument("--perturb_scale", type=float, default=0.6, help="Perturbation scale for latent functions")
+    parser.add_argument("--filename", type=str, default="try_21", help="Output directory name")
+    parser.add_argument("--zdim", type=int, default=100, help="Latent dimension size")
+    parser.add_argument("--epochs", type=int, default=150, help="Number of training epochs")
+    parser.add_argument("--perturb_scale", type=float, default=0.25, help="Perturbation scale for latent functions")
     parser.add_argument("--threshold", type=float, default=0.0, help="Threshold for nearest neighbor search")
     parser.add_argument("--pos_enc_L", type=int, default=15, help="Positional encoding parameter L")
     parser.add_argument("--lr", type=float, default=5e-4, help="Learning rate for the optimizer")
     parser.add_argument("--num_Z_samples", type=int, default=70, help="Number of latent function samples")
     parser.add_argument("--xdim", type=int, default=2, help="Number of latent function samples")
-    parser.add_argument("--num_points", type=int, default=484, help="Number of points")
+    parser.add_argument("--num_points", type=int, default=6889, help="Number of points")
 
 
     
@@ -158,6 +171,8 @@ def main():
     )
     
     torch.save(H_t.state_dict(), f"training_out/Out_{args.filename}/H_t_weights.pth")
+    file_path = f"training_out/Out_{args.filename}/H_t_weights.pth"
+    #H_t.load_state_dict(torch.load(file_path))
     if xdim == 1:
         x = torch.linspace(-0.05, 0.05, num_points).to(device).unsqueeze(1)
         data = (generate_data(num_points)).to(device)

@@ -130,7 +130,7 @@ def plot_generated_curves_3D(H_t, data, z_in, num_samples=15, num_points=576, zd
 
     print(f"Saved {num_samples} images in {save_path}")
 
-    num_samps = 15
+    num_samps = 30
     Zxs = torch.empty((num_samps, num_points, zdim + int(pos_enc_L*2*xdim))).to(device)
     Zs = generate_NN_latent_functions(num_samples=num_samps, xdim=z_in.shape[1], zdim=zdim, bias=1)
     # Create a directory to store the .obj files
