@@ -3,6 +3,7 @@ import torch
 import math
 from .load_t2 import load_t2_data
 from .load_nerfsyn import load_blender_data
+from .load_humbi import load_humbi_data
 
 
 def cam_to_world(coords, c2w, vector=True):
@@ -134,6 +135,20 @@ def load_meta_data(args, mode="train"):
         images, poses, hwf, image_paths = load_blender_data(
             args.path, split=mode, factor=args.factor, read_offline=args.read_offline)
         print('Loaded blender', images.shape, hwf, args.path)
+
+        H, W, focal = hwf
+        hwf = [H, W, focal, focal]
+
+        if args.white_bg:
+            images = images[..., :3] * \
+                images[..., -1:] + (1. - images[..., -1:])
+        else:
+            images = images[..., :3]
+    
+    elif args.type == "humbi":
+        images, poses, hwf, image_paths = load_humbi_data(
+            args.path, split=mode, factor=args.factor, read_offline=args.read_offline)
+        print('Loaded HUMBI', images.shape, hwf, args.path)
 
         H, W, focal = hwf
         hwf = [H, W, focal, focal]
