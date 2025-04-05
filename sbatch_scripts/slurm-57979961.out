@@ -1,0 +1,21 @@
+
+Lmod is automatically replacing "intel/2020.1.217" with "gcc/9.3.0".
+
+Lmod Warning:
+-------------------------------------------------------------------------------
+The following dependent module(s) are not currently loaded: scipy-stack/2022a
+(required by: opencv/4.6.0)
+-------------------------------------------------------------------------------
+
+
+
+Traceback (most recent call last):
+  File "/project/6054857/irisma/human-poses/Human_Pose_Generation/4D-Humans/demo.py", line 5, in <module>
+    import cv2
+  File "/home/irisma/py39/lib/python3.9/site-packages/cv2/__init__.py", line 181, in <module>
+    bootstrap()
+  File "/home/irisma/py39/lib/python3.9/site-packages/cv2/__init__.py", line 153, in bootstrap
+    native_module = importlib.import_module("cv2")
+  File "/cvmfs/soft.computecanada.ca/easybuild/software/2020/avx2/Core/python/3.9.6/lib/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+ImportError: /cvmfs/soft.computecanada.ca/easybuild/software/2020/Core/imkl/2020.1.217/mkl/lib/intel64/libmkl_intel_lp64.so: undefined symbol: mkl_dft_bless_node_omp

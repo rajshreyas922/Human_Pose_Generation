@@ -1,0 +1,50 @@
+
+Lmod is automatically replacing "intel/2020.1.217" with "gcc/9.3.0".
+
+Lmod Warning:
+-------------------------------------------------------------------------------
+The following dependent module(s) are not currently loaded: scipy-stack/2022a
+(required by: opencv/4.6.0)
+-------------------------------------------------------------------------------
+
+
+
+/project/6054857/irisma/human-poses/Human_Pose_Generation/PAPR/utils.py:270: UserWarning: The figure layout has changed to tight
+  fig.tight_layout()
+Traceback (most recent call last):
+  File "/project/6054857/irisma/human-poses/Human_Pose_Generation/PAPR/train.py", line 362, in <module>
+    main(train_config, eval_config, args.resume)
+  File "/project/6054857/irisma/human-poses/Human_Pose_Generation/PAPR/train.py", line 328, in main
+    train_and_eval(start_step, model, device, dataset, eval_dataset, losses, args)
+  File "/project/6054857/irisma/human-poses/Human_Pose_Generation/PAPR/train.py", line 260, in train_and_eval
+    eval_step(steps, model, device, dataset, eval_dataset, batch, loss_fn, out, args, train_losses, eval_losses, eval_psnrs, pt_lrs, attn_lrs)
+  File "/project/6054857/irisma/human-poses/Human_Pose_Generation/PAPR/train.py", line 33, in eval_step
+    img, rayd, rayo = eval_dataset.get_full_img(args.eval.img_idx)
+  File "/project/6054857/irisma/human-poses/Human_Pose_Generation/PAPR/dataset/dataset.py", line 114, in get_full_img
+    image, rayo, rayd = self._read_image_from_path(img_idx)
+  File "/project/6054857/irisma/human-poses/Human_Pose_Generation/PAPR/dataset/dataset.py", line 51, in _read_image_from_path
+    image_path = self.image_paths[image_idx]
+IndexError: list index out of range
+Initialized points scale:  tensor(-12.) tensor(12.) tensor(-12.) tensor(12.) tensor(-12.) tensor(12.)
+Number of parameters of renderer:  3643395
+Point features:  torch.Size([10000, 64]) tensor(-4.5974, grad_fn=<MinBackward1>) tensor(4.5664, grad_fn=<MaxBackward1>) tensor(0.0010, grad_fn=<MeanBackward0>) tensor(1.0013, grad_fn=<StdBackward0>)
+Using v_extra_dim:  64
+LR factor:  1.0
+Loaded HUMBI (1, 1080, 1920, 4) [1080, 1920, 953.1587196261681, 549.6640186915888] ./data/humbi/body_01
+c2w:  torch.Size([100, 4, 4])
+Loaded HUMBI (1, 1080, 1920, 4) [1080, 1920, 953.1587196261681, 549.6640186915888] ./data/humbi/body_01
+c2w:  torch.Size([7, 4, 4])
+Using MSE loss, loss weight:  1.0
+Loading model from: /project/6054857/irisma/human-poses/Human_Pose_Generation/PAPR/vgg.pth
+Using LPIPS loss, loss weight:  0.01
+Start step: 0 Total steps: 250000
+ embedv: 0 torch.Size([25600, 20, 32]) -0.334228515625 0.465576171875 0.022247314453125 0.13427734375
+ scores: 0 torch.Size([25600, 1, 1, 20]) 0.0 0.283935546875 0.013946533203125 0.060791015625
+ feat map: 0 torch.Size([1, 160, 160, 32]) -0.2497314214706421 0.33620601892471313 0.022251691669225693 0.12614750862121582
+ predict rgb: 0 torch.Size([1, 160, 160, 3]) 0.8717781901359558 0.8808552622795105 0.8753952980041504 0.0031901318579912186
+Train step: 200 loss: 0.2643851637840271 attn_lr: 6.00000000000005e-06 pts_lr: 0.001999996873232 scale: 65536.0 time: 386.00s
+ embedv: 200 torch.Size([25600, 20, 32]) -0.51611328125 0.4853515625 0.0305938720703125 0.147705078125
+ scores: 200 torch.Size([25600, 1, 1, 20]) 0.0 0.271728515625 0.018768310546875 0.06134033203125
+Train step: 400 loss: 0.01263509038835764 attn_lr: 1.200000000000007e-05 pts_lr: 0.0019999874300192094 scale: 65536.0 time: 280.85s
+ embedv: 400 torch.Size([25600, 20, 32]) -2.140625 1.7353515625 0.080322265625 0.463623046875
+ scores: 400 torch.Size([25600, 1, 1, 20]) 12.1953125 13.84375 13.078125 0.43310546875

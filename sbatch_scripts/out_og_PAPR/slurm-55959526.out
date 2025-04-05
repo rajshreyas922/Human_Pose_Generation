@@ -1,0 +1,32 @@
+
+Lmod is automatically replacing "intel/2020.1.217" with "gcc/9.3.0".
+
+Lmod Warning:
+-------------------------------------------------------------------------------
+The following dependent module(s) are not currently loaded: scipy-stack/2022a
+(required by: opencv/4.6.0)
+-------------------------------------------------------------------------------
+
+
+
+Traceback (most recent call last):
+  File "/project/6054857/irisma/human-poses/Human_Pose_Generation/PAPR/train.py", line 362, in <module>
+    main(train_config, eval_config, args.resume)
+  File "/project/6054857/irisma/human-poses/Human_Pose_Generation/PAPR/train.py", line 300, in main
+    dataset = get_dataset(args.dataset, mode="train")
+  File "/project/6054857/irisma/human-poses/Human_Pose_Generation/PAPR/dataset/__init__.py", line 23, in get_dataset
+    return get_traindataset(args)
+  File "/project/6054857/irisma/human-poses/Human_Pose_Generation/PAPR/dataset/__init__.py", line 6, in get_traindataset
+    return RINDataset(args, mode='train')
+  File "/project/6054857/irisma/human-poses/Human_Pose_Generation/PAPR/dataset/dataset.py", line 15, in __init__
+    images, c2w, H, W, focal_x, focal_y, image_paths = load_meta_data(args, mode=mode)
+  File "/project/6054857/irisma/human-poses/Human_Pose_Generation/PAPR/dataset/utils.py", line 134, in load_meta_data
+    images, poses, hwf, image_paths = load_blender_data(
+  File "/project/6054857/irisma/human-poses/Human_Pose_Generation/PAPR/dataset/load_nerfsyn.py", line 9, in load_blender_data
+    with open(os.path.join(basedir, f'transforms_{split}.json'), 'r') as fp:
+FileNotFoundError: [Errno 2] No such file or directory: './data/nerf_synthetic/lego/transforms_train.json'
+Initialized points scale:  tensor(-12.) tensor(12.) tensor(-12.) tensor(12.) tensor(-12.) tensor(12.)
+Number of parameters of renderer:  3643395
+Point features:  torch.Size([3000, 64]) tensor(-4.5974, grad_fn=<MinBackward1>) tensor(4.3983, grad_fn=<MaxBackward1>) tensor(-0.0005, grad_fn=<MeanBackward0>) tensor(0.9997, grad_fn=<StdBackward0>)
+Using v_extra_dim:  64
+LR factor:  1.0

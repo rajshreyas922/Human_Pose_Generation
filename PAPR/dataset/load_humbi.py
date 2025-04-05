@@ -6,7 +6,7 @@ import json
 
 
 def load_humbi_data(basedir, split='train', factor=1, read_offline=True):
-    with open(os.path.join(basedir, f'transform.json'), 'r') as fp:
+    with open(os.path.join(basedir, f'transforms_{split}.json'), 'r') as fp:
         meta = json.load(fp)
 
     poses = []
@@ -35,7 +35,9 @@ def load_humbi_data(basedir, split='train', factor=1, read_offline=True):
     images = np.array(images).astype(np.float32)
 
     H, W = images[0].shape[:2]
-    camera_angle_x = float(meta['camera_angle_x'])
-    focal = .5 * W / np.tan(.5 * camera_angle_x)
+    # camera_angle_x = float(meta['camera_angle_x'])
+    # focal = .5 * W / np.tan(.5 * camera_angle_x)
+    focal_x = meta['focal_x']
+    focal_y = meta['focal_y']
 
-    return images, poses, [H, W, focal], image_paths
+    return images, poses, [H, W, focal_x, focal_y], image_paths

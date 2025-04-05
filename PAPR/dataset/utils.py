@@ -150,8 +150,8 @@ def load_meta_data(args, mode="train"):
             args.path, split=mode, factor=args.factor, read_offline=args.read_offline)
         print('Loaded HUMBI', images.shape, hwf, args.path)
 
-        H, W, focal = hwf
-        hwf = [H, W, focal, focal]
+        # H, W, focal = hwf
+        # hwf = [H, W, focal, focal]
 
         if args.white_bg:
             images = images[..., :3] * \

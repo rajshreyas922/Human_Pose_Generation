@@ -10,9 +10,12 @@ training:
   add_stop: 50000
 eval:
   dataset:
+    type: "humbi"
     path: "./data/humbi/body_01"
+  img_idx: 0
 test:
   # load_path: "checkpoints/chair.pth"
   datasets:
     - name: "testset"
+      type: "humbi"
       path: "./data/humbi/body_01"
