@@ -1,0 +1,745 @@
+
+Lmod is automatically replacing "intel/2020.1.217" with "gcc/9.3.0".
+
+Lmod Warning:
+-------------------------------------------------------------------------------
+The following dependent module(s) are not currently loaded: scipy-stack/2022a
+(required by: opencv/4.6.0)
+-------------------------------------------------------------------------------
+
+
+
+/project/6054857/irisma/human-poses/Human_Pose_Generation/PAPR/utils.py:270: UserWarning: The figure layout has changed to tight
+  fig.tight_layout()
+Clipping input data to the valid range for imshow with RGB data ([0..1] for floats or [0..255] for integers).
+/home/irisma/py39/lib/python3.9/site-packages/torch/optim/lr_scheduler.py:163: UserWarning: The epoch parameter in `scheduler.step()` was not necessary and is being deprecated where possible. Please use `scheduler.step()` to step the scheduler. During the deprecation, if epoch is different from None, the closed form is used instead of the new chainable form, where available. Please open an issue if you are unable to replicate your use case: https://github.com/pytorch/pytorch/issues/new/choose.
+  warnings.warn(EPOCH_DEPRECATION_WARNING, UserWarning)
+/home/irisma/py39/lib/python3.9/site-packages/torch/optim/lr_scheduler.py:138: UserWarning: Detected call of `lr_scheduler.step()` before `optimizer.step()`. In PyTorch 1.1.0 and later, you should call them in the opposite order: `optimizer.step()` before `lr_scheduler.step()`.  Failure to do this will result in PyTorch skipping the first value of the learning rate schedule. See more details at https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
+  warnings.warn("Detected call of `lr_scheduler.step()` before `optimizer.step()`. "
+Traceback (most recent call last):
+  File "/project/6054857/irisma/human-poses/Human_Pose_Generation/PAPR/train.py", line 362, in <module>
+    main(train_config, eval_config, args.resume)
+  File "/project/6054857/irisma/human-poses/Human_Pose_Generation/PAPR/train.py", line 328, in main
+    train_and_eval(start_step, model, device, dataset, eval_dataset, losses, args)
+  File "/project/6054857/irisma/human-poses/Human_Pose_Generation/PAPR/train.py", line 245, in train_and_eval
+    loss, out = train_step(step, model, device, dataset, batch, loss_fn, args)
+  File "/project/6054857/irisma/human-poses/Human_Pose_Generation/PAPR/train.py", line 162, in train_step
+    out = model(rayo, rayd, c2w, step)
+  File "/home/irisma/py39/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1194, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/project/6054857/irisma/human-poses/Human_Pose_Generation/PAPR/models/model.py", line 504, in forward
+    points, select_k_ind = self._get_points(rays_o, rays_d, c2w, step)
+  File "/project/6054857/irisma/human-poses/Human_Pose_Generation/PAPR/models/model.py", line 329, in _get_points
+    select_k_ind = self._calculate_global_distances(rays_o, rays_d, points)   # (N, H, W, num_pts)
+  File "/project/6054857/irisma/human-poses/Human_Pose_Generation/PAPR/models/model.py", line 279, in _calculate_global_distances
+    feature = torch.norm(D, dim=-1)
+  File "/home/irisma/py39/lib/python3.9/site-packages/torch/functional.py", line 1506, in norm
+    return _VF.frobenius_norm(input, _dim, keepdim=keepdim)
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.44 GiB (GPU 0; 11.90 GiB total capacity; 8.75 GiB already allocated; 1.42 GiB free; 9.71 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+Initialized points scale:  tensor(-12.) tensor(12.) tensor(-12.) tensor(12.) tensor(-12.) tensor(12.)
+Number of parameters of renderer:  3643395
+Point features:  torch.Size([10000, 64]) tensor(-4.5974, grad_fn=<MinBackward1>) tensor(4.5664, grad_fn=<MaxBackward1>) tensor(0.0010, grad_fn=<MeanBackward0>) tensor(1.0013, grad_fn=<StdBackward0>)
+Using v_extra_dim:  64
+LR factor:  1.0
+Loaded HUMBI (1, 1080, 1920, 4) [1080, 1920, 953.1587196261681, 549.6640186915888] ./data/humbi/body_01
+c2w:  torch.Size([100, 4, 4])
+Loaded HUMBI (1, 1080, 1920, 4) [1080, 1920, 953.1587196261681, 549.6640186915888] ./data/humbi/body_01
+c2w:  torch.Size([7, 4, 4])
+Using MSE loss, loss weight:  1.0
+Loading model from: /project/6054857/irisma/human-poses/Human_Pose_Generation/PAPR/vgg.pth
+Using LPIPS loss, loss weight:  0.01
+Start step: 0 Total steps: 250000
+ embedv: 0 torch.Size([25600, 20, 32]) -0.334228515625 0.465576171875 0.022247314453125 0.13427734375
+ scores: 0 torch.Size([25600, 1, 1, 20]) 0.0 0.283935546875 0.013946533203125 0.060791015625
+ feat map: 0 torch.Size([1, 160, 160, 32]) -0.2497314214706421 0.33620601892471313 0.022251691669225693 0.12614750862121582
+ predict rgb: 0 torch.Size([1, 160, 160, 3]) 0.8717781901359558 0.8808552622795105 0.8753952980041504 0.0031901318579912186
+Train step: 200 loss: 0.2643851637840271 attn_lr: 6.00000000000005e-06 pts_lr: 0.001999996873232 scale: 65536.0 time: 379.82s
+ embedv: 200 torch.Size([25600, 20, 32]) -0.51611328125 0.4853515625 0.0305938720703125 0.147705078125
+ scores: 200 torch.Size([25600, 1, 1, 20]) 0.0 0.271728515625 0.018768310546875 0.06134033203125
+Train step: 400 loss: 0.01263509038835764 attn_lr: 1.200000000000007e-05 pts_lr: 0.0019999874300192094 scale: 65536.0 time: 362.73s
+ embedv: 400 torch.Size([25600, 20, 32]) -2.140625 1.7353515625 0.080322265625 0.463623046875
+ scores: 400 torch.Size([25600, 1, 1, 20]) 12.1953125 13.84375 13.078125 0.43310546875
+Eval step: 500 train_loss: 0.047793690609745684 eval_loss: 0.0421772375702858 eval_psnr: 13.792353895073179
+Train step: 600 loss: 0.36382046341896057 attn_lr: 1.8000000000000102e-05 pts_lr: 0.0019999716703423317 scale: 65536.0 time: 389.58s
+ embedv: 600 torch.Size([25600, 20, 32]) -2.095703125 1.3681640625 0.08807373046875 0.64111328125
+ scores: 600 torch.Size([25600, 1, 1, 20]) 28.421875 29.875 29.15625 0.4580078125
+Train step: 800 loss: 0.42498594522476196 attn_lr: 2.4000000000000123e-05 pts_lr: 0.0019999495943009062 scale: 65536.0 time: 345.40s
+ embedv: 800 torch.Size([25600, 20, 32]) -1.6259765625 1.05078125 0.0882568359375 0.50390625
+ scores: 800 torch.Size([25600, 1, 1, 20]) 47.5 48.4375 47.90625 0.29052734375
+Train step: 1000 loss: 0.004845599643886089 attn_lr: 3.0000000000000123e-05 pts_lr: 0.00199992120203438 scale: 65536.0 time: 347.67s
+Eval step: 1000 train_loss: 0.04470601502479985 eval_loss: 0.042364928871393204 eval_psnr: 13.7692243654863
+ embedv: 1000 torch.Size([25600, 20, 32]) -3.42578125 2.37109375 0.1317138671875 0.82177734375
+ scores: 1000 torch.Size([25600, 1, 1, 20]) 45.40625 48.1875 47.25 0.759765625
+ feat map: 1000 torch.Size([1, 160, 160, 32]) -2.188037395477295 1.456170678138733 0.1311735212802887 0.7834228277206421
+ predict rgb: 1000 torch.Size([1, 160, 160, 3]) 0.9013149738311768 0.9382156729698181 0.9320400953292847 0.004155879840254784
+Train step: 1200 loss: 0.011927909217774868 attn_lr: 3.600000000000017e-05 pts_lr: 0.0019998864937220947 scale: 65536.0 time: 384.01s
+ embedv: 1200 torch.Size([25600, 20, 32]) -2.759765625 2.318359375 0.0787353515625 0.701171875
+ scores: 1200 torch.Size([25600, 1, 1, 20]) 38.8125 43.03125 41.0625 1.2744140625
+Train step: 1400 loss: 0.36669889092445374 attn_lr: 4.200000000000009e-05 pts_lr: 0.001999845469583283 scale: 65536.0 time: 347.95s
+ embedv: 1400 torch.Size([25600, 20, 32]) -2.455078125 1.3994140625 0.11846923828125 0.73291015625
+ scores: 1400 torch.Size([25600, 1, 1, 20]) 41.1875 42.3125 41.6875 0.269287109375
+Eval step: 1500 train_loss: 0.04993436271138489 eval_loss: 0.042973510921001434 eval_psnr: 13.709288590727656
+Train step: 1600 loss: 0.009872596710920334 attn_lr: 4.8000000000000184e-05 pts_lr: 0.0019997981298770793 scale: 65536.0 time: 384.17s
+ embedv: 1600 torch.Size([25600, 20, 32]) -2.140625 1.66796875 0.09326171875 0.525390625
+ scores: 1600 torch.Size([25600, 1, 1, 20]) 13.09375 27.890625 18.6875 4.84765625
+Train step: 1800 loss: 0.0061378804966807365 attn_lr: 5.4000000000000215e-05 pts_lr: 0.0019997444749025035 scale: 65536.0 time: 341.73s
+ embedv: 1800 torch.Size([25600, 20, 32]) -2.689453125 2.01171875 0.10028076171875 0.64892578125
+ scores: 1800 torch.Size([25600, 1, 1, 20]) 17.390625 19.359375 18.4375 0.5625
+Train step: 2000 loss: 0.002333176787942648 attn_lr: 6.000000000000029e-05 pts_lr: 0.001999684504998472 scale: 131072.0 time: 343.20s
+Eval step: 2000 train_loss: 0.049845667723217045 eval_loss: 0.041943762451410294 eval_psnr: 13.81029192684359
+ embedv: 2000 torch.Size([25600, 20, 32]) -4.80859375 3.173828125 0.1090087890625 0.974609375
+ scores: 2000 torch.Size([25600, 1, 1, 20]) 18.9375 46.6875 29.921875 11.03125
+ feat map: 2000 torch.Size([1, 160, 160, 32]) -3.030917167663574 2.0378806591033936 0.11272129416465759 0.9679819941520691
+ predict rgb: 2000 torch.Size([1, 160, 160, 3]) 0.9211670160293579 0.9616948962211609 0.958440363407135 0.0028194375336170197
+Train step: 2200 loss: 0.002747591119259596 attn_lr: 6.60000000000004e-05 pts_lr: 0.001999618220543781 scale: 131072.0 time: 384.34s
+ embedv: 2200 torch.Size([25600, 20, 32]) -3.146484375 1.8466796875 0.126953125 0.69921875
+ scores: 2200 torch.Size([25600, 1, 1, 20]) 0.0 28.5 10.96875 12.390625
+Train step: 2400 loss: 0.010846576653420925 attn_lr: 7.200000000000054e-05 pts_lr: 0.0019995456219571266 scale: 131072.0 time: 354.29s
+ embedv: 2400 torch.Size([25600, 20, 32]) -2.55859375 1.5234375 0.09747314453125 0.54638671875
+ scores: 2400 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Eval step: 2500 train_loss: 0.053370729748159644 eval_loss: 0.04225296899676323 eval_psnr: 13.781372092999002
+Train step: 2600 loss: 0.008307954296469688 attn_lr: 7.800000000000077e-05 pts_lr: 0.0019994667096970824 scale: 131072.0 time: 385.44s
+ embedv: 2600 torch.Size([25600, 20, 32]) -2.453125 1.73046875 0.0960693359375 0.5927734375
+ scores: 2600 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 2800 loss: 0.006802129093557596 attn_lr: 8.400000000000103e-05 pts_lr: 0.0019993814842620963 scale: 131072.0 time: 341.33s
+ embedv: 2800 torch.Size([25600, 20, 32]) -3.7734375 2.93359375 0.12078857421875 0.87158203125
+ scores: 2800 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 3000 loss: 0.09665071964263916 attn_lr: 9.000000000000129e-05 pts_lr: 0.0019992899461904966 scale: 131072.0 time: 342.26s
+Eval step: 3000 train_loss: 0.055992629130603745 eval_loss: 0.042839415371418 eval_psnr: 13.724187348576157
+ embedv: 3000 torch.Size([25600, 20, 32]) -1.744140625 1.0556640625 0.07415771484375 0.52197265625
+ scores: 3000 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+ feat map: 3000 torch.Size([1, 160, 160, 32]) -1.462499976158142 0.8230469226837158 0.0741688683629036 0.5177051424980164
+ predict rgb: 3000 torch.Size([1, 160, 160, 3]) 0.8869669437408447 0.9057435393333435 0.9006679654121399 0.0014648443320766091
+Train step: 3200 loss: 0.5282658934593201 attn_lr: 9.600000000000145e-05 pts_lr: 0.0019991920960604954 scale: 131072.0 time: 387.28s
+ embedv: 3200 torch.Size([25600, 20, 32]) -4.453125 3.162109375 0.11224365234375 0.98583984375
+ scores: 3200 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 3400 loss: 0.00659753754734993 attn_lr: 0.00010200000000000184 pts_lr: 0.001999087934490158 scale: 131072.0 time: 347.60s
+ embedv: 3400 torch.Size([25600, 20, 32]) -4.328125 3.2421875 0.11468505859375 1.048828125
+ scores: 3400 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Eval step: 3500 train_loss: 0.05095472749506007 eval_loss: 0.04242154583334923 eval_psnr: 13.763428563400135
+Train step: 3600 loss: 0.10697324573993683 attn_lr: 0.0001080000000000017 pts_lr: 0.0019989774621374324 scale: 131072.0 time: 384.85s
+ embedv: 3600 torch.Size([25600, 20, 32]) -2.0546875 1.33984375 0.06951904296875 0.626953125
+ scores: 3600 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 3800 loss: 0.008991105481982231 attn_lr: 0.00011400000000000192 pts_lr: 0.0019988606797001233 scale: 131072.0 time: 353.42s
+ embedv: 3800 torch.Size([25600, 20, 32]) -2.087890625 1.3759765625 0.076416015625 0.477294921875
+ scores: 3800 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 4000 loss: 0.009557859972119331 attn_lr: 0.00012000000000000167 pts_lr: 0.0019987375879158852 scale: 262144.0 time: 345.15s
+Eval step: 4000 train_loss: 0.05738200203119777 eval_loss: 0.04276611655950546 eval_psnr: 13.728226945611894
+ embedv: 4000 torch.Size([25600, 20, 32]) -2.2890625 1.5830078125 0.0753173828125 0.5791015625
+ scores: 4000 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+ feat map: 4000 torch.Size([1, 160, 160, 32]) -1.2958984375 0.8951293230056763 0.07534568756818771 0.5533649921417236
+ predict rgb: 4000 torch.Size([1, 160, 160, 3]) 0.890833854675293 0.9193702936172485 0.9123513102531433 0.003980106208473444
+Train step: 4200 loss: 0.007668835576623678 attn_lr: 0.00012600000000000203 pts_lr: 0.0019986081875622386 scale: 262144.0 time: 382.96s
+ embedv: 4200 torch.Size([25600, 20, 32]) -2.0390625 1.373046875 0.07763671875 0.55615234375
+ scores: 4200 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 4400 loss: 0.008602102287113667 attn_lr: 0.00013200000000000223 pts_lr: 0.0019984724794565416 scale: 262144.0 time: 329.65s
+ embedv: 4400 torch.Size([25600, 20, 32]) -1.7861328125 1.244140625 0.07733154296875 0.5673828125
+ scores: 4400 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Eval step: 4500 train_loss: 0.05234234773128992 eval_loss: 0.042185746133327484 eval_psnr: 13.784256663163537
+Train step: 4600 loss: 0.0043950933031737804 attn_lr: 0.00013800000000000222 pts_lr: 0.0019983304644560027 scale: 262144.0 time: 336.92s
+ embedv: 4600 torch.Size([25600, 20, 32]) -5.5078125 4.1328125 0.1954345703125 1.474609375
+ scores: 4600 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 4800 loss: 0.0036628679372370243 attn_lr: 0.00014400000000000236 pts_lr: 0.0019981821434576696 scale: 262144.0 time: 293.17s
+ embedv: 4800 torch.Size([25600, 20, 32]) -2.765625 2.03125 0.09423828125 0.87060546875
+ scores: 4800 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 5000 loss: 0.007849134504795074 attn_lr: 0.000150000000000002 pts_lr: 0.0019980275173984152 scale: 262144.0 time: 286.77s
+Eval step: 5000 train_loss: 0.04505543193644553 eval_loss: 0.042926594614982605 eval_psnr: 13.717570030098974
+ embedv: 5000 torch.Size([25600, 20, 32]) -1.0517578125 0.8974609375 0.036529541015625 0.325927734375
+ scores: 5000 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+ feat map: 5000 torch.Size([1, 160, 160, 32]) -0.775561511516571 0.660107433795929 0.03653453290462494 0.3198517858982086
+ predict rgb: 5000 torch.Size([1, 160, 160, 3]) 0.8900365829467773 0.9118320941925049 0.909088671207428 0.0018871150678023696
+Train step: 5200 loss: 0.002424184000119567 attn_lr: 0.0001560000000000022 pts_lr: 0.001997866587254939 scale: 262144.0 time: 322.75s
+ embedv: 5200 torch.Size([25600, 20, 32]) -1.822265625 2.3671875 0.090087890625 0.69775390625
+ scores: 5200 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 5400 loss: 0.010047643445432186 attn_lr: 0.00016200000000000223 pts_lr: 0.0019976993540437634 scale: 262144.0 time: 279.00s
+ embedv: 5400 torch.Size([25600, 20, 32]) -0.90673828125 0.82763671875 0.025970458984375 0.2259521484375
+ scores: 5400 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Eval step: 5500 train_loss: 0.05393007946608122 eval_loss: 0.04231856390833855 eval_psnr: 13.771004323641703
+Train step: 5600 loss: 0.006915480364114046 attn_lr: 0.0001680000000000017 pts_lr: 0.0019975258188212283 scale: 262144.0 time: 319.87s
+ embedv: 5600 torch.Size([25600, 20, 32]) -1.20703125 1.0380859375 0.033905029296875 0.419921875
+ scores: 5600 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 5800 loss: 0.006480889394879341 attn_lr: 0.00017400000000000182 pts_lr: 0.001997345982683472 scale: 262144.0 time: 279.64s
+ embedv: 5800 torch.Size([25600, 20, 32]) -0.6591796875 0.63037109375 0.0167083740234375 0.2152099609375
+ scores: 5800 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 6000 loss: 0.005124787800014019 attn_lr: 0.0001800000000000017 pts_lr: 0.0019971598467664452 scale: 524288.0 time: 279.05s
+Eval step: 6000 train_loss: 0.05206967324996367 eval_loss: 0.04185673967003822 eval_psnr: 13.815737361347505
+ embedv: 6000 torch.Size([25600, 20, 32]) -0.84228515625 0.78955078125 0.0345458984375 0.30126953125
+ scores: 6000 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+ feat map: 6000 torch.Size([1, 160, 160, 32]) -0.611010730266571 0.6141112446784973 0.03454095125198364 0.2953394651412964
+ predict rgb: 6000 torch.Size([1, 160, 160, 3]) 0.9008002281188965 0.9403902888298035 0.9336357116699219 0.004417352844029665
+Train step: 6200 loss: 0.0029964486602693796 attn_lr: 0.00018600000000000178 pts_lr: 0.001996967412245877 scale: 524288.0 time: 321.70s
+ embedv: 6200 torch.Size([25600, 20, 32]) -1.1767578125 1.0810546875 0.031829833984375 0.3369140625
+ scores: 6200 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 6400 loss: 0.0035174016375094652 attn_lr: 0.00019200000000000177 pts_lr: 0.0019967686803372873 scale: 524288.0 time: 280.51s
+ embedv: 6400 torch.Size([25600, 20, 32]) -0.94873046875 0.80615234375 0.0312042236328125 0.294921875
+ scores: 6400 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Eval step: 6500 train_loss: 0.04438235618334147 eval_loss: 0.04223886504769325 eval_psnr: 13.781630628797354
+Train step: 6600 loss: 0.003091231919825077 attn_lr: 0.00019800000000000224 pts_lr: 0.001996563652295974 scale: 524288.0 time: 325.83s
+ embedv: 6600 torch.Size([25600, 20, 32]) -1.009765625 0.763671875 0.01332855224609375 0.264892578125
+ scores: 6600 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 6800 loss: 0.012811506167054176 attn_lr: 0.0002040000000000026 pts_lr: 0.0019963523294170096 scale: 524288.0 time: 277.97s
+ embedv: 6800 torch.Size([25600, 20, 32]) -0.445068359375 0.325439453125 0.01873779296875 0.152099609375
+ scores: 6800 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 7000 loss: 0.2353072464466095 attn_lr: 0.00021000000000000245 pts_lr: 0.0019961347130352295 scale: 524288.0 time: 277.40s
+Eval step: 7000 train_loss: 0.04476149670383893 eval_loss: 0.04205278307199478 eval_psnr: 13.792054043873843
+ embedv: 7000 torch.Size([25600, 20, 32]) -0.5166015625 0.548828125 0.0208587646484375 0.195068359375
+ scores: 7000 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+ feat map: 7000 torch.Size([1, 160, 160, 32]) -0.3920532166957855 0.4278564155101776 0.02086564525961876 0.1930932104587555
+ predict rgb: 7000 torch.Size([1, 160, 160, 3]) 0.9095126390457153 0.9645124673843384 0.9563848972320557 0.005842285230755806
+Train step: 7200 loss: 0.0054516177624464035 attn_lr: 0.00021600000000000246 pts_lr: 0.001995910804525209 scale: 524288.0 time: 319.23s
+ embedv: 7200 torch.Size([25600, 20, 32]) -0.35205078125 0.25048828125 0.005619049072265625 0.113037109375
+ scores: 7200 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 7400 loss: 0.006842561531811953 attn_lr: 0.0002220000000000022 pts_lr: 0.0019956806053012762 scale: 524288.0 time: 278.29s
+ embedv: 7400 torch.Size([25600, 20, 32]) -0.58642578125 0.541015625 0.0146636962890625 0.17236328125
+ scores: 7400 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Eval step: 7500 train_loss: 0.051125626827793896 eval_loss: 0.04199559986591339 eval_psnr: 13.802325463860852
+Train step: 7600 loss: 0.006219958886504173 attn_lr: 0.00022800000000000207 pts_lr: 0.0019954441168174943 scale: 524288.0 time: 316.74s
+ embedv: 7600 torch.Size([25600, 20, 32]) -0.63916015625 0.650390625 0.015045166015625 0.1827392578125
+ scores: 7600 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 7800 loss: 0.005663031712174416 attn_lr: 0.00023400000000000203 pts_lr: 0.0019952013405676546 scale: 524288.0 time: 277.29s
+ embedv: 7800 torch.Size([25600, 20, 32]) -0.328369140625 0.27099609375 0.007350921630859375 0.103759765625
+ scores: 7800 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 8000 loss: 0.2187105417251587 attn_lr: 0.00024000000000000223 pts_lr: 0.0019949522780852657 scale: 1048576.0 time: 276.80s
+Eval step: 8000 train_loss: 0.05189882589600165 eval_loss: 0.04196057841181755 eval_psnr: 13.803311102857322
+ embedv: 8000 torch.Size([25600, 20, 32]) -0.77197265625 0.90576171875 0.042266845703125 0.295654296875
+ scores: 8000 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+ feat map: 8000 torch.Size([1, 160, 160, 32]) -0.537646472454071 0.6542479395866394 0.04225592687726021 0.2867545783519745
+ predict rgb: 8000 torch.Size([1, 160, 160, 3]) 0.9127599000930786 0.9664260149002075 0.9593953490257263 0.004444271791726351
+Train step: 8200 loss: 0.0067421384155750275 attn_lr: 0.00024600000000000197 pts_lr: 0.0019946969309435386 scale: 524288.0 time: 319.73s
+ embedv: 8200 torch.Size([25600, 20, 32]) -0.2392578125 0.1810302734375 0.006320953369140625 0.08111572265625
+ scores: 8200 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 8400 loss: 0.006602135952562094 attn_lr: 0.0002520000000000023 pts_lr: 0.001994435300755387 scale: 524288.0 time: 283.83s
+ embedv: 8400 torch.Size([25600, 20, 32]) -0.171875 0.149169921875 0.00928497314453125 0.07135009765625
+ scores: 8400 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Eval step: 8500 train_loss: 0.05366651741694659 eval_loss: 0.04206918552517891 eval_psnr: 13.796375606039154
+Train step: 8600 loss: 0.0021683303639292717 attn_lr: 0.000258000000000002 pts_lr: 0.0019941673891734073 scale: 524288.0 time: 319.30s
+ embedv: 8600 torch.Size([25600, 20, 32]) -0.34423828125 0.27294921875 0.017669677734375 0.1187744140625
+ scores: 8600 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 8800 loss: 0.0063249170780181885 attn_lr: 0.00026400000000000154 pts_lr: 0.001993893197889879 scale: 524288.0 time: 284.01s
+ embedv: 8800 torch.Size([25600, 20, 32]) -0.22509765625 0.159423828125 0.0071258544921875 0.07244873046875
+ scores: 8800 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 9000 loss: 0.004734033718705177 attn_lr: 0.000270000000000002 pts_lr: 0.0019936127286367374 scale: 524288.0 time: 279.39s
+Eval step: 9000 train_loss: 0.04696666032384383 eval_loss: 0.04183794558048248 eval_psnr: 13.817437124331109
+ embedv: 9000 torch.Size([25600, 20, 32]) -0.1934814453125 0.171630859375 0.007045745849609375 0.0711669921875
+ scores: 9000 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+ feat map: 9000 torch.Size([1, 160, 160, 32]) -0.171539306640625 0.15204466879367828 0.007047075312584639 0.07070992141962051
+ predict rgb: 9000 torch.Size([1, 160, 160, 3]) 0.9006263017654419 0.9407961964607239 0.9324198365211487 0.0051574669778347015
+Train step: 9200 loss: 0.005618974566459656 attn_lr: 0.00027600000000000237 pts_lr: 0.0019933259831855805 scale: 524288.0 time: 322.27s
+ embedv: 9200 torch.Size([25600, 20, 32]) -0.21484375 0.200439453125 0.007110595703125 0.0699462890625
+ scores: 9200 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 9400 loss: 0.4650787115097046 attn_lr: 0.000282000000000003 pts_lr: 0.00199303296334765 scale: 524288.0 time: 277.99s
+ embedv: 9400 torch.Size([25600, 20, 32]) -0.166015625 0.1485595703125 0.0063629150390625 0.066650390625
+ scores: 9400 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Eval step: 9500 train_loss: 0.044998246110742914 eval_loss: 0.04185856878757477 eval_psnr: 13.813645808996137
+Train step: 9600 loss: 0.0052932798862457275 attn_lr: 0.00028800000000000364 pts_lr: 0.0019927336709738203 scale: 524288.0 time: 322.94s
+ embedv: 9600 torch.Size([25600, 20, 32]) -0.1746826171875 0.1533203125 0.005451202392578125 0.0650634765625
+ scores: 9600 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 9800 loss: 0.004617744591087103 attn_lr: 0.0002940000000000042 pts_lr: 0.0019924281079545807 scale: 524288.0 time: 277.98s
+ embedv: 9800 torch.Size([25600, 20, 32]) -0.18310546875 0.1533203125 0.003978729248046875 0.06549072265625
+ scores: 9800 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 10000 loss: 0.00540235685184598 attn_lr: 0.0003 pts_lr: 0.0019921162762200333 scale: 524288.0 time: 276.97s
+Eval step: 10000 train_loss: 0.05075513794180006 eval_loss: 0.04195989668369293 eval_psnr: 13.806215727776099
+@@@@@@@@@  pruned 9889/10000
+@@@@@@@@@ New points:  torch.Size([111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([111, 64])
+LR factor:  1.0
+Step 10000: Pruned 9889 points
+@@@@@@@@@  added 1000 points
+@@@@@@@@@ New points:  torch.Size([1111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([1111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([1111, 64])
+LR factor:  1.0
+Step 10000: Added 1000 points
+ embedv: 10000 torch.Size([25600, 20, 32]) -0.17236328125 0.1766357421875 0.006725311279296875 0.06439208984375
+ scores: 10000 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+ feat map: 10000 torch.Size([1, 160, 160, 32]) -0.16007080674171448 0.16329345107078552 0.0067263413220644 0.06414132565259933
+ predict rgb: 10000 torch.Size([1, 160, 160, 3]) 0.8997854590415955 0.9369980692863464 0.9272884130477905 0.004415406379848719
+Train step: 10200 loss: 0.40580061078071594 attn_lr: 0.0002999998714895447 pts_lr: 0.0019917981777398757 scale: 524288.0 time: 300.39s
+ embedv: 10200 torch.Size([25600, 20, 32]) -0.1650390625 0.2359619140625 0.0073089599609375 0.0693359375
+ scores: 10200 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 10400 loss: 0.007947366684675217 attn_lr: 0.00029999948595839837 pts_lr: 0.001991473814523395 scale: 524288.0 time: 266.89s
+ embedv: 10400 torch.Size([25600, 20, 32]) -0.35986328125 0.346435546875 -0.003253936767578125 0.1109619140625
+ scores: 10400 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+@@@@@@@@@  pruned 0/1111
+@@@@@@@@@ New points:  torch.Size([1111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([1111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([1111, 64])
+LR factor:  1.0
+Step 10500: Pruned 0 points
+Train step: 10600 loss: 0.005453947465866804 attn_lr: 0.00029999884340722166 pts_lr: 0.0019911431886194433 scale: 524288.0 time: 261.18s
+ embedv: 10600 torch.Size([25600, 20, 32]) -0.22216796875 0.211669921875 0.0162353515625 0.11859130859375
+ scores: 10600 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 10800 loss: 0.005526686552911997 attn_lr: 0.00029999794383711516 pts_lr: 0.0019908063021164372 scale: 524288.0 time: 255.33s
+ embedv: 10800 torch.Size([25600, 20, 32]) -0.316650390625 0.33935546875 0.011810302734375 0.1536865234375
+ scores: 10800 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 11000 loss: 0.006936368066817522 attn_lr: 0.00029999678724962076 pts_lr: 0.0019904631571423343 scale: 524288.0 time: 253.60s
+@@@@@@@@@  pruned 0/1111
+@@@@@@@@@ New points:  torch.Size([1111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([1111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([1111, 64])
+LR factor:  1.0
+Step 11000: Pruned 0 points
+@@@@@@@@@  added 1000 points
+@@@@@@@@@ New points:  torch.Size([2111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([2111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([2111, 64])
+LR factor:  1.0
+Step 11000: Added 1000 points
+ embedv: 11000 torch.Size([25600, 20, 32]) -0.1190185546875 0.1524658203125 0.0102996826171875 0.06744384765625
+ scores: 11000 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+ feat map: 11000 torch.Size([1, 160, 160, 32]) -0.09938659518957138 0.13158568739891052 0.010299534536898136 0.066776804625988
+ predict rgb: 11000 torch.Size([1, 160, 160, 3]) 0.8958931565284729 0.9275173544883728 0.9182674288749695 0.0049540200270712376
+Train step: 11200 loss: 0.006667626556009054 attn_lr: 0.0002999953736467196 pts_lr: 0.0019901137558646187 scale: 524288.0 time: 258.70s
+ embedv: 11200 torch.Size([25600, 20, 32]) -0.412353515625 0.46923828125 0.0230560302734375 0.169921875
+ scores: 11200 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 11400 loss: 0.2671636939048767 attn_lr: 0.00029999370303083426 pts_lr: 0.001989758100490305 scale: 524288.0 time: 263.16s
+ embedv: 11400 torch.Size([25600, 20, 32]) -0.399658203125 0.4736328125 0.00420379638671875 0.158935546875
+ scores: 11400 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+@@@@@@@@@  pruned 0/2111
+@@@@@@@@@ New points:  torch.Size([2111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([2111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([2111, 64])
+LR factor:  1.0
+Step 11500: Pruned 0 points
+Train step: 11600 loss: 0.6087993383407593 attn_lr: 0.00029999177540482747 pts_lr: 0.0019893961932659033 scale: 524288.0 time: 257.67s
+ embedv: 11600 torch.Size([25600, 20, 32]) -0.135009765625 0.1895751953125 0.0142822265625 0.0733642578125
+ scores: 11600 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 11800 loss: 0.007386929355561733 attn_lr: 0.0002999895907720025 pts_lr: 0.0019890280364774134 scale: 524288.0 time: 257.42s
+ embedv: 11800 torch.Size([25600, 20, 32]) -0.319091796875 0.3408203125 0.0208740234375 0.1422119140625
+ scores: 11800 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 12000 loss: 0.14411130547523499 attn_lr: 0.0002999871491361016 pts_lr: 0.0019886536324503156 scale: 262144.0 time: 259.97s
+@@@@@@@@@  pruned 0/2111
+@@@@@@@@@ New points:  torch.Size([2111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([2111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([2111, 64])
+LR factor:  1.0
+Step 12000: Pruned 0 points
+@@@@@@@@@  added 1000 points
+@@@@@@@@@ New points:  torch.Size([3111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([3111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([3111, 64])
+LR factor:  1.0
+Step 12000: Added 1000 points
+ embedv: 12000 torch.Size([25600, 20, 32]) -0.133544921875 0.149169921875 0.01116943359375 0.05712890625
+ scores: 12000 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+ feat map: 12000 torch.Size([1, 160, 160, 32]) -0.1195068359375 0.13180236518383026 0.01117071881890297 0.05694146454334259
+ predict rgb: 12000 torch.Size([1, 160, 160, 3]) 0.8970311284065247 0.9201241135597229 0.9164657592773438 0.002312232041731477
+Train step: 12200 loss: 0.11208749562501907 attn_lr: 0.00029998445050130937 pts_lr: 0.0019882729835495505 scale: 262144.0 time: 267.33s
+ embedv: 12200 torch.Size([25600, 20, 32]) -0.2783203125 0.266357421875 0.007686614990234375 0.10711669921875
+ scores: 12200 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 12400 loss: 0.007785638328641653 attn_lr: 0.00029998149487224973 pts_lr: 0.0019878860921795027 scale: 262144.0 time: 271.52s
+ embedv: 12400 torch.Size([25600, 20, 32]) -0.37109375 0.353271484375 -0.0034942626953125 0.137451171875
+ scores: 12400 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+@@@@@@@@@  pruned 0/3111
+@@@@@@@@@ New points:  torch.Size([3111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([3111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([3111, 64])
+LR factor:  1.0
+Step 12500: Pruned 0 points
+Train step: 12600 loss: 0.062881238758564 attn_lr: 0.00029997828225398685 pts_lr: 0.0019874929607839875 scale: 262144.0 time: 264.80s
+ embedv: 12600 torch.Size([25600, 20, 32]) -0.62255859375 0.344970703125 -0.01076507568359375 0.1842041015625
+ scores: 12600 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 12800 loss: 0.006019039545208216 attn_lr: 0.0002999748126520255 pts_lr: 0.0019870935918462397 scale: 262144.0 time: 263.39s
+ embedv: 12800 torch.Size([25600, 20, 32]) -0.32958984375 0.297607421875 -2.6226043701171875e-05 0.1064453125
+ scores: 12800 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 13000 loss: 0.007236246019601822 attn_lr: 0.0002999710860723104 pts_lr: 0.0019866879878888883 scale: 262144.0 time: 262.05s
+@@@@@@@@@  pruned 0/3111
+@@@@@@@@@ New points:  torch.Size([3111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([3111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([3111, 64])
+LR factor:  1.0
+Step 13000: Pruned 0 points
+@@@@@@@@@  added 1000 points
+@@@@@@@@@ New points:  torch.Size([4111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([4111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([4111, 64])
+LR factor:  1.0
+Step 13000: Added 1000 points
+ embedv: 13000 torch.Size([25600, 20, 32]) -0.9921875 0.90625 -0.0085601806640625 0.4150390625
+ scores: 13000 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+ feat map: 13000 torch.Size([1, 160, 160, 32]) -0.8705199956893921 0.8116546273231506 -0.008563793264329433 0.40764614939689636
+ predict rgb: 13000 torch.Size([1, 160, 160, 3]) 0.9058740139007568 0.938186764717102 0.93283611536026 0.002722613513469696
+Train step: 13200 loss: 0.004080364480614662 attn_lr: 0.0002999671025212274 pts_lr: 0.001986276151473947 scale: 262144.0 time: 268.56s
+ embedv: 13200 torch.Size([25600, 20, 32]) -0.345458984375 0.33935546875 0.0089111328125 0.11907958984375
+ scores: 13200 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 13400 loss: 0.007241325452923775 attn_lr: 0.00029996286200560196 pts_lr: 0.001985858085202804 scale: 262144.0 time: 265.19s
+ embedv: 13400 torch.Size([25600, 20, 32]) -0.26611328125 0.2432861328125 0.00304412841796875 0.1072998046875
+ scores: 13400 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+@@@@@@@@@  pruned 0/4111
+@@@@@@@@@ New points:  torch.Size([4111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([4111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([4111, 64])
+LR factor:  1.0
+Step 13500: Pruned 0 points
+Train step: 13600 loss: 0.0018798485398292542 attn_lr: 0.0002999583645327005 pts_lr: 0.001985433791716188 scale: 262144.0 time: 268.55s
+ embedv: 13600 torch.Size([25600, 20, 32]) -0.381591796875 0.2440185546875 -0.00673675537109375 0.130615234375
+ scores: 13600 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 13800 loss: 0.00701148621737957 attn_lr: 0.0002999536101102295 pts_lr: 0.0019850032736941693 scale: 262144.0 time: 262.31s
+ embedv: 13800 torch.Size([25600, 20, 32]) -0.2047119140625 0.154541015625 -0.0022525787353515625 0.077880859375
+ scores: 13800 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 14000 loss: 0.007290944457054138 attn_lr: 0.0002999485987463341 pts_lr: 0.001984566533856131 scale: 524288.0 time: 262.63s
+@@@@@@@@@  pruned 0/4111
+@@@@@@@@@ New points:  torch.Size([4111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([4111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([4111, 64])
+LR factor:  1.0
+Step 14000: Pruned 0 points
+@@@@@@@@@  added 1000 points
+@@@@@@@@@ New points:  torch.Size([5111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([5111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([5111, 64])
+LR factor:  1.0
+Step 14000: Added 1000 points
+ embedv: 14000 torch.Size([25600, 20, 32]) -0.1412353515625 0.156982421875 0.0006313323974609375 0.07232666015625
+ scores: 14000 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+ feat map: 14000 torch.Size([1, 160, 160, 32]) -0.13039550185203552 0.14913329482078552 0.0006313007907010615 0.0722835510969162
+ predict rgb: 14000 torch.Size([1, 160, 160, 3]) 0.8917181491851807 0.9173697829246521 0.9111055731773376 0.002401862060651183
+Train step: 14200 loss: 0.006471726112067699 attn_lr: 0.0002999433304496025 pts_lr: 0.0019841235749607587 scale: 524288.0 time: 268.10s
+ embedv: 14200 torch.Size([25600, 20, 32]) -1.193359375 0.9716796875 -0.009735107421875 0.2705078125
+ scores: 14200 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 14400 loss: 0.007588071748614311 attn_lr: 0.00029993780522906134 pts_lr: 0.001983674399806027 scale: 524288.0 time: 270.79s
+ embedv: 14400 torch.Size([25600, 20, 32]) -2.119140625 1.5966796875 -0.056182861328125 0.64501953125
+ scores: 14400 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+@@@@@@@@@  pruned 0/5111
+@@@@@@@@@ New points:  torch.Size([5111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([5111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([5111, 64])
+LR factor:  1.0
+Step 14500: Pruned 0 points
+Train step: 14600 loss: 0.005743963178247213 attn_lr: 0.0002999320230941781 pts_lr: 0.001983219011229167 scale: 524288.0 time: 266.50s
+ embedv: 14600 torch.Size([25600, 20, 32]) -0.83154296875 0.560546875 -0.0022869110107421875 0.2261962890625
+ scores: 14600 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 14800 loss: 0.004014584235846996 attn_lr: 0.0002999259840548601 pts_lr: 0.001982757412106661 scale: 524288.0 time: 265.17s
+ embedv: 14800 torch.Size([25600, 20, 32]) -0.5263671875 0.52001953125 0.0360107421875 0.2093505859375
+ scores: 14800 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 15000 loss: 0.007915657944977283 attn_lr: 0.0002999196881214551 pts_lr: 0.0019822896053542168 scale: 524288.0 time: 265.10s
+Eval step: 15000 train_loss: 0.05182953986987632 eval_loss: 0.04274227097630501 eval_psnr: 13.732310805852725
+@@@@@@@@@  pruned 0/5111
+@@@@@@@@@ New points:  torch.Size([5111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([5111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([5111, 64])
+LR factor:  1.0
+Step 15000: Pruned 0 points
+@@@@@@@@@  added 1000 points
+@@@@@@@@@ New points:  torch.Size([6111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([6111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([6111, 64])
+LR factor:  1.0
+Step 15000: Added 1000 points
+ embedv: 15000 torch.Size([25600, 20, 32]) -0.1229248046875 0.1005859375 0.0008912086486816406 0.05413818359375
+ scores: 15000 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+ feat map: 15000 torch.Size([1, 160, 160, 32]) -0.11634215712547302 0.09714049845933914 0.0008912553894333541 0.05410660803318024
+ predict rgb: 15000 torch.Size([1, 160, 160, 3]) 0.890116274356842 0.919660210609436 0.9116172790527344 0.0029687003698199987
+Train step: 15200 loss: 0.007275187876075506 attn_lr: 0.0002999131353047513 pts_lr: 0.0019818155939267603 scale: 524288.0 time: 308.90s
+ embedv: 15200 torch.Size([25600, 20, 32]) -0.298828125 0.2177734375 0.00589752197265625 0.1170654296875
+ scores: 15200 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 15400 loss: 0.0026197247207164764 attn_lr: 0.000299906325615976 pts_lr: 0.0019813353808184014 scale: 524288.0 time: 271.08s
+ embedv: 15400 torch.Size([25600, 20, 32]) -0.3505859375 0.45849609375 0.029815673828125 0.2000732421875
+ scores: 15400 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+@@@@@@@@@  pruned 0/6111
+@@@@@@@@@ New points:  torch.Size([6111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([6111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([6111, 64])
+LR factor:  1.0
+Step 15500: Pruned 0 points
+Train step: 15600 loss: 3.738039595191367e-05 attn_lr: 0.00029989925906679846 pts_lr: 0.0019808489690624352 scale: 524288.0 time: 268.01s
+ embedv: 15600 torch.Size([25600, 20, 32]) -0.64453125 0.748046875 0.062042236328125 0.334228515625
+ scores: 15600 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 15800 loss: 0.003084103111177683 attn_lr: 0.00029989193566932624 pts_lr: 0.001980356361731295 scale: 524288.0 time: 270.53s
+ embedv: 15800 torch.Size([25600, 20, 32]) -0.2178955078125 0.2392578125 0.017181396484375 0.10723876953125
+ scores: 15800 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 16000 loss: 0.004665465094149113 attn_lr: 0.00029988435543610816 pts_lr: 0.001979857561936559 scale: 1048576.0 time: 268.25s
+@@@@@@@@@  pruned 0/6111
+@@@@@@@@@ New points:  torch.Size([6111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([6111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([6111, 64])
+LR factor:  1.0
+Step 16000: Pruned 0 points
+@@@@@@@@@  added 1000 points
+@@@@@@@@@ New points:  torch.Size([7111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([7111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([7111, 64])
+LR factor:  1.0
+Step 16000: Added 1000 points
+ embedv: 16000 torch.Size([25600, 20, 32]) -0.62890625 0.3779296875 0.006595611572265625 0.16845703125
+ scores: 16000 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+ feat map: 16000 torch.Size([1, 160, 160, 32]) -0.49095457792282104 0.29462891817092896 0.006596378516405821 0.16715824604034424
+ predict rgb: 16000 torch.Size([1, 160, 160, 3]) 0.9001768827438354 0.949552059173584 0.9344433546066284 0.005693988874554634
+Train step: 16200 loss: 0.0029198017437011003 attn_lr: 0.0002998765183801325 pts_lr: 0.001979352572828917 scale: 524288.0 time: 273.27s
+ embedv: 16200 torch.Size([25600, 20, 32]) -0.60888671875 0.397216796875 0.00490570068359375 0.0845947265625
+ scores: 16200 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 16400 loss: 0.0033002065028995275 attn_lr: 0.00029986842451482836 pts_lr: 0.0019788413975981513 scale: 524288.0 time: 271.24s
+ embedv: 16400 torch.Size([25600, 20, 32]) -0.1903076171875 0.139892578125 0.004638671875 0.06341552734375
+ scores: 16400 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+@@@@@@@@@  pruned 0/7111
+@@@@@@@@@ New points:  torch.Size([7111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([7111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([7111, 64])
+LR factor:  1.0
+Step 16500: Pruned 0 points
+Train step: 16600 loss: 0.0050167785957455635 attn_lr: 0.0002998600738540639 pts_lr: 0.001978324039473126 scale: 524288.0 time: 274.99s
+ embedv: 16600 torch.Size([25600, 20, 32]) -0.4462890625 0.4287109375 0.01512908935546875 0.194091796875
+ scores: 16600 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 16800 loss: 0.005055361893028021 attn_lr: 0.00029985146641214785 pts_lr: 0.0019778005017217575 scale: 524288.0 time: 270.30s
+ embedv: 16800 torch.Size([25600, 20, 32]) -0.5087890625 0.619140625 -0.0411376953125 0.221435546875
+ scores: 16800 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 17000 loss: 0.006438001524657011 attn_lr: 0.0002998426022038291 pts_lr: 0.0019772707876509954 scale: 524288.0 time: 271.21s
+@@@@@@@@@  pruned 0/7111
+@@@@@@@@@ New points:  torch.Size([7111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([7111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([7111, 64])
+LR factor:  1.0
+Step 17000: Pruned 0 points
+@@@@@@@@@  added 1000 points
+@@@@@@@@@ New points:  torch.Size([8111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([8111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([8111, 64])
+LR factor:  1.0
+Step 17000: Added 1000 points
+ embedv: 17000 torch.Size([25600, 20, 32]) -0.1273193359375 0.117919921875 0.0099334716796875 0.057952880859375
+ scores: 17000 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+ feat map: 17000 torch.Size([1, 160, 160, 32]) -0.12075194716453552 0.1164092868566513 0.009933370165526867 0.0578935481607914
+ predict rgb: 17000 torch.Size([1, 160, 160, 3]) 0.8930881023406982 0.9239221811294556 0.9201796650886536 0.001964275725185871
+Train step: 17200 loss: 0.00730302557349205 attn_lr: 0.0002998334812442955 pts_lr: 0.0019767349006068 scale: 524288.0 time: 279.52s
+ embedv: 17200 torch.Size([25600, 20, 32]) -0.1202392578125 0.1141357421875 0.01213836669921875 0.051300048828125
+ scores: 17200 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 17400 loss: 0.004635348916053772 attn_lr: 0.00029982410354917615 pts_lr: 0.0019761928439741214 scale: 262144.0 time: 273.16s
+ embedv: 17400 torch.Size([25600, 20, 32]) -0.0848388671875 0.093994140625 0.00817108154296875 0.045684814453125
+ scores: 17400 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+@@@@@@@@@  pruned 0/8111
+@@@@@@@@@ New points:  torch.Size([8111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([8111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([8111, 64])
+LR factor:  1.0
+Step 17500: Pruned 0 points
+Train step: 17600 loss: 0.002145863603800535 attn_lr: 0.0002998144691345394 pts_lr: 0.0019756446211768915 scale: 262144.0 time: 275.90s
+ embedv: 17600 torch.Size([25600, 20, 32]) -0.3046875 0.415771484375 0.04949951171875 0.1265869140625
+ scores: 17600 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 17800 loss: 0.0037422259338200092 attn_lr: 0.00029980457801689317 pts_lr: 0.001975090235677977 scale: 262144.0 time: 274.35s
+ embedv: 17800 torch.Size([25600, 20, 32]) -0.6201171875 0.63671875 0.05181884765625 0.232177734375
+ scores: 17800 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 18000 loss: 0.007069562096148729 attn_lr: 0.0002997944302131864 pts_lr: 0.00197452969097918 scale: 262144.0 time: 277.31s
+@@@@@@@@@  pruned 0/8111
+@@@@@@@@@ New points:  torch.Size([8111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([8111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([8111, 64])
+LR factor:  1.0
+Step 18000: Pruned 0 points
+@@@@@@@@@  added 1000 points
+@@@@@@@@@ New points:  torch.Size([9111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([9111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([9111, 64])
+LR factor:  1.0
+Step 18000: Added 1000 points
+ embedv: 18000 torch.Size([25600, 20, 32]) -0.10406494140625 0.140380859375 0.01271820068359375 0.042816162109375
+ scores: 18000 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+ feat map: 18000 torch.Size([1, 160, 160, 32]) -0.08472594618797302 0.10299071669578552 0.012717681005597115 0.04115603119134903
+ predict rgb: 18000 torch.Size([1, 160, 160, 3]) 0.8911745548248291 0.9228494763374329 0.9155640006065369 0.003302292199805379
+Train step: 18200 loss: 0.0066206371411681175 attn_lr: 0.00029978402574080677 pts_lr: 0.001973962990621209 scale: 262144.0 time: 280.68s
+ embedv: 18200 torch.Size([25600, 20, 32]) -0.40380859375 0.564453125 0.01467132568359375 0.1708984375
+ scores: 18200 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 18400 loss: 0.05715973302721977 attn_lr: 0.000299773364617581 pts_lr: 0.0019733901381836436 scale: 262144.0 time: 278.53s
+ embedv: 18400 torch.Size([25600, 20, 32]) -0.342041015625 0.30029296875 -0.003925323486328125 0.11029052734375
+ scores: 18400 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+@@@@@@@@@  pruned 0/9111
+@@@@@@@@@ New points:  torch.Size([9111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([9111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([9111, 64])
+LR factor:  1.0
+Step 18500: Pruned 0 points
+Train step: 18600 loss: 0.00591620709747076 attn_lr: 0.0002997624468617782 pts_lr: 0.001972811137284938 scale: 262144.0 time: 282.38s
+ embedv: 18600 torch.Size([25600, 20, 32]) -1.1103515625 0.705078125 -0.09527587890625 0.376220703125
+ scores: 18600 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 18800 loss: 0.2219659388065338 attn_lr: 0.00029975127249210463 pts_lr: 0.001972225991582374 scale: 262144.0 time: 275.52s
+ embedv: 18800 torch.Size([25600, 20, 32]) -0.325439453125 0.2744140625 -0.0087127685546875 0.11065673828125
+ scores: 18800 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 19000 loss: 0.006392790470272303 attn_lr: 0.00029973984152770704 pts_lr: 0.001971634704772053 scale: 262144.0 time: 277.74s
+@@@@@@@@@  pruned 0/9111
+@@@@@@@@@ New points:  torch.Size([9111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([9111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([9111, 64])
+LR factor:  1.0
+Step 19000: Pruned 0 points
+@@@@@@@@@  added 1000 points
+@@@@@@@@@ New points:  torch.Size([10111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([10111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([10111, 64])
+LR factor:  1.0
+Step 19000: Added 1000 points
+ embedv: 19000 torch.Size([25600, 20, 32]) -0.214599609375 0.1552734375 -0.00658416748046875 0.0767822265625
+ scores: 19000 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+ feat map: 19000 torch.Size([1, 160, 160, 32]) -0.20089110732078552 0.14567869901657104 -0.006583884824067354 0.07674133777618408
+ predict rgb: 19000 torch.Size([1, 160, 160, 3]) 0.8909643292427063 0.9265605807304382 0.9215172529220581 0.0022543452214449644
+Train step: 19200 loss: 0.005541147198528051 attn_lr: 0.00029972815398817337 pts_lr: 0.0019710372805888617 scale: 262144.0 time: 296.88s
+ embedv: 19200 torch.Size([25600, 20, 32]) -0.40771484375 0.53857421875 0.016571044921875 0.1751708984375
+ scores: 19200 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 19400 loss: 0.0034853057004511356 attn_lr: 0.0002997162098935287 pts_lr: 0.0019704337228064546 scale: 524288.0 time: 282.65s
+ embedv: 19400 torch.Size([25600, 20, 32]) -0.1402587890625 0.2587890625 0.0170745849609375 0.08184814453125
+ scores: 19400 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+@@@@@@@@@  pruned 0/10111
+@@@@@@@@@ New points:  torch.Size([10111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([10111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([10111, 64])
+LR factor:  1.0
+Step 19500: Pruned 0 points
+Train step: 19600 loss: 0.5924515128135681 attn_lr: 0.0002997040092642402 pts_lr: 0.001969824035237228 scale: 262144.0 time: 281.96s
+ embedv: 19600 torch.Size([25600, 20, 32]) -0.1851806640625 0.29052734375 0.00677490234375 0.09027099609375
+ scores: 19600 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 19800 loss: 0.004184783436357975 attn_lr: 0.00029969155212121207 pts_lr: 0.001969208221732305 scale: 262144.0 time: 282.82s
+ embedv: 19800 torch.Size([25600, 20, 32]) -0.382080078125 0.56103515625 0.0159149169921875 0.08782958984375
+ scores: 19800 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 20000 loss: 0.005601402837783098 attn_lr: 0.0002996788384857902 pts_lr: 0.0019685862861814965 scale: 262144.0 time: 285.63s
+Eval step: 20000 train_loss: 0.04737382378776019 eval_loss: 0.041847579181194305 eval_psnr: 13.81754973813245
+@@@@@@@@@  pruned 0/10111
+@@@@@@@@@ New points:  torch.Size([10111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([10111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([10111, 64])
+LR factor:  1.0
+Step 20000: Pruned 0 points
+@@@@@@@@@  added 1000 points
+@@@@@@@@@ New points:  torch.Size([11111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([11111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([11111, 64])
+LR factor:  1.0
+Step 20000: Added 1000 points
+ embedv: 20000 torch.Size([25600, 20, 32]) -0.4541015625 0.44482421875 0.04034423828125 0.1187744140625
+ scores: 20000 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+ feat map: 20000 torch.Size([1, 160, 160, 32]) -0.3153930604457855 0.3097045421600342 0.040353186428546906 0.1175391748547554
+ predict rgb: 20000 torch.Size([1, 160, 160, 3]) 0.8942912817001343 0.9451451301574707 0.9340383410453796 0.004106581676751375
+Train step: 20200 loss: 0.006966918241232634 attn_lr: 0.000299665868379758 pts_lr: 0.001967958232513288 scale: 262144.0 time: 334.38s
+ embedv: 20200 torch.Size([25600, 20, 32]) -0.267578125 0.469970703125 0.0501708984375 0.1746826171875
+ scores: 20200 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 20400 loss: 0.004837812855839729 attn_lr: 0.00029965264182534 pts_lr: 0.0019673240646948032 scale: 262144.0 time: 289.88s
+ embedv: 20400 torch.Size([25600, 20, 32]) -0.2005615234375 0.1678466796875 0.00872802734375 0.07293701171875
+ scores: 20400 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+@@@@@@@@@  pruned 0/11111
+@@@@@@@@@ New points:  torch.Size([11111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([11111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([11111, 64])
+LR factor:  1.0
+Step 20500: Pruned 0 points
+Train step: 20600 loss: 0.004220460541546345 attn_lr: 0.00029963915884519956 pts_lr: 0.0019666837867317955 scale: 262144.0 time: 288.88s
+ embedv: 20600 torch.Size([25600, 20, 32]) -1.8271484375 1.3896484375 -0.005229949951171875 0.630859375
+ scores: 20600 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 20800 loss: 0.005439209286123514 attn_lr: 0.0002996254194624395 pts_lr: 0.001966037402668606 scale: 262144.0 time: 292.26s
+ embedv: 20800 torch.Size([25600, 20, 32]) -0.28369140625 0.232666015625 0.0002187490463256836 0.09783935546875
+ scores: 20800 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 21000 loss: 0.0053753117099404335 attn_lr: 0.00029961142370060176 pts_lr: 0.001965384916588146 scale: 262144.0 time: 284.80s
+@@@@@@@@@  pruned 0/11111
+@@@@@@@@@ New points:  torch.Size([11111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([11111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([11111, 64])
+LR factor:  1.0
+Step 21000: Pruned 0 points
+@@@@@@@@@  added 1000 points
+@@@@@@@@@ New points:  torch.Size([12111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([12111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([12111, 64])
+LR factor:  1.0
+Step 21000: Added 1000 points
+ embedv: 21000 torch.Size([25600, 20, 32]) -0.2095947265625 0.1595458984375 -0.003879547119140625 0.06622314453125
+ scores: 21000 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+ feat map: 21000 torch.Size([1, 160, 160, 32]) -0.17772215604782104 0.1030883714556694 -0.0038804588839411736 0.06478390842676163
+ predict rgb: 21000 torch.Size([1, 160, 160, 3]) 0.8852853178977966 0.9298368096351624 0.921985924243927 0.002603451954200864
+Train step: 21200 loss: 0.006789080798625946 attn_lr: 0.0002995971715836681 pts_lr: 0.001964726332611873 scale: 262144.0 time: 292.17s
+ embedv: 21200 torch.Size([25600, 20, 32]) -0.2183837890625 0.349365234375 0.0162811279296875 0.1280517578125
+ scores: 21200 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 21400 loss: 0.002809009049087763 attn_lr: 0.0002995826631360584 pts_lr: 0.001964061654899763 scale: 262144.0 time: 286.79s
+ embedv: 21400 torch.Size([25600, 20, 32]) -0.2015380859375 0.2371826171875 0.02008056640625 0.10400390625
+ scores: 21400 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+@@@@@@@@@  pruned 0/12111
+@@@@@@@@@ New points:  torch.Size([12111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([12111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([12111, 64])
+LR factor:  1.0
+Step 21500: Pruned 0 points
+Train step: 21600 loss: 0.22284966707229614 attn_lr: 0.0002995678983826329 pts_lr: 0.0019633908876502794 scale: 524288.0 time: 288.05s
+ embedv: 21600 torch.Size([25600, 20, 32]) -0.27685546875 0.2171630859375 0.00981903076171875 0.119384765625
+ scores: 21600 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 21800 loss: 0.006103680934756994 attn_lr: 0.00029955287734869003 pts_lr: 0.001962714035100355 scale: 524288.0 time: 287.68s
+ embedv: 21800 torch.Size([25600, 20, 32]) -0.155517578125 0.133544921875 0.0083160400390625 0.05352783203125
+ scores: 21800 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 22000 loss: 0.37492647767066956 attn_lr: 0.00029953760005996846 pts_lr: 0.001962031101525356 scale: 262144.0 time: 288.93s
+@@@@@@@@@  pruned 0/12111
+@@@@@@@@@ New points:  torch.Size([12111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([12111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([12111, 64])
+LR factor:  1.0
+Step 22000: Pruned 0 points
+@@@@@@@@@  added 1000 points
+@@@@@@@@@ New points:  torch.Size([13111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([13111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([13111, 64])
+LR factor:  1.0
+Step 22000: Added 1000 points
+ embedv: 22000 torch.Size([25600, 20, 32]) -0.39013671875 0.36669921875 -0.0260467529296875 0.1673583984375
+ scores: 22000 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+ feat map: 22000 torch.Size([1, 160, 160, 32]) -0.34504392743110657 0.32380369305610657 -0.026044778525829315 0.16284283995628357
+ predict rgb: 22000 torch.Size([1, 160, 160, 3]) 0.8941535949707031 0.9479284286499023 0.9391418695449829 0.004586901981383562
+Train step: 22200 loss: 0.003616910893470049 attn_lr: 0.00029952206654264535 pts_lr: 0.001961342091239066 scale: 262144.0 time: 298.40s
+ embedv: 22200 torch.Size([25600, 20, 32]) -1.8388671875 2.11328125 -0.10614013671875 0.66943359375
+ scores: 22200 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 22400 loss: 0.0054711331613361835 attn_lr: 0.00029950627682333704 pts_lr: 0.001960647008593645 scale: 262144.0 time: 293.41s
+ embedv: 22400 torch.Size([25600, 20, 32]) -0.51171875 0.473876953125 0.009918212890625 0.250244140625
+ scores: 22400 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+@@@@@@@@@  pruned 0/13111
+@@@@@@@@@ New points:  torch.Size([13111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([13111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([13111, 64])
+LR factor:  1.0
+Step 22500: Pruned 0 points
+Train step: 22600 loss: 0.2473287731409073 attn_lr: 0.0002994902309290995 pts_lr: 0.001959945857979615 scale: 262144.0 time: 301.76s
+ embedv: 22600 torch.Size([25600, 20, 32]) -0.149658203125 0.1915283203125 0.00934600830078125 0.064697265625
+ scores: 22600 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 22800 loss: 0.006737774237990379 attn_lr: 0.00029947392888742555 pts_lr: 0.0019592386438258267 scale: 262144.0 time: 308.59s
+ embedv: 22800 torch.Size([25600, 20, 32]) -0.57373046875 0.517578125 -0.01097869873046875 0.239501953125
+ scores: 22800 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 23000 loss: 0.006369678303599358 attn_lr: 0.0002994573707262487 pts_lr: 0.0019585253705994236 scale: 262144.0 time: 294.77s
+@@@@@@@@@  pruned 0/13111
+@@@@@@@@@ New points:  torch.Size([13111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([13111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([13111, 64])
+LR factor:  1.0
+Step 23000: Pruned 0 points
+@@@@@@@@@  added 1000 points
+@@@@@@@@@ New points:  torch.Size([14111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([14111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([14111, 64])
+LR factor:  1.0
+Step 23000: Added 1000 points
+ embedv: 23000 torch.Size([25600, 20, 32]) -0.261962890625 0.239501953125 0.030303955078125 0.11224365234375
+ scores: 23000 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+ feat map: 23000 torch.Size([1, 160, 160, 32]) -0.24571533501148224 0.22380980849266052 0.030306758359074593 0.11214445531368256
+ predict rgb: 23000 torch.Size([1, 160, 160, 3]) 0.8787564635276794 0.935577392578125 0.9198873043060303 0.005950130056589842
+Train step: 23200 loss: 0.005960339214652777 attn_lr: 0.00029944055647394103 pts_lr: 0.0019578060428058312 scale: 262144.0 time: 311.24s
+ embedv: 23200 torch.Size([25600, 20, 32]) -0.1607666015625 0.29296875 0.0399169921875 0.10784912109375
+ scores: 23200 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 23400 loss: 0.003827071748673916 attn_lr: 0.00029942348615931387 pts_lr: 0.0019570806649887073 scale: 262144.0 time: 299.94s
+ embedv: 23400 torch.Size([25600, 20, 32]) -0.1160888671875 0.170654296875 0.024017333984375 0.07830810546875
+ scores: 23400 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+@@@@@@@@@  pruned 0/14111
+@@@@@@@@@ New points:  torch.Size([14111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([14111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([14111, 64])
+LR factor:  1.0
+Step 23500: Pruned 0 points
+Train step: 23600 loss: 0.003025447716936469 attn_lr: 0.00029940615981161587 pts_lr: 0.001956349241729943 scale: 131072.0 time: 301.99s
+ embedv: 23600 torch.Size([25600, 20, 32]) -0.335693359375 0.49755859375 0.07208251953125 0.21630859375
+ scores: 23600 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 23800 loss: 0.004593885503709316 attn_lr: 0.00029938857746053554 pts_lr: 0.0019556117776495974 scale: 131072.0 time: 298.40s
+ embedv: 23800 torch.Size([25600, 20, 32]) -0.1375732421875 0.1932373046875 0.0289459228515625 0.08685302734375
+ scores: 23800 torch.Size([25600, 1, 1, 20]) 0.0 0.0 0.0 0.0
+Train step: 24000 loss: 0.25467902421951294 attn_lr: 0.0002993707391362002 pts_lr: 0.001954868277405897 scale: 131072.0 time: 298.80s
+@@@@@@@@@  pruned 0/14111
+@@@@@@@@@ New points:  torch.Size([14111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([14111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([14111, 64])
+LR factor:  1.0
+Step 24000: Pruned 0 points
+@@@@@@@@@  added 1000 points
+@@@@@@@@@ New points:  torch.Size([15111, 3])
+@@@@@@@@@ New points_influ_scores:  torch.Size([15111, 1])
+@@@@@@@@@ New pc_feats:  torch.Size([15111, 64])
+LR factor:  1.0
+Step 24000: Added 1000 points

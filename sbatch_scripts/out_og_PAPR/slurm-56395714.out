@@ -1,0 +1,305 @@
+
+Lmod is automatically replacing "intel/2020.1.217" with "gcc/9.3.0".
+
+Lmod Warning:
+-------------------------------------------------------------------------------
+The following dependent module(s) are not currently loaded: scipy-stack/2022a
+(required by: opencv/4.6.0)
+-------------------------------------------------------------------------------
+
+
+
+/home/irisma/py39/lib/python3.9/site-packages/torchvision/models/_utils.py:208: UserWarning: The parameter 'pretrained' is deprecated since 0.13 and may be removed in the future, please use 'weights' instead.
+  warnings.warn(
+/home/irisma/py39/lib/python3.9/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=AlexNet_Weights.IMAGENET1K_V1`. You can also use `weights=AlexNet_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)
+/home/irisma/py39/lib/python3.9/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=VGG16_Weights.IMAGENET1K_V1`. You can also use `weights=VGG16_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)
+testset {'name': 'testset', 'mode': 'test', 'extract_patch': False, 'type': 'synthetic', 'white_bg': True, 'path': './data/nerf_synthetic/chair/', 'factor': 1, 'num_workers': 0, 'num_slices': -1}
+Initialized points scale:  tensor(-12.) tensor(12.) tensor(-12.) tensor(12.) tensor(-12.) tensor(12.)
+Number of parameters of renderer:  3643395
+Point features:  torch.Size([10000, 64]) tensor(-4.5974, grad_fn=<MinBackward1>) tensor(4.5664, grad_fn=<MaxBackward1>) tensor(0.0010, grad_fn=<MeanBackward0>) tensor(1.0013, grad_fn=<StdBackward0>)
+Using v_extra_dim:  64
+LR factor:  1.0
+Loaded blender (1, 800, 800, 4) [800, 800, 1111.1110311937682] ./data/nerf_synthetic/chair/
+c2w:  torch.Size([200, 4, 4])
+points torch.Size([13096, 3])
+points_influ_scores torch.Size([13096, 1])
+bkg_feats torch.Size([1, 3])
+pc_feats torch.Size([13096, 64])
+select_k torch.Size([])
+renderer.inc.double_conv.0.weight torch.Size([128, 32, 3, 3])
+renderer.inc.double_conv.0.bias torch.Size([128])
+renderer.down1.maxpool_conv.1.double_conv.0.weight torch.Size([256, 128, 3, 3])
+renderer.down1.maxpool_conv.1.double_conv.0.bias torch.Size([256])
+renderer.down2.maxpool_conv.1.double_conv.0.weight torch.Size([512, 256, 3, 3])
+renderer.down2.maxpool_conv.1.double_conv.0.bias torch.Size([512])
+renderer.up1.up.weight torch.Size([512, 256, 2, 2])
+renderer.up1.up.bias torch.Size([256])
+renderer.up1.conv.double_conv.0.weight torch.Size([256, 512, 3, 3])
+renderer.up1.conv.double_conv.0.bias torch.Size([256])
+renderer.up2.up.weight torch.Size([256, 128, 2, 2])
+renderer.up2.up.bias torch.Size([128])
+renderer.up2.conv.double_conv.0.weight torch.Size([128, 256, 3, 3])
+renderer.up2.conv.double_conv.0.bias torch.Size([128])
+renderer.outc.conv.weight torch.Size([3, 128, 1, 1])
+renderer.outc.conv.bias torch.Size([3])
+proximity_attn.embed.embed_k.innorm.a_2 torch.Size([117])
+proximity_attn.embed.embed_k.innorm.b_2 torch.Size([117])
+proximity_attn.embed.embed_k.outnorm.a_2 torch.Size([256])
+proximity_attn.embed.embed_k.outnorm.b_2 torch.Size([256])
+proximity_attn.embed.embed_k.mlp.model.1.weight torch.Size([256, 117])
+proximity_attn.embed.embed_k.mlp.model.1.bias torch.Size([256])
+proximity_attn.embed.embed_k.mlp.model.3.weight torch.Size([256, 256])
+proximity_attn.embed.embed_k.mlp.model.3.bias torch.Size([256])
+proximity_attn.embed.embed_k.mlp.model.5.weight torch.Size([256, 256])
+proximity_attn.embed.embed_k.mlp.model.5.bias torch.Size([256])
+proximity_attn.embed.embed_k.mlp.model.7.weight torch.Size([256, 256])
+proximity_attn.embed.embed_k.mlp.model.7.bias torch.Size([256])
+proximity_attn.embed.embed_k.mlp.model.9.weight torch.Size([256, 256])
+proximity_attn.embed.embed_k.mlp.model.9.bias torch.Size([256])
+proximity_attn.embed.embed_q.innorm.a_2 torch.Size([39])
+proximity_attn.embed.embed_q.innorm.b_2 torch.Size([39])
+proximity_attn.embed.embed_q.outnorm.a_2 torch.Size([256])
+proximity_attn.embed.embed_q.outnorm.b_2 torch.Size([256])
+proximity_attn.embed.embed_q.mlp.model.1.weight torch.Size([256, 39])
+proximity_attn.embed.embed_q.mlp.model.1.bias torch.Size([256])
+proximity_attn.embed.embed_q.mlp.model.3.weight torch.Size([256, 256])
+proximity_attn.embed.embed_q.mlp.model.3.bias torch.Size([256])
+proximity_attn.embed.embed_q.mlp.model.5.weight torch.Size([256, 256])
+proximity_attn.embed.embed_q.mlp.model.5.bias torch.Size([256])
+proximity_attn.embed.embed_q.mlp.model.7.weight torch.Size([256, 256])
+proximity_attn.embed.embed_q.mlp.model.7.bias torch.Size([256])
+proximity_attn.embed.embed_q.mlp.model.9.weight torch.Size([256, 256])
+proximity_attn.embed.embed_q.mlp.model.9.bias torch.Size([256])
+proximity_attn.embed.embed_v.mlp.model.1.weight torch.Size([256, 142])
+proximity_attn.embed.embed_v.mlp.model.1.bias torch.Size([256])
+proximity_attn.embed.embed_v.mlp.model.3.weight torch.Size([256, 256])
+proximity_attn.embed.embed_v.mlp.model.3.bias torch.Size([256])
+proximity_attn.embed.embed_v.mlp.model.5.weight torch.Size([256, 256])
+proximity_attn.embed.embed_v.mlp.model.5.bias torch.Size([256])
+proximity_attn.embed.embed_v.mlp.model.7.weight torch.Size([256, 256])
+proximity_attn.embed.embed_v.mlp.model.7.bias torch.Size([256])
+proximity_attn.embed.embed_v.mlp.model.9.weight torch.Size([256, 256])
+proximity_attn.embed.embed_v.mlp.model.9.bias torch.Size([256])
+proximity_attn.embed.embed_v.mlp.model.11.weight torch.Size([256, 256])
+proximity_attn.embed.embed_v.mlp.model.11.bias torch.Size([256])
+proximity_attn.embed.embed_v.mlp.model.13.weight torch.Size([256, 256])
+proximity_attn.embed.embed_v.mlp.model.13.bias torch.Size([256])
+proximity_attn.embed.embed_v.mlp.model.15.weight torch.Size([32, 256])
+proximity_attn.embed.embed_v.mlp.model.15.bias torch.Size([32])
+proximity_attn.attention_layer.w_k.weight torch.Size([256, 256])
+proximity_attn.attention_layer.w_k.bias torch.Size([256])
+proximity_attn.attention_layer.w_q.weight torch.Size([256, 256])
+proximity_attn.attention_layer.w_q.bias torch.Size([256])
+load pc_feats torch.Size([13096, 64]) tensor(-4.3361, device='cuda:0', grad_fn=<MinBackward1>) tensor(4.0088, device='cuda:0', grad_fn=<MaxBackward1>)
+!!!!! Loaded model from ./experiments/chair at step 25000
+testloader: <torch.utils.data.dataloader.DataLoader object at 0x14e50a6a7bb0>
+Using MSE loss, loss weight:  1.0
+Loading model from: /project/6054857/irisma/human-poses/Human_Pose_Generation/PAPR/vgg.pth
+Using LPIPS loss, loss weight:  0.01
+Setting up [LPIPS] perceptual loss: trunk [alex], v[0.1], spatial [off]
+Loading model from: /home/irisma/py39/lib/python3.9/site-packages/lpips/weights/v0.1/alex.pth
+Setting up [LPIPS] perceptual loss: trunk [vgg], v[0.1], spatial [off]
+Loading model from: /home/irisma/py39/lib/python3.9/site-packages/lpips/weights/v0.1/vgg.pth
+Test frame: 0, code mean: 0, test_loss: 0.0016, test_psnr: 28.7012, test_ssim: 0.9424, test_lpips_alex: 0.0757, test_lpips_vgg: 0.0709
+Test frame: 1, code mean: 0, test_loss: 0.0018, test_psnr: 28.2317, test_ssim: 0.9400, test_lpips_alex: 0.0752, test_lpips_vgg: 0.0706
+Test frame: 2, code mean: 0, test_loss: 0.0018, test_psnr: 28.1093, test_ssim: 0.9374, test_lpips_alex: 0.0782, test_lpips_vgg: 0.0738
+Test frame: 3, code mean: 0, test_loss: 0.0019, test_psnr: 27.9251, test_ssim: 0.9349, test_lpips_alex: 0.0790, test_lpips_vgg: 0.0761
+Test frame: 4, code mean: 0, test_loss: 0.0020, test_psnr: 27.7640, test_ssim: 0.9323, test_lpips_alex: 0.0823, test_lpips_vgg: 0.0761
+Test frame: 5, code mean: 0, test_loss: 0.0020, test_psnr: 27.6615, test_ssim: 0.9298, test_lpips_alex: 0.0839, test_lpips_vgg: 0.0784
+Test frame: 6, code mean: 0, test_loss: 0.0020, test_psnr: 27.6717, test_ssim: 0.9288, test_lpips_alex: 0.0856, test_lpips_vgg: 0.0786
+Test frame: 7, code mean: 0, test_loss: 0.0021, test_psnr: 27.4934, test_ssim: 0.9255, test_lpips_alex: 0.0875, test_lpips_vgg: 0.0806
+Test frame: 8, code mean: 0, test_loss: 0.0022, test_psnr: 27.3359, test_ssim: 0.9215, test_lpips_alex: 0.0899, test_lpips_vgg: 0.0833
+Test frame: 9, code mean: 0, test_loss: 0.0023, test_psnr: 27.0822, test_ssim: 0.9173, test_lpips_alex: 0.0927, test_lpips_vgg: 0.0855
+Test frame: 10, code mean: 0, test_loss: 0.0024, test_psnr: 26.7978, test_ssim: 0.9121, test_lpips_alex: 0.0957, test_lpips_vgg: 0.0891
+Test frame: 11, code mean: 0, test_loss: 0.0025, test_psnr: 26.5898, test_ssim: 0.9087, test_lpips_alex: 0.0995, test_lpips_vgg: 0.0921
+Test frame: 12, code mean: 0, test_loss: 0.0028, test_psnr: 26.1679, test_ssim: 0.9048, test_lpips_alex: 0.1025, test_lpips_vgg: 0.0953
+Test frame: 13, code mean: 0, test_loss: 0.0029, test_psnr: 25.8864, test_ssim: 0.9004, test_lpips_alex: 0.1048, test_lpips_vgg: 0.0990
+Test frame: 14, code mean: 0, test_loss: 0.0031, test_psnr: 25.6594, test_ssim: 0.8957, test_lpips_alex: 0.1053, test_lpips_vgg: 0.1009
+Test frame: 15, code mean: 0, test_loss: 0.0032, test_psnr: 25.4268, test_ssim: 0.8920, test_lpips_alex: 0.1081, test_lpips_vgg: 0.1029
+Test frame: 16, code mean: 0, test_loss: 0.0034, test_psnr: 25.1823, test_ssim: 0.8876, test_lpips_alex: 0.1114, test_lpips_vgg: 0.1046
+Test frame: 17, code mean: 0, test_loss: 0.0035, test_psnr: 25.1138, test_ssim: 0.8859, test_lpips_alex: 0.1117, test_lpips_vgg: 0.1047
+Test frame: 18, code mean: 0, test_loss: 0.0035, test_psnr: 25.0337, test_ssim: 0.8840, test_lpips_alex: 0.1177, test_lpips_vgg: 0.1046
+Test frame: 19, code mean: 0, test_loss: 0.0035, test_psnr: 25.0590, test_ssim: 0.8853, test_lpips_alex: 0.1139, test_lpips_vgg: 0.1047
+Test frame: 20, code mean: 0, test_loss: 0.0034, test_psnr: 25.2478, test_ssim: 0.8870, test_lpips_alex: 0.1127, test_lpips_vgg: 0.1030
+Test frame: 21, code mean: 0, test_loss: 0.0033, test_psnr: 25.4098, test_ssim: 0.8879, test_lpips_alex: 0.1130, test_lpips_vgg: 0.1026
+Test frame: 22, code mean: 0, test_loss: 0.0033, test_psnr: 25.4173, test_ssim: 0.8859, test_lpips_alex: 0.1161, test_lpips_vgg: 0.1041
+Test frame: 23, code mean: 0, test_loss: 0.0033, test_psnr: 25.4111, test_ssim: 0.8828, test_lpips_alex: 0.1207, test_lpips_vgg: 0.1067
+Test frame: 24, code mean: 0, test_loss: 0.0034, test_psnr: 25.3048, test_ssim: 0.8796, test_lpips_alex: 0.1238, test_lpips_vgg: 0.1096
+Test frame: 25, code mean: 0, test_loss: 0.0034, test_psnr: 25.2282, test_ssim: 0.8760, test_lpips_alex: 0.1275, test_lpips_vgg: 0.1139
+Test frame: 26, code mean: 0, test_loss: 0.0035, test_psnr: 25.1041, test_ssim: 0.8723, test_lpips_alex: 0.1324, test_lpips_vgg: 0.1165
+Test frame: 27, code mean: 0, test_loss: 0.0036, test_psnr: 24.9531, test_ssim: 0.8687, test_lpips_alex: 0.1324, test_lpips_vgg: 0.1183
+Test frame: 28, code mean: 0, test_loss: 0.0037, test_psnr: 24.9201, test_ssim: 0.8662, test_lpips_alex: 0.1370, test_lpips_vgg: 0.1220
+Test frame: 29, code mean: 0, test_loss: 0.0037, test_psnr: 24.8763, test_ssim: 0.8640, test_lpips_alex: 0.1371, test_lpips_vgg: 0.1229
+Test frame: 30, code mean: 0, test_loss: 0.0038, test_psnr: 24.7480, test_ssim: 0.8605, test_lpips_alex: 0.1395, test_lpips_vgg: 0.1247
+Test frame: 31, code mean: 0, test_loss: 0.0039, test_psnr: 24.6643, test_ssim: 0.8578, test_lpips_alex: 0.1400, test_lpips_vgg: 0.1262
+Test frame: 32, code mean: 0, test_loss: 0.0040, test_psnr: 24.5468, test_ssim: 0.8552, test_lpips_alex: 0.1444, test_lpips_vgg: 0.1284
+Test frame: 33, code mean: 0, test_loss: 0.0041, test_psnr: 24.4533, test_ssim: 0.8526, test_lpips_alex: 0.1472, test_lpips_vgg: 0.1309
+Test frame: 34, code mean: 0, test_loss: 0.0042, test_psnr: 24.3101, test_ssim: 0.8498, test_lpips_alex: 0.1515, test_lpips_vgg: 0.1326
+Test frame: 35, code mean: 0, test_loss: 0.0042, test_psnr: 24.2559, test_ssim: 0.8482, test_lpips_alex: 0.1502, test_lpips_vgg: 0.1341
+Test frame: 36, code mean: 0, test_loss: 0.0043, test_psnr: 24.2096, test_ssim: 0.8471, test_lpips_alex: 0.1531, test_lpips_vgg: 0.1357
+Test frame: 37, code mean: 0, test_loss: 0.0044, test_psnr: 24.0837, test_ssim: 0.8461, test_lpips_alex: 0.1550, test_lpips_vgg: 0.1366
+Test frame: 38, code mean: 0, test_loss: 0.0045, test_psnr: 23.9855, test_ssim: 0.8442, test_lpips_alex: 0.1574, test_lpips_vgg: 0.1381
+Test frame: 39, code mean: 0, test_loss: 0.0045, test_psnr: 23.9541, test_ssim: 0.8438, test_lpips_alex: 0.1588, test_lpips_vgg: 0.1381
+Test frame: 40, code mean: 0, test_loss: 0.0046, test_psnr: 23.8815, test_ssim: 0.8422, test_lpips_alex: 0.1621, test_lpips_vgg: 0.1381
+Test frame: 41, code mean: 0, test_loss: 0.0046, test_psnr: 23.9010, test_ssim: 0.8408, test_lpips_alex: 0.1643, test_lpips_vgg: 0.1371
+Test frame: 42, code mean: 0, test_loss: 0.0045, test_psnr: 23.9404, test_ssim: 0.8423, test_lpips_alex: 0.1645, test_lpips_vgg: 0.1376
+Test frame: 43, code mean: 0, test_loss: 0.0046, test_psnr: 23.8901, test_ssim: 0.8418, test_lpips_alex: 0.1644, test_lpips_vgg: 0.1371
+Test frame: 44, code mean: 0, test_loss: 0.0044, test_psnr: 24.0146, test_ssim: 0.8435, test_lpips_alex: 0.1677, test_lpips_vgg: 0.1364
+Test frame: 45, code mean: 0, test_loss: 0.0045, test_psnr: 23.9444, test_ssim: 0.8421, test_lpips_alex: 0.1684, test_lpips_vgg: 0.1366
+Test frame: 46, code mean: 0, test_loss: 0.0045, test_psnr: 23.9825, test_ssim: 0.8426, test_lpips_alex: 0.1703, test_lpips_vgg: 0.1371
+Test frame: 47, code mean: 0, test_loss: 0.0045, test_psnr: 24.0260, test_ssim: 0.8432, test_lpips_alex: 0.1731, test_lpips_vgg: 0.1380
+Test frame: 48, code mean: 0, test_loss: 0.0044, test_psnr: 24.0527, test_ssim: 0.8429, test_lpips_alex: 0.1748, test_lpips_vgg: 0.1393
+Test frame: 49, code mean: 0, test_loss: 0.0044, test_psnr: 24.1053, test_ssim: 0.8431, test_lpips_alex: 0.1748, test_lpips_vgg: 0.1406
+Test frame: 50, code mean: 0, test_loss: 0.0044, test_psnr: 24.1129, test_ssim: 0.8438, test_lpips_alex: 0.1732, test_lpips_vgg: 0.1396
+Test frame: 51, code mean: 0, test_loss: 0.0044, test_psnr: 24.1318, test_ssim: 0.8441, test_lpips_alex: 0.1743, test_lpips_vgg: 0.1395
+Test frame: 52, code mean: 0, test_loss: 0.0043, test_psnr: 24.1597, test_ssim: 0.8448, test_lpips_alex: 0.1750, test_lpips_vgg: 0.1377
+Test frame: 53, code mean: 0, test_loss: 0.0042, test_psnr: 24.2758, test_ssim: 0.8464, test_lpips_alex: 0.1723, test_lpips_vgg: 0.1396
+Test frame: 54, code mean: 0, test_loss: 0.0042, test_psnr: 24.3103, test_ssim: 0.8480, test_lpips_alex: 0.1705, test_lpips_vgg: 0.1381
+Test frame: 55, code mean: 0, test_loss: 0.0041, test_psnr: 24.3989, test_ssim: 0.8506, test_lpips_alex: 0.1675, test_lpips_vgg: 0.1355
+Test frame: 56, code mean: 0, test_loss: 0.0041, test_psnr: 24.3477, test_ssim: 0.8510, test_lpips_alex: 0.1658, test_lpips_vgg: 0.1351
+Test frame: 57, code mean: 0, test_loss: 0.0042, test_psnr: 24.2607, test_ssim: 0.8525, test_lpips_alex: 0.1638, test_lpips_vgg: 0.1344
+Test frame: 58, code mean: 0, test_loss: 0.0042, test_psnr: 24.2471, test_ssim: 0.8541, test_lpips_alex: 0.1637, test_lpips_vgg: 0.1338
+Test frame: 59, code mean: 0, test_loss: 0.0042, test_psnr: 24.3356, test_ssim: 0.8571, test_lpips_alex: 0.1617, test_lpips_vgg: 0.1331
+Test frame: 60, code mean: 0, test_loss: 0.0041, test_psnr: 24.3425, test_ssim: 0.8601, test_lpips_alex: 0.1556, test_lpips_vgg: 0.1307
+Test frame: 61, code mean: 0, test_loss: 0.0040, test_psnr: 24.4691, test_ssim: 0.8639, test_lpips_alex: 0.1566, test_lpips_vgg: 0.1285
+Test frame: 62, code mean: 0, test_loss: 0.0039, test_psnr: 24.5838, test_ssim: 0.8680, test_lpips_alex: 0.1523, test_lpips_vgg: 0.1268
+Test frame: 63, code mean: 0, test_loss: 0.0038, test_psnr: 24.7086, test_ssim: 0.8733, test_lpips_alex: 0.1435, test_lpips_vgg: 0.1240
+Test frame: 64, code mean: 0, test_loss: 0.0036, test_psnr: 24.9538, test_ssim: 0.8787, test_lpips_alex: 0.1401, test_lpips_vgg: 0.1215
+Test frame: 65, code mean: 0, test_loss: 0.0036, test_psnr: 25.0102, test_ssim: 0.8817, test_lpips_alex: 0.1378, test_lpips_vgg: 0.1199
+Test frame: 66, code mean: 0, test_loss: 0.0035, test_psnr: 25.1059, test_ssim: 0.8858, test_lpips_alex: 0.1354, test_lpips_vgg: 0.1170
+Test frame: 67, code mean: 0, test_loss: 0.0034, test_psnr: 25.2070, test_ssim: 0.8892, test_lpips_alex: 0.1328, test_lpips_vgg: 0.1153
+Test frame: 68, code mean: 0, test_loss: 0.0034, test_psnr: 25.2097, test_ssim: 0.8921, test_lpips_alex: 0.1302, test_lpips_vgg: 0.1122
+Test frame: 69, code mean: 0, test_loss: 0.0034, test_psnr: 25.2290, test_ssim: 0.8932, test_lpips_alex: 0.1285, test_lpips_vgg: 0.1113
+Test frame: 70, code mean: 0, test_loss: 0.0034, test_psnr: 25.2689, test_ssim: 0.8941, test_lpips_alex: 0.1263, test_lpips_vgg: 0.1096
+Test frame: 71, code mean: 0, test_loss: 0.0034, test_psnr: 25.2271, test_ssim: 0.8945, test_lpips_alex: 0.1254, test_lpips_vgg: 0.1097
+Test frame: 72, code mean: 0, test_loss: 0.0035, test_psnr: 25.1725, test_ssim: 0.8965, test_lpips_alex: 0.1228, test_lpips_vgg: 0.1106
+Test frame: 73, code mean: 0, test_loss: 0.0035, test_psnr: 25.0825, test_ssim: 0.8970, test_lpips_alex: 0.1213, test_lpips_vgg: 0.1105
+Test frame: 74, code mean: 0, test_loss: 0.0035, test_psnr: 25.0601, test_ssim: 0.8986, test_lpips_alex: 0.1170, test_lpips_vgg: 0.1094
+Test frame: 75, code mean: 0, test_loss: 0.0036, test_psnr: 24.9612, test_ssim: 0.8980, test_lpips_alex: 0.1174, test_lpips_vgg: 0.1085
+Test frame: 76, code mean: 0, test_loss: 0.0037, test_psnr: 24.8487, test_ssim: 0.8960, test_lpips_alex: 0.1196, test_lpips_vgg: 0.1064
+Test frame: 77, code mean: 0, test_loss: 0.0041, test_psnr: 24.2840, test_ssim: 0.8922, test_lpips_alex: 0.1243, test_lpips_vgg: 0.1105
+Test frame: 78, code mean: 0, test_loss: 0.0047, test_psnr: 23.7792, test_ssim: 0.8817, test_lpips_alex: 0.1499, test_lpips_vgg: 0.1268
+Test frame: 79, code mean: 0, test_loss: 0.0045, test_psnr: 23.9411, test_ssim: 0.8800, test_lpips_alex: 0.1590, test_lpips_vgg: 0.1322
+Test frame: 80, code mean: 0, test_loss: 0.0044, test_psnr: 24.0500, test_ssim: 0.8853, test_lpips_alex: 0.1513, test_lpips_vgg: 0.1265
+Test frame: 81, code mean: 0, test_loss: 0.0043, test_psnr: 24.1144, test_ssim: 0.8906, test_lpips_alex: 0.1254, test_lpips_vgg: 0.1133
+Test frame: 82, code mean: 0, test_loss: 0.0043, test_psnr: 24.1153, test_ssim: 0.8910, test_lpips_alex: 0.1302, test_lpips_vgg: 0.1167
+Test frame: 83, code mean: 0, test_loss: 0.0042, test_psnr: 24.2014, test_ssim: 0.8901, test_lpips_alex: 0.1324, test_lpips_vgg: 0.1176
+Test frame: 84, code mean: 0, test_loss: 0.0039, test_psnr: 24.6604, test_ssim: 0.8932, test_lpips_alex: 0.1330, test_lpips_vgg: 0.1163
+Test frame: 85, code mean: 0, test_loss: 0.0038, test_psnr: 24.7168, test_ssim: 0.8929, test_lpips_alex: 0.1303, test_lpips_vgg: 0.1178
+Test frame: 86, code mean: 0, test_loss: 0.0039, test_psnr: 24.6020, test_ssim: 0.8925, test_lpips_alex: 0.1330, test_lpips_vgg: 0.1185
+Test frame: 87, code mean: 0, test_loss: 0.0038, test_psnr: 24.7760, test_ssim: 0.8930, test_lpips_alex: 0.1336, test_lpips_vgg: 0.1167
+Test frame: 88, code mean: 0, test_loss: 0.0037, test_psnr: 24.8767, test_ssim: 0.8932, test_lpips_alex: 0.1306, test_lpips_vgg: 0.1168
+Test frame: 89, code mean: 0, test_loss: 0.0036, test_psnr: 24.9937, test_ssim: 0.8943, test_lpips_alex: 0.1297, test_lpips_vgg: 0.1147
+Test frame: 90, code mean: 0, test_loss: 0.0036, test_psnr: 24.9488, test_ssim: 0.8923, test_lpips_alex: 0.1319, test_lpips_vgg: 0.1162
+Test frame: 91, code mean: 0, test_loss: 0.0034, test_psnr: 25.3383, test_ssim: 0.8953, test_lpips_alex: 0.1254, test_lpips_vgg: 0.1153
+Test frame: 92, code mean: 0, test_loss: 0.0031, test_psnr: 25.6517, test_ssim: 0.8986, test_lpips_alex: 0.1240, test_lpips_vgg: 0.1126
+Test frame: 93, code mean: 0, test_loss: 0.0031, test_psnr: 25.7440, test_ssim: 0.8997, test_lpips_alex: 0.1260, test_lpips_vgg: 0.1104
+Test frame: 94, code mean: 0, test_loss: 0.0030, test_psnr: 25.9148, test_ssim: 0.9008, test_lpips_alex: 0.1254, test_lpips_vgg: 0.1099
+Test frame: 95, code mean: 0, test_loss: 0.0029, test_psnr: 26.0271, test_ssim: 0.9018, test_lpips_alex: 0.1235, test_lpips_vgg: 0.1095
+Test frame: 96, code mean: 0, test_loss: 0.0030, test_psnr: 25.9694, test_ssim: 0.9007, test_lpips_alex: 0.1245, test_lpips_vgg: 0.1134
+Test frame: 97, code mean: 0, test_loss: 0.0030, test_psnr: 25.9136, test_ssim: 0.9003, test_lpips_alex: 0.1334, test_lpips_vgg: 0.1200
+Test frame: 98, code mean: 0, test_loss: 0.0030, test_psnr: 26.0292, test_ssim: 0.8974, test_lpips_alex: 0.1400, test_lpips_vgg: 0.1243
+Test frame: 99, code mean: 0, test_loss: 0.0030, test_psnr: 25.9883, test_ssim: 0.8991, test_lpips_alex: 0.1292, test_lpips_vgg: 0.1187
+Test frame: 100, code mean: 0, test_loss: 0.0029, test_psnr: 26.0654, test_ssim: 0.9012, test_lpips_alex: 0.1227, test_lpips_vgg: 0.1150
+Test frame: 101, code mean: 0, test_loss: 0.0029, test_psnr: 26.0978, test_ssim: 0.8999, test_lpips_alex: 0.1338, test_lpips_vgg: 0.1223
+Test frame: 102, code mean: 0, test_loss: 0.0030, test_psnr: 26.0385, test_ssim: 0.8984, test_lpips_alex: 0.1263, test_lpips_vgg: 0.1224
+Test frame: 103, code mean: 0, test_loss: 0.0029, test_psnr: 26.0349, test_ssim: 0.8996, test_lpips_alex: 0.1240, test_lpips_vgg: 0.1163
+Test frame: 104, code mean: 0, test_loss: 0.0030, test_psnr: 25.9671, test_ssim: 0.8985, test_lpips_alex: 0.1226, test_lpips_vgg: 0.1164
+Test frame: 105, code mean: 0, test_loss: 0.0029, test_psnr: 26.0451, test_ssim: 0.8994, test_lpips_alex: 0.1235, test_lpips_vgg: 0.1154
+Test frame: 106, code mean: 0, test_loss: 0.0030, test_psnr: 25.9161, test_ssim: 0.9000, test_lpips_alex: 0.1212, test_lpips_vgg: 0.1159
+Test frame: 107, code mean: 0, test_loss: 0.0030, test_psnr: 25.9301, test_ssim: 0.9004, test_lpips_alex: 0.1199, test_lpips_vgg: 0.1141
+Test frame: 108, code mean: 0, test_loss: 0.0029, test_psnr: 25.9934, test_ssim: 0.9010, test_lpips_alex: 0.1168, test_lpips_vgg: 0.1113
+Test frame: 109, code mean: 0, test_loss: 0.0030, test_psnr: 25.9012, test_ssim: 0.9012, test_lpips_alex: 0.1157, test_lpips_vgg: 0.1096
+Test frame: 110, code mean: 0, test_loss: 0.0031, test_psnr: 25.7756, test_ssim: 0.9001, test_lpips_alex: 0.1196, test_lpips_vgg: 0.1118
+Test frame: 111, code mean: 0, test_loss: 0.0031, test_psnr: 25.6350, test_ssim: 0.8987, test_lpips_alex: 0.1220, test_lpips_vgg: 0.1127
+Test frame: 112, code mean: 0, test_loss: 0.0033, test_psnr: 25.4018, test_ssim: 0.8950, test_lpips_alex: 0.1200, test_lpips_vgg: 0.1130
+Test frame: 113, code mean: 0, test_loss: 0.0033, test_psnr: 25.4601, test_ssim: 0.8942, test_lpips_alex: 0.1208, test_lpips_vgg: 0.1145
+Test frame: 114, code mean: 0, test_loss: 0.0033, test_psnr: 25.4540, test_ssim: 0.8948, test_lpips_alex: 0.1211, test_lpips_vgg: 0.1137
+Test frame: 115, code mean: 0, test_loss: 0.0035, test_psnr: 25.0865, test_ssim: 0.8924, test_lpips_alex: 0.1207, test_lpips_vgg: 0.1107
+Test frame: 116, code mean: 0, test_loss: 0.0036, test_psnr: 24.9417, test_ssim: 0.8904, test_lpips_alex: 0.1199, test_lpips_vgg: 0.1123
+Test frame: 117, code mean: 0, test_loss: 0.0036, test_psnr: 25.0036, test_ssim: 0.8909, test_lpips_alex: 0.1190, test_lpips_vgg: 0.1121
+Test frame: 118, code mean: 0, test_loss: 0.0034, test_psnr: 25.1652, test_ssim: 0.8922, test_lpips_alex: 0.1174, test_lpips_vgg: 0.1073
+Test frame: 119, code mean: 0, test_loss: 0.0035, test_psnr: 25.0617, test_ssim: 0.8911, test_lpips_alex: 0.1188, test_lpips_vgg: 0.1075
+Test frame: 120, code mean: 0, test_loss: 0.0036, test_psnr: 24.9708, test_ssim: 0.8905, test_lpips_alex: 0.1199, test_lpips_vgg: 0.1058
+Test frame: 121, code mean: 0, test_loss: 0.0034, test_psnr: 25.1293, test_ssim: 0.8930, test_lpips_alex: 0.1139, test_lpips_vgg: 0.1026
+Test frame: 122, code mean: 0, test_loss: 0.0033, test_psnr: 25.2741, test_ssim: 0.8967, test_lpips_alex: 0.1093, test_lpips_vgg: 0.0970
+Test frame: 123, code mean: 0, test_loss: 0.0029, test_psnr: 25.9611, test_ssim: 0.9051, test_lpips_alex: 0.1023, test_lpips_vgg: 0.0929
+Test frame: 124, code mean: 0, test_loss: 0.0027, test_psnr: 26.2552, test_ssim: 0.9075, test_lpips_alex: 0.1031, test_lpips_vgg: 0.0916
+Test frame: 125, code mean: 0, test_loss: 0.0028, test_psnr: 26.1077, test_ssim: 0.9014, test_lpips_alex: 0.1052, test_lpips_vgg: 0.0960
+Test frame: 126, code mean: 0, test_loss: 0.0029, test_psnr: 25.9168, test_ssim: 0.8974, test_lpips_alex: 0.1071, test_lpips_vgg: 0.0983
+Test frame: 127, code mean: 0, test_loss: 0.0029, test_psnr: 26.0309, test_ssim: 0.8947, test_lpips_alex: 0.1150, test_lpips_vgg: 0.1013
+Test frame: 128, code mean: 0, test_loss: 0.0030, test_psnr: 25.7677, test_ssim: 0.8897, test_lpips_alex: 0.1178, test_lpips_vgg: 0.1035
+Test frame: 129, code mean: 0, test_loss: 0.0033, test_psnr: 25.3972, test_ssim: 0.8839, test_lpips_alex: 0.1222, test_lpips_vgg: 0.1083
+Test frame: 130, code mean: 0, test_loss: 0.0035, test_psnr: 25.1302, test_ssim: 0.8782, test_lpips_alex: 0.1245, test_lpips_vgg: 0.1123
+Test frame: 131, code mean: 0, test_loss: 0.0035, test_psnr: 25.1566, test_ssim: 0.8767, test_lpips_alex: 0.1234, test_lpips_vgg: 0.1133
+Test frame: 132, code mean: 0, test_loss: 0.0036, test_psnr: 24.9582, test_ssim: 0.8728, test_lpips_alex: 0.1265, test_lpips_vgg: 0.1163
+Test frame: 133, code mean: 0, test_loss: 0.0038, test_psnr: 24.7583, test_ssim: 0.8678, test_lpips_alex: 0.1334, test_lpips_vgg: 0.1200
+Test frame: 134, code mean: 0, test_loss: 0.0038, test_psnr: 24.7253, test_ssim: 0.8646, test_lpips_alex: 0.1370, test_lpips_vgg: 0.1221
+Test frame: 135, code mean: 0, test_loss: 0.0039, test_psnr: 24.6306, test_ssim: 0.8625, test_lpips_alex: 0.1394, test_lpips_vgg: 0.1233
+Test frame: 136, code mean: 0, test_loss: 0.0040, test_psnr: 24.5555, test_ssim: 0.8606, test_lpips_alex: 0.1422, test_lpips_vgg: 0.1248
+Test frame: 137, code mean: 0, test_loss: 0.0040, test_psnr: 24.5600, test_ssim: 0.8598, test_lpips_alex: 0.1443, test_lpips_vgg: 0.1263
+Test frame: 138, code mean: 0, test_loss: 0.0041, test_psnr: 24.4367, test_ssim: 0.8571, test_lpips_alex: 0.1461, test_lpips_vgg: 0.1278
+Test frame: 139, code mean: 0, test_loss: 0.0042, test_psnr: 24.2762, test_ssim: 0.8542, test_lpips_alex: 0.1490, test_lpips_vgg: 0.1294
+Test frame: 140, code mean: 0, test_loss: 0.0043, test_psnr: 24.1311, test_ssim: 0.8510, test_lpips_alex: 0.1541, test_lpips_vgg: 0.1316
+Test frame: 141, code mean: 0, test_loss: 0.0044, test_psnr: 24.0995, test_ssim: 0.8488, test_lpips_alex: 0.1567, test_lpips_vgg: 0.1313
+Test frame: 142, code mean: 0, test_loss: 0.0044, test_psnr: 24.0539, test_ssim: 0.8485, test_lpips_alex: 0.1585, test_lpips_vgg: 0.1308
+Test frame: 143, code mean: 0, test_loss: 0.0044, test_psnr: 24.0281, test_ssim: 0.8486, test_lpips_alex: 0.1579, test_lpips_vgg: 0.1322
+Test frame: 144, code mean: 0, test_loss: 0.0045, test_psnr: 23.9795, test_ssim: 0.8479, test_lpips_alex: 0.1607, test_lpips_vgg: 0.1339
+Test frame: 145, code mean: 0, test_loss: 0.0045, test_psnr: 23.9642, test_ssim: 0.8465, test_lpips_alex: 0.1638, test_lpips_vgg: 0.1346
+Test frame: 146, code mean: 0, test_loss: 0.0045, test_psnr: 23.9786, test_ssim: 0.8463, test_lpips_alex: 0.1663, test_lpips_vgg: 0.1336
+Test frame: 147, code mean: 0, test_loss: 0.0044, test_psnr: 24.0542, test_ssim: 0.8457, test_lpips_alex: 0.1674, test_lpips_vgg: 0.1354
+Test frame: 148, code mean: 0, test_loss: 0.0045, test_psnr: 24.0170, test_ssim: 0.8440, test_lpips_alex: 0.1720, test_lpips_vgg: 0.1382
+Test frame: 149, code mean: 0, test_loss: 0.0044, test_psnr: 24.0482, test_ssim: 0.8436, test_lpips_alex: 0.1722, test_lpips_vgg: 0.1407
+Test frame: 150, code mean: 0, test_loss: 0.0044, test_psnr: 24.0562, test_ssim: 0.8438, test_lpips_alex: 0.1737, test_lpips_vgg: 0.1398
+Test frame: 151, code mean: 0, test_loss: 0.0044, test_psnr: 24.1324, test_ssim: 0.8441, test_lpips_alex: 0.1743, test_lpips_vgg: 0.1395
+Test frame: 152, code mean: 0, test_loss: 0.0043, test_psnr: 24.2006, test_ssim: 0.8444, test_lpips_alex: 0.1735, test_lpips_vgg: 0.1378
+Test frame: 153, code mean: 0, test_loss: 0.0042, test_psnr: 24.3154, test_ssim: 0.8455, test_lpips_alex: 0.1732, test_lpips_vgg: 0.1397
+Test frame: 154, code mean: 0, test_loss: 0.0042, test_psnr: 24.3349, test_ssim: 0.8471, test_lpips_alex: 0.1742, test_lpips_vgg: 0.1391
+Test frame: 155, code mean: 0, test_loss: 0.0041, test_psnr: 24.4709, test_ssim: 0.8497, test_lpips_alex: 0.1690, test_lpips_vgg: 0.1367
+Test frame: 156, code mean: 0, test_loss: 0.0040, test_psnr: 24.5075, test_ssim: 0.8503, test_lpips_alex: 0.1670, test_lpips_vgg: 0.1350
+Test frame: 157, code mean: 0, test_loss: 0.0041, test_psnr: 24.3820, test_ssim: 0.8508, test_lpips_alex: 0.1641, test_lpips_vgg: 0.1348
+Test frame: 158, code mean: 0, test_loss: 0.0041, test_psnr: 24.3862, test_ssim: 0.8529, test_lpips_alex: 0.1631, test_lpips_vgg: 0.1351
+Test frame: 159, code mean: 0, test_loss: 0.0041, test_psnr: 24.4378, test_ssim: 0.8550, test_lpips_alex: 0.1650, test_lpips_vgg: 0.1343
+Test frame: 160, code mean: 0, test_loss: 0.0039, test_psnr: 24.6018, test_ssim: 0.8580, test_lpips_alex: 0.1582, test_lpips_vgg: 0.1332
+Test frame: 161, code mean: 0, test_loss: 0.0038, test_psnr: 24.7206, test_ssim: 0.8619, test_lpips_alex: 0.1547, test_lpips_vgg: 0.1329
+Test frame: 162, code mean: 0, test_loss: 0.0038, test_psnr: 24.8150, test_ssim: 0.8658, test_lpips_alex: 0.1516, test_lpips_vgg: 0.1294
+Test frame: 163, code mean: 0, test_loss: 0.0037, test_psnr: 24.9176, test_ssim: 0.8691, test_lpips_alex: 0.1466, test_lpips_vgg: 0.1283
+Test frame: 164, code mean: 0, test_loss: 0.0036, test_psnr: 25.0111, test_ssim: 0.8718, test_lpips_alex: 0.1439, test_lpips_vgg: 0.1263
+Test frame: 165, code mean: 0, test_loss: 0.0035, test_psnr: 25.1524, test_ssim: 0.8753, test_lpips_alex: 0.1412, test_lpips_vgg: 0.1228
+Test frame: 166, code mean: 0, test_loss: 0.0035, test_psnr: 25.1992, test_ssim: 0.8783, test_lpips_alex: 0.1354, test_lpips_vgg: 0.1212
+Test frame: 167, code mean: 0, test_loss: 0.0035, test_psnr: 25.2041, test_ssim: 0.8817, test_lpips_alex: 0.1325, test_lpips_vgg: 0.1186
+Test frame: 168, code mean: 0, test_loss: 0.0034, test_psnr: 25.3349, test_ssim: 0.8841, test_lpips_alex: 0.1307, test_lpips_vgg: 0.1174
+Test frame: 169, code mean: 0, test_loss: 0.0033, test_psnr: 25.3974, test_ssim: 0.8867, test_lpips_alex: 0.1298, test_lpips_vgg: 0.1158
+Test frame: 170, code mean: 0, test_loss: 0.0033, test_psnr: 25.3457, test_ssim: 0.8876, test_lpips_alex: 0.1280, test_lpips_vgg: 0.1143
+Test frame: 171, code mean: 0, test_loss: 0.0034, test_psnr: 25.3156, test_ssim: 0.8882, test_lpips_alex: 0.1264, test_lpips_vgg: 0.1134
+Test frame: 172, code mean: 0, test_loss: 0.0035, test_psnr: 25.1680, test_ssim: 0.8897, test_lpips_alex: 0.1254, test_lpips_vgg: 0.1112
+Test frame: 173, code mean: 0, test_loss: 0.0035, test_psnr: 25.1129, test_ssim: 0.8916, test_lpips_alex: 0.1234, test_lpips_vgg: 0.1103
+Test frame: 174, code mean: 0, test_loss: 0.0035, test_psnr: 25.0799, test_ssim: 0.8938, test_lpips_alex: 0.1184, test_lpips_vgg: 0.1089
+Test frame: 175, code mean: 0, test_loss: 0.0035, test_psnr: 25.0902, test_ssim: 0.8955, test_lpips_alex: 0.1173, test_lpips_vgg: 0.1058
+Test frame: 176, code mean: 0, test_loss: 0.0034, test_psnr: 25.2003, test_ssim: 0.8983, test_lpips_alex: 0.1124, test_lpips_vgg: 0.1048
+Test frame: 177, code mean: 0, test_loss: 0.0035, test_psnr: 25.1162, test_ssim: 0.9005, test_lpips_alex: 0.1087, test_lpips_vgg: 0.1026
+Test frame: 178, code mean: 0, test_loss: 0.0036, test_psnr: 24.9944, test_ssim: 0.9003, test_lpips_alex: 0.1116, test_lpips_vgg: 0.1036
+Test frame: 179, code mean: 0, test_loss: 0.0036, test_psnr: 24.8989, test_ssim: 0.8986, test_lpips_alex: 0.1158, test_lpips_vgg: 0.1073
+Test frame: 180, code mean: 0, test_loss: 0.0037, test_psnr: 24.7732, test_ssim: 0.8972, test_lpips_alex: 0.1144, test_lpips_vgg: 0.1056
+Test frame: 181, code mean: 0, test_loss: 0.0038, test_psnr: 24.7137, test_ssim: 0.8978, test_lpips_alex: 0.1078, test_lpips_vgg: 0.1012
+Test frame: 182, code mean: 0, test_loss: 0.0038, test_psnr: 24.6959, test_ssim: 0.8973, test_lpips_alex: 0.1040, test_lpips_vgg: 0.0998
+Test frame: 183, code mean: 0, test_loss: 0.0035, test_psnr: 25.0111, test_ssim: 0.9012, test_lpips_alex: 0.1046, test_lpips_vgg: 0.0980
+Test frame: 184, code mean: 0, test_loss: 0.0034, test_psnr: 25.2478, test_ssim: 0.9030, test_lpips_alex: 0.1055, test_lpips_vgg: 0.0959
+Test frame: 185, code mean: 0, test_loss: 0.0032, test_psnr: 25.3960, test_ssim: 0.9050, test_lpips_alex: 0.1013, test_lpips_vgg: 0.0953
+Test frame: 186, code mean: 0, test_loss: 0.0031, test_psnr: 25.6721, test_ssim: 0.9084, test_lpips_alex: 0.0981, test_lpips_vgg: 0.0925
+Test frame: 187, code mean: 0, test_loss: 0.0029, test_psnr: 25.8747, test_ssim: 0.9119, test_lpips_alex: 0.0945, test_lpips_vgg: 0.0898
+Test frame: 188, code mean: 0, test_loss: 0.0028, test_psnr: 26.1482, test_ssim: 0.9161, test_lpips_alex: 0.0905, test_lpips_vgg: 0.0871
+Test frame: 189, code mean: 0, test_loss: 0.0025, test_psnr: 26.5814, test_ssim: 0.9196, test_lpips_alex: 0.0894, test_lpips_vgg: 0.0851
+Test frame: 190, code mean: 0, test_loss: 0.0024, test_psnr: 26.8396, test_ssim: 0.9230, test_lpips_alex: 0.0852, test_lpips_vgg: 0.0833
+Test frame: 191, code mean: 0, test_loss: 0.0024, test_psnr: 26.8640, test_ssim: 0.9246, test_lpips_alex: 0.0840, test_lpips_vgg: 0.0806
+Test frame: 192, code mean: 0, test_loss: 0.0023, test_psnr: 27.0278, test_ssim: 0.9268, test_lpips_alex: 0.0829, test_lpips_vgg: 0.0784
+Test frame: 193, code mean: 0, test_loss: 0.0022, test_psnr: 27.2354, test_ssim: 0.9289, test_lpips_alex: 0.0818, test_lpips_vgg: 0.0772
+Test frame: 194, code mean: 0, test_loss: 0.0021, test_psnr: 27.5495, test_ssim: 0.9317, test_lpips_alex: 0.0782, test_lpips_vgg: 0.0770
+Test frame: 195, code mean: 0, test_loss: 0.0020, test_psnr: 27.6257, test_ssim: 0.9341, test_lpips_alex: 0.0808, test_lpips_vgg: 0.0757
+Test frame: 196, code mean: 0, test_loss: 0.0019, test_psnr: 27.8557, test_ssim: 0.9362, test_lpips_alex: 0.0784, test_lpips_vgg: 0.0754
+Test frame: 197, code mean: 0, test_loss: 0.0018, test_psnr: 28.1139, test_ssim: 0.9372, test_lpips_alex: 0.0757, test_lpips_vgg: 0.0740
+Test frame: 198, code mean: 0, test_loss: 0.0018, test_psnr: 28.2471, test_ssim: 0.9387, test_lpips_alex: 0.0764, test_lpips_vgg: 0.0721
+Test frame: 199, code mean: 0, test_loss: 0.0017, test_psnr: 28.4430, test_ssim: 0.9404, test_lpips_alex: 0.0755, test_lpips_vgg: 0.0693
+Avg test loss: 0.0035, test PSNR: 25.2176, test SSIM: 0.8832, test LPIPS Alex: 0.1299, test LPIPS VGG: 0.1144
