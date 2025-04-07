@@ -5,10 +5,11 @@ def generate_NN_latent_functions(num_samples, xdim=1, zdim=2, bias=0):
     class NN(nn.Module):
         def __init__(self, input_dim, output_dim):
             super(NN, self).__init__()
-            self.fc1 = nn.Linear(input_dim, 5)
-            self.fc2 = nn.Linear(5, 5)
-            self.fc3 = nn.Linear(5, 5)
-            self.fc4 = nn.Linear(5, output_dim)
+            self.fc1 = nn.Linear(input_dim, 4)
+            self.fc2 = nn.Linear(4, 4)
+            self.fc3 = nn.Linear(4, 4)
+            self.fc4 = nn.Linear(4, 4)
+            self.fc5 = nn.Linear(4, output_dim)
 
             for param in self.parameters():
                 param.requires_grad = False
@@ -23,8 +24,9 @@ def generate_NN_latent_functions(num_samples, xdim=1, zdim=2, bias=0):
                 x3 = torch.relu(self.fc3(x2))
                 #print("x3:", x3.norm(p = 2, dim = 1))
                 #print("--"*100)
-                x4 = self.fc4(x3+x2+x1)
-                x = torch.cat((x4/100, inp), dim = 1)
+                x4 = torch.relu(self.fc4(x3))
+                x5 = self.fc5(x4+x3+x2+x1)
+                x = torch.cat((x5/100, inp), dim = 1)
             return x
 
     #  weight initialization function
@@ -72,16 +74,7 @@ def generate_NN_latent_functions(num_samples, xdim=1, zdim=2, bias=0):
 #         print("---" * 20)
 #     return min_idx.item()
 
-# def diffs(Y, G):
-#     weighted_diffs = (G - Y)**2
-#     diffs = torch.sum(weighted_diffs, dim=2)
-#     return diffs
 
-# def f_loss(Y, G):
-#     diff = diffs(Y,G)
-#     point_loss_mean = diff.mean(dim=1)
-#     curve_loss_mean = point_loss_mean.mean(dim=0)
-#     return curve_loss_mean
 
 def find_nns(Y, G, threshold=0.0, disp=False):
     Y_expanded = Y.expand(G.size(0), -1, -1)  # (B, N, D)
@@ -89,7 +82,7 @@ def find_nns(Y, G, threshold=0.0, disp=False):
 
     part1 = d.min(dim=2)[0].mean(dim=1)  # G -> Y
     part2 = d.min(dim=1)[0].mean(dim=1)  # Y -> G
-    distances = part1 + part2
+    distances = (part1 + part2)
 
     mask = distances > threshold
     valid_indices = mask.nonzero().squeeze(1)
@@ -115,3 +108,15 @@ def f_loss(Y, G):
     d = torch.cdist(Y, G, p=2)**2
     diff = d.min(dim=2)[0].mean(dim=1) + d.min(dim=1)[0].mean(dim=1)
     return diff.mean()
+
+# def diffs(Y, G):
+
+#     weighted_diffs = (G - Y)**2
+#     diffs = torch.sum(weighted_diffs, dim=2)
+#     return diffs
+
+# def f_loss(Y, G):
+#     diff = diffs(Y,G)
+#     point_loss_mean = diff.mean(dim=1)
+#     curve_loss_mean = point_loss_mean.mean(dim=0)
+#     return curve_loss_mean

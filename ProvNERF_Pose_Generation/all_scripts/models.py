@@ -2,8 +2,180 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+class UNetRes(nn.Module):
+    def __init__(self, input_dim, output_dim=3, hidden_dim=512, depth=3):
+        super().__init__()
+        self.depth = depth
+        
+        # Initial projection
+        self.input_layer = nn.Sequential(
+            nn.Linear(input_dim, hidden_dim),
+            nn.LayerNorm(hidden_dim),
+            nn.LeakyReLU(0.2)
+        )
+
+        # Encoder components
+        self.encoder_blocks = nn.ModuleList()
+        self.down_layers = nn.ModuleList()
+        current_dim = hidden_dim
+        for _ in range(depth):
+            # Create residual blocks and scales for this stage
+            res_blocks = nn.ModuleList()
+            scales = nn.ParameterList()
+            for _ in range(2):  # 2 residual blocks per stage
+                res_blocks.append(nn.Sequential(
+                    nn.Linear(current_dim, current_dim),
+                    nn.LayerNorm(current_dim),
+                    nn.LeakyReLU(0.2),
+                    nn.Linear(current_dim, current_dim),
+                    nn.LayerNorm(current_dim),
+                ))
+                scales.append(nn.Parameter(torch.tensor(0.5)))
+            
+            # Create a container module for this encoder stage
+            stage = nn.ModuleDict({
+                'blocks': res_blocks,
+                'scales': scales
+            })
+            self.encoder_blocks.append(stage)
+            
+            # Downsampling
+            self.down_layers.append(nn.Sequential(
+                nn.Linear(current_dim, current_dim//2),
+                nn.LayerNorm(current_dim//2),
+                nn.LeakyReLU(0.2)
+            ))
+            current_dim = current_dim // 2
+
+        # Bottleneck
+        self.bottleneck_blocks = nn.ModuleList()
+        self.bottleneck_scales = nn.ParameterList()
+        for _ in range(2):
+            self.bottleneck_blocks.append(nn.Sequential(
+                nn.Linear(current_dim, current_dim),
+                nn.LayerNorm(current_dim),
+                nn.LeakyReLU(0.2),
+                nn.Linear(current_dim, current_dim),
+                nn.LayerNorm(current_dim),
+            ))
+            self.bottleneck_scales.append(nn.Parameter(torch.tensor(0.5)))
+
+        # Decoder components
+        self.decoder_blocks = nn.ModuleList()
+        self.up_layers = nn.ModuleList()
+        for _ in range(depth):
+            # Upsampling
+            self.up_layers.append(nn.Sequential(
+                nn.Linear(current_dim, current_dim*2),
+                nn.LayerNorm(current_dim*2),
+                nn.LeakyReLU(0.2)
+            ))
+            current_dim *= 2
+            
+            # Create residual blocks and scales for this stage
+            res_blocks = nn.ModuleList()
+            scales = nn.ParameterList()
+            for _ in range(2):  # 2 residual blocks per stage
+                res_blocks.append(nn.Sequential(
+                    nn.Linear(current_dim, current_dim),
+                    nn.LayerNorm(current_dim),
+                    nn.LeakyReLU(0.2),
+                    nn.Linear(current_dim, current_dim),
+                    nn.LayerNorm(current_dim),
+                ))
+                scales.append(nn.Parameter(torch.tensor(0.5)))
+            
+            # Create a container module for this decoder stage
+            stage = nn.ModuleDict({
+                'blocks': res_blocks,
+                'scales': scales
+            })
+            self.decoder_blocks.append(stage)
+
+        self.output_layer = nn.Linear(current_dim, output_dim)
+
+    def forward(self, x):
+        skips = []
+        
+        # Encoder path
+        x = self.input_layer(x)
+        for i in range(self.depth):
+            # Process residual blocks
+            stage = self.encoder_blocks[i]
+            for j, block in enumerate(stage['blocks']):
+                residual = x
+                x = block(x)
+                x = x * stage['scales'][j] + residual
+                x = F.leaky_relu(x, 0.2)
+            skips.append(x)
+            
+            # Downsample
+            x = self.down_layers[i](x)
+
+        # Bottleneck
+        for j, block in enumerate(self.bottleneck_blocks):
+            residual = x
+            x = block(x)
+            x = x * self.bottleneck_scales[j] + residual
+            x = F.leaky_relu(x, 0.2)
+
+        # Decoder path
+        for i in range(self.depth):
+            # Upsample
+            x = self.up_layers[i](x)
+            
+            # Add skip connection
+            x = x + skips.pop()
+            
+            # Process residual blocks
+            stage = self.decoder_blocks[i]
+            for j, block in enumerate(stage['blocks']):
+                residual = x
+                x = block(x)
+                x = x * stage['scales'][j] + residual
+                x = F.leaky_relu(x, 0.2)
+
+        return self.output_layer(x)
+
+
+class H_theta_Res(nn.Module):
+    def __init__(self, input_dim, output_dim=3, hidden_dim=512):
+        super().__init__()
+        self.input_layer = nn.Sequential(
+            nn.Linear(input_dim, hidden_dim),
+            nn.LayerNorm(hidden_dim),
+            nn.LeakyReLU(0.2) 
+        )
+        
+        self.res_blocks = nn.ModuleList([
+            nn.Sequential(
+                nn.Linear(hidden_dim, hidden_dim),
+                nn.LayerNorm(hidden_dim),
+                nn.LeakyReLU(0.2),  
+                nn.Linear(hidden_dim, hidden_dim),
+                nn.LayerNorm(hidden_dim),
+            ) for _ in range(12)  
+        ])
+
+        self.res_scales = nn.ParameterList([
+            nn.Parameter(torch.tensor(0.5)) for _ in range(len(self.res_blocks))  # Scale factors for residual connections
+        ])
+        
+        self.final_layer = nn.Linear(hidden_dim, output_dim)
+
+    def forward(self, x):
+        x = self.input_layer(x)
+
+        for i, block in enumerate(self.res_blocks):
+            residual = x
+            x = block(x)
+            x = x * self.res_scales[i] + residual
+            x = F.leaky_relu(x, 0.2)  
+        
+        return self.final_layer(x)
+        
 class H_theta(nn.Module):
-    def __init__(self, input_dim, output_dim, num_layers=70, num_neurons=20):
+    def __init__(self, input_dim, output_dim, num_layers=5, num_neurons=2000):
         super(H_theta, self).__init__()
         layers = []
         for i in range(num_layers):

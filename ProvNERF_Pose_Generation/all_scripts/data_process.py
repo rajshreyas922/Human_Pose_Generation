@@ -12,8 +12,8 @@ def pos_encoder(x, L):
 
     for i in range(n):
         for l in range(L):
-            encoding.append(torch.sin(1.1*(2**l) * torch.pi * x[:, i:i+1]))
-            encoding.append(torch.cos(1.1*(2**l) * torch.pi * x[:, i:i+1]))
+            encoding.append(torch.sin(1.5*(2**l) * torch.pi * x[:, i:i+1]))
+            encoding.append(torch.cos(1.5*(2**l) * torch.pi * x[:, i:i+1]))
     encoded_x = torch.cat(encoding, dim=-1)
     return encoded_x
 

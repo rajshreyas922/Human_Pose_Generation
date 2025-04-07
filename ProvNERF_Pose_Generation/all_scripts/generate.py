@@ -87,6 +87,11 @@ def plot_generated_curves_grid_2D(
     plt.close()
 
 def plot_generated_curves_3D(H_t, data, z_in, num_samples=15, num_points=576, zdim=3, pos_enc_L=0, device='cpu', save_dir='default'):
+
+    #H_t: generator
+    #z_in: pos_enc
+
+
     xdim = 2
     # Initialize storage for latent representations
     latent_dim = zdim + int(pos_enc_L * 2 * xdim)
@@ -112,12 +117,12 @@ def plot_generated_curves_3D(H_t, data, z_in, num_samples=15, num_points=576, zd
         x_real, y_real, z_real = real_np[:, :, 0], real_np[:, :, 1], real_np[:, :, 2]
         
         # Create figure for each row (single sample)
-        fig, axs = plt.subplots(1, 3, figsize=(18, 6), subplot_kw={'projection': '3d'})
+        fig, axs = plt.subplots(1, 4, figsize=(18, 6), subplot_kw={'projection': '3d'})
         
-        for j, (elev, azim) in enumerate([(20, 30), (40, -60), (60, 120)]):
+        for j, (elev, azim) in enumerate([(20, 30), (40, -60), (60, 120), (90,-60)]):
             ax = axs[j]
-            ax.scatter(xg, yg, zg, marker='o', label='Generated')
-            ax.scatter(x_real, y_real, z_real, marker='x', alpha=0.5, label='Real data')
+            ax.scatter(xg, yg, zg, marker='o', label='Generated', s=0.5)
+            #ax.scatter(x_real, y_real, z_real, marker='x', alpha=1, s = 0.02, label='Real data')
             ax.set_title(f'Sample {i + 1} - View {j + 1}')
             ax.view_init(elev=elev, azim=azim)
             ax.set_xlabel('X')
@@ -125,34 +130,34 @@ def plot_generated_curves_3D(H_t, data, z_in, num_samples=15, num_points=576, zd
             ax.set_zlabel('Z')
         
         plt.tight_layout()
-        plt.savefig(f"{save_path}/Generated_Curve_Sample_{i + 1}.png", dpi=300, bbox_inches="tight")
+        plt.savefig(f"{save_path}/Generated_Curve_Sample_{i + 1}.png", dpi=400, bbox_inches="tight")
         plt.close(fig)  # Close the figure to free memory
 
     print(f"Saved {num_samples} images in {save_path}")
 
-    num_samps = 30
-    Zxs = torch.empty((num_samps, num_points, zdim + int(pos_enc_L*2*xdim))).to(device)
-    Zs = generate_NN_latent_functions(num_samples=num_samps, xdim=z_in.shape[1], zdim=zdim, bias=1)
-    # Create a directory to store the .obj files
-    output_dir = f"{save_path}/generated_objs"
-    os.makedirs(output_dir, exist_ok=True)
+    # num_samps = 30
+    # Zxs = torch.empty((num_samps, num_points, zdim + int(pos_enc_L*2*xdim))).to(device)
+    # Zs = generate_NN_latent_functions(num_samples=num_samps, xdim=z_in.shape[1], zdim=zdim, bias=1)
+    # # Create a directory to store the .obj files
+    # output_dir = f"{save_path}/generated_objs"
+    # os.makedirs(output_dir, exist_ok=True)
 
-    for i, model in enumerate(Zs):
-        model = model.to(device)
-        z = model(z_in)
-        Zxs[i] = z.to(device)
-        generated = H_t(Zxs[i]).to(device)  # Shape: (576, 3)
+    # for i, model in enumerate(Zs):
+    #     model = model.to(device)
+    #     z = model(z_in)
+    #     Zxs[i] = z.to(device)
+    #     generated = H_t(Zxs[i]).to(device)  # Shape: (576, 3)
 
-        # Extract the generated points as a numpy array
-        points = generated.detach().cpu().numpy()
+    #     # Extract the generated points as a numpy array
+    #     points = generated.detach().cpu().numpy()
 
-        # Define the filename for the .obj file
-        obj_filename = f"{save_path}/generated_objs/generated_points_{i}.obj"
+    #     # Define the filename for the .obj file
+    #     obj_filename = f"{save_path}/generated_objs/generated_points_{i}.obj"
 
-        # Write the points to the .obj file
-        with open(obj_filename, "w") as f:
-            for point in points:
-                f.write(f"v {point[0]} {point[1]} {point[2]}\n")
+    #     # Write the points to the .obj file
+    #     with open(obj_filename, "w") as f:
+    #         for point in points:
+    #             f.write(f"v {point[0]} {point[1]} {point[2]}\n")
         
-        print(f"Saved {obj_filename}")
+    #     print(f"Saved {obj_filename}")
 

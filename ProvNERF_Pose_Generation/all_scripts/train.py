@@ -13,133 +13,183 @@ from imle import generate_NN_latent_functions, find_nns, f_loss
 from models import *
 from data_process import *
 from misc import *
-
-
+import trimesh
+import glob
 def train(
         H_t,
         optimizer,
         out_dir,
         device,
         epochs=10000,
-        staleness=2,
+        staleness=5,
         num_Z_samples=70,
         num_points=40,
         xdim=1,
         zdim=30,
-        pos_enc_L=4,
-        plot_epoch=25,
+        pos_enc_L=10,
+        plot_epoch=250,
         perturb_scale=0.97,
-        threshold=0.0
+        threshold=0.0,
+        data_dir=None
 ):
     grad_norms = []
     param_norms = []
     losses = []
     os.makedirs('training_out/' + out_dir, exist_ok=True)
-    batch_size = 83
+    batch_size = 750
     indices = torch.randperm(num_points)
-    batches = torch.split(indices, batch_size)
+    batches = torch.split(indices, batch_size)  # Automatically handles remainders
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size = 1000, gamma = 0.5)
+    #gamma = 0.3 ** (1.0 / 2500)
+    #scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=gamma)  
+    #scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+    #optimizer, T_max=7000, eta_min=1e-5)
+    # Data generation
     if xdim == 1:
         x = torch.linspace(-0.05, 0.05, num_points).to(device).unsqueeze(1)
-        data = (generate_data(num_points)).to(device)
+        data = generate_data(num_points).to(device)
     else:
         x1 = torch.linspace(-0.05, 0.05, int(np.sqrt(num_points)))
         x2 = torch.linspace(-0.05, 0.05, int(np.sqrt(num_points)))
         grid_x1, grid_x2 = torch.meshgrid((x1, x2), indexing='ij')
-        data = (generate_3D_data(np.sqrt(num_points).astype(int))).to(device)[:,0:num_points,:]
-        data = torch.stack([data[i, torch.randperm(data.shape[1]), :] for i in range(data.shape[0])])
         x = torch.stack((grid_x1, grid_x2), dim=-1).reshape(-1, 2).to(device)
+        
+        if data_dir is None:
+            data = generate_3D_data(int(np.sqrt(num_points))).to(device)[:, 0:num_points, :]
+        else:
+            data = []
+            obj_files = sorted(glob.glob(os.path.join(data_dir, '*.obj')))
+            print(obj_files)
+            for file_path in obj_files:
+                mesh = trimesh.load(file_path)
+                vertices = torch.tensor(mesh.vertices, dtype=torch.float32)
+                vertices = vertices - vertices.mean(0)
+                data.append(vertices[0:num_points, :].unsqueeze(0))
 
-    Zxs = torch.empty((num_Z_samples, batch_size, zdim + int(pos_enc_L * 2 * xdim))).to(device)
-    
+            data = torch.cat(data, dim=0).to(device)
+    print(data.shape)
     z_in = pos_encoder(x, L=pos_enc_L).to(device)
-    batch_num = 1
+    
+    stored_imle_transformed_points = []
+
     for e in tqdm(range(epochs)):
-        print(f"Batch: {batch_num}")
-        batch_num += 1
-        loss_sum = 0
-        for batch_indices in batches:
+        epoch_loss = 0
+        # if e % 2500 == 0:
+        #     perturb_scale *= 1.1
+        if e % staleness == 0:
+            stored_imle_transformed_points = []
+
+        for batch_idx, batch_indices in enumerate(batches):
+            current_batch_size = len(batch_indices)
             data_batch = data[:, batch_indices, :]
             if e % staleness == 0:
-                Zs = generate_NN_latent_functions(num_samples=num_Z_samples, xdim=z_in.shape[1], zdim=zdim, bias=1)
+                Zs = generate_NN_latent_functions(
+                    num_samples=num_Z_samples,
+                    xdim=z_in.shape[1],
+                    zdim=zdim,
+                    bias=1
+                )
+                
+                Zxs = torch.empty((num_Z_samples, current_batch_size, zdim + int(pos_enc_L * 2 * xdim))).to(device)
                 for i, model in enumerate(Zs):
                     model = model.to(device)
-                    z = model(z_in[batch_indices, :])
-                    #z = F.normalize(z, p=2, dim=0)
-                    Zxs[i] = z.to(device)
-                generated = H_t(Zxs).to(device)
-                imle_nns = [find_nns(d, generated, threshold=threshold, disp=False) for d in data_batch]
-                imle_transformed_points = torch.empty((data.shape[0], batch_size, zdim + int(pos_enc_L * 2 * xdim))).to(device)
-                perturbed_Zs = []
-                for i, (idx, _) in enumerate(imle_nns):
-                    model = Zs[idx]
-                    perturbed_model = copy.deepcopy(model)
+                    with torch.no_grad():
+                        z = model(z_in[batch_indices])
+                    Zxs[i] = z
+                with torch.no_grad():
+                    generated = H_t(Zxs)
+                    imle_nns = [find_nns(d, generated, threshold=threshold) for d in data_batch]
+
+                imle_transformed_points = torch.empty((data.shape[0], current_batch_size, zdim + int(pos_enc_L * 2 * xdim))).to(device)
+
+                for i, (nn_idx, _) in enumerate(imle_nns):
+                    original_model = Zs[nn_idx]
+                    perturbed_model = copy.deepcopy(original_model).to(device)
                     with torch.no_grad():
                         for param in perturbed_model.parameters():
-                            param.add_(torch.randn_like(param) * perturb_scale)
-                    perturbed_Zs.append(perturbed_model)
-                    perturbed_model = perturbed_model.to(device)
-                    z = perturbed_model(z_in[batch_indices, :])
-                    imle_transformed_points[i] = z.to(device)
+                            param += torch.randn_like(param) * perturb_scale
+                        z_perturbed = perturbed_model(z_in[batch_indices])
 
-            # Zero gradients, calculate loss, backpropagate, and update weights
+                    imle_transformed_points[i] = z_perturbed
+                stored_imle_transformed_points.append(imle_transformed_points)
+
+            else:
+                imle_transformed_points = stored_imle_transformed_points[batch_idx]
+
             optimizer.zero_grad()
-            outs = H_t(imle_transformed_points)
-            loss = f_loss(data_batch, outs)
-            loss_sum += loss
+            outputs = H_t(imle_transformed_points)
+            loss = f_loss(data_batch, outputs)
             loss.backward()
             optimizer.step()
-        avg_loss = (loss_sum/batch_size).item()
+            epoch_loss += loss.item()
 
+        scheduler.step()
+        avg_loss = np.log10(epoch_loss)
         losses.append(avg_loss)
 
-        if e % plot_epoch == 0 or e == epochs - 1:
-            generated_disp = generated.to(device='cpu').detach().numpy()
-            outs_disp = outs.to(device='cpu').detach().numpy()
-            points_disp = data.to(device='cpu').detach().numpy()
-            plt.figure(figsize=(15, 15))
-            for i in range(data.shape[0]):
-                line1 = plt.plot(outs_disp[i, :, 0], outs_disp[i, :, 1], marker='+')
-                color = line1[0].get_color()
-                plt.plot(points_disp[i, :, 0], points_disp[i, :, 1], marker='o', color=color)
-            plt.title(f'Epoch: {e}')
-            plt.savefig(f"training_out/{out_dir}/epoch_{e}.png")
-            # Close plts
-            plt.close()
-            plt.figure(figsize=(15, 5))
-            plt.plot(losses, label='Loss')
-            plt.ylim(0, 15)
-            plt.xlabel('Epochs')
-            plt.ylabel('Loss')
-            plt.title('Loss Curve')
-            plt.legend()
-            plt.savefig(f"training_out/{out_dir}/loss_curve.png")
 
-        
-        # grad_sum = 0
-        # param_sum = 0
-        # for param in H_t.parameters():
-        #     param_sum += torch.norm(param) ** 2
-        #     grad_sum += torch.norm(param.grad) ** 2
-
-        # grad_norm = torch.sqrt(grad_sum).item()
-        # param_norm = torch.sqrt(param_sum).item()
-        # grad_norms.append(grad_norm)
-        # param_norms.append(param_norm)
-        
+        if e % plot_epoch == 0 or e == epochs-1:
+            plot_results(
+                data.cpu().numpy(),
+                outputs.detach().cpu().numpy(),
+                losses,
+                e,
+                epochs,
+                out_dir
+            )
 
     return H_t, grad_norms, param_norms, losses
+
+def plot_results(data, outputs, losses, epoch, total_epochs, out_dir):
+    # Create output directory if it doesn't exist
+    os.makedirs(f'training_out/{out_dir}', exist_ok=True)
+
+    # Plot 10 cloud pairs in 2x5 grid
+    plt.figure(figsize=(25, 12))  # Width=25", Height=10" for 2x5 grid
+    
+    for i in range(12):
+        plt.subplot(2, 6, i+1)  # 2 rows, 5 columns, position i+1
+        plt.scatter(data[i, :, 0], data[i, :, 1], 
+                    c='blue', label='Real', s=3, alpha=0.5)
+        plt.scatter(outputs[i, :, 0], outputs[i, :, 1], 
+                    c='red', label='Generated', s=5, alpha=0.6)
+        plt.title(f'Cloud {i+1} Comparison')
+        plt.legend()
+        plt.axis('equal')
+    
+    plt.tight_layout()
+    plt.savefig(f'training_out/{out_dir}/epoch_{epoch}_clouds.png')
+    plt.close()
+
+
+    # Plot loss curve separately
+    plt.figure(figsize=(12, 6))
+    window_size = 50
+    if len(losses) >= window_size:
+        moving_avg = np.convolve(losses, np.ones(window_size)/window_size, mode='valid')
+        plt.plot(range(window_size-1, len(losses)), moving_avg, 
+                color='orange')
+    plt.plot(losses, alpha=0.3)
+    plt.title('Training Loss Progress')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss Value')
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.savefig(f'training_out/{out_dir}/Loss_curve.png')
+    plt.close()
+
 
 
 def main():
     parser = argparse.ArgumentParser(description="Train a model with configurable parameters.")
-    parser.add_argument("--filename", type=str, default="try_21", help="Output directory name")
-    parser.add_argument("--zdim", type=int, default=100, help="Latent dimension size")
-    parser.add_argument("--epochs", type=int, default=150, help="Number of training epochs")
-    parser.add_argument("--perturb_scale", type=float, default=0.25, help="Perturbation scale for latent functions")
-    parser.add_argument("--threshold", type=float, default=0.0, help="Threshold for nearest neighbor search")
-    parser.add_argument("--pos_enc_L", type=int, default=15, help="Positional encoding parameter L")
-    parser.add_argument("--lr", type=float, default=5e-4, help="Learning rate for the optimizer")
-    parser.add_argument("--num_Z_samples", type=int, default=70, help="Number of latent function samples")
+    parser.add_argument("--filename", type=str, default="Job0", help="Output directory name")
+    parser.add_argument("--zdim", type=int, default=6, help="Latent dimension size")
+    parser.add_argument("--epochs", type=int, default=7000, help="Number of training epochs")
+    parser.add_argument("--perturb_scale", type=float, default=0.0, help="Perturbation scale for latent functions")
+    parser.add_argument("--threshold", type=float, default=0.00, help="Threshold for nearest neighbor search")
+    parser.add_argument("--pos_enc_L", type=int, default=7, help="Positional encoding parameter L")
+    parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate for the optimizer")
+    parser.add_argument("--num_Z_samples", type=int, default=100, help="Number of latent function samples")
     parser.add_argument("--xdim", type=int, default=2, help="Number of latent function samples")
     parser.add_argument("--num_points", type=int, default=6889, help="Number of points")
 
@@ -151,7 +201,9 @@ def main():
     output_dim = 3
     xdim = args.xdim
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    H_t = H_theta(input_dim=args.zdim + int(args.pos_enc_L * 2 * args.xdim), output_dim=output_dim, num_layers=4, num_neurons=1500).to(device)
+    H_t = H_theta_Res(input_dim=args.zdim + int(args.pos_enc_L * 2 * args.xdim), output_dim=output_dim).to(device)
+    #H_t = H_theta(input_dim=args.zdim + int(args.pos_enc_L * 2 * args.xdim), output_dim=output_dim).to(device)
+    
     #H_t = H_theta_skip(input_dim=args.zdim + int(args.pos_enc_L * 2 * args.xdim), output_dim=output_dim).to(device)
     optimizer = torch.optim.AdamW(H_t.parameters(), lr=args.lr)
     save_path = f'Out_{args.filename}/'
@@ -167,12 +219,14 @@ def main():
         num_Z_samples=args.num_Z_samples,
         zdim=args.zdim,
         xdim=args.xdim,
-        num_points = num_points
+        num_points = num_points,
+        data_dir='/home/rsp8/scratch/Human_Point_Clouds/'
     )
-    
     torch.save(H_t.state_dict(), f"training_out/Out_{args.filename}/H_t_weights.pth")
+
     file_path = f"training_out/Out_{args.filename}/H_t_weights.pth"
-    #H_t.load_state_dict(torch.load(file_path))
+    H_t.load_state_dict(torch.load(file_path))
+    data_dir = '/home/rsp8/scratch/Human_Point_Clouds/'
     if xdim == 1:
         x = torch.linspace(-0.05, 0.05, num_points).to(device).unsqueeze(1)
         data = (generate_data(num_points)).to(device)
@@ -181,6 +235,21 @@ def main():
         x2 = torch.linspace(-0.05, 0.05, int(np.sqrt(num_points)))
         grid_x1, grid_x2 = torch.meshgrid((x1, x2), indexing='ij')
         data = (generate_3D_data(np.sqrt(num_points).astype(int))).to(device)[:,0:num_points,:]
+        if data_dir is None:
+            data = generate_3D_data(np.sqrt(num_points).astype(int)).to(device)[:, 0:num_points, :]
+            #data = torch.stack([data[i, torch.randperm(data.shape[1]), :] for i in range(data.shape[0])])
+        else:
+            data = []
+            for i in range(0,13):
+                mesh = trimesh.load(data_dir + f'skates_{i}.obj')
+                vertices = np.array(mesh.vertices)
+                mean = np.mean(vertices, axis=0)
+                centered_vertices = vertices - mean
+                tensor = centered_vertices[np.newaxis, 0:num_points, :]
+                max_scale = np.max(np.abs(tensor))
+                data_temp = torch.from_numpy(tensor).float().to(device)
+                data.append(data_temp)
+            data = torch.cat(data, dim=0)
         x = torch.stack((grid_x1, grid_x2), dim=-1).reshape(-1, 2).to(device)
     z_in = pos_encoder(x, L=args.pos_enc_L).to(device)
     if output_dim == 2:
@@ -207,7 +276,7 @@ def main():
             H_t=H_t,
             z_in=z_in,
             num_points=num_points,
-            num_samples=40,
+            num_samples=20,
             device=device,
             zdim=args.zdim,
             pos_enc_L=args.pos_enc_L,
