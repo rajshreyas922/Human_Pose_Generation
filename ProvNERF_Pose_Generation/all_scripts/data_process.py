@@ -9,11 +9,41 @@ def pos_encoder(x, L):
     _, n = x.shape
 
     encoding = []
+    alpha = 1.0
 
     for i in range(n):
         for l in range(L):
-            encoding.append(torch.sin(1.5*(2**l) * torch.pi * x[:, i:i+1]))
-            encoding.append(torch.cos(1.5*(2**l) * torch.pi * x[:, i:i+1]))
+            if l > 6:
+                alpha = 0.5
+            encoding.append(alpha*torch.sin(1.1*(2**l) * torch.pi * x[:, i:i+1]))
+            encoding.append(alpha*torch.cos(1.1*(2**l) * torch.pi * x[:, i:i+1]))
+    encoded_x = torch.cat(encoding, dim=-1)
+    return encoded_x
+
+def pos_encoder_decaying(x, L, decay_factor=0.8):
+
+    _, n = x.shape
+    encoding = []
+
+    for i in range(n):  # Iterate through each input dimension
+        for l in range(L):  # Iterate through each frequency level
+            # Calculate the base frequency for this level
+            # (Using 1.0 instead of 1.1 here, closer to original NeRF, but adjust if needed)
+            # freq = (2**l) * torch.pi
+            freq = 1.1 * (2**l) * torch.pi # Keeping your original 1.1 factor
+
+            # Select the i-th dimension
+            x_slice = x[:, i:i+1]
+
+            # Calculate the weight for this frequency level
+            # Weight decreases exponentially as 'l' increases if decay_factor < 1
+            weight = decay_factor ** l
+
+            # Calculate and append weighted sin and cos components
+            encoding.append(weight * torch.sin(freq * x_slice))
+            encoding.append(weight * torch.cos(freq * x_slice))
+
+    # Concatenate all components along the feature dimension
     encoded_x = torch.cat(encoding, dim=-1)
     return encoded_x
 

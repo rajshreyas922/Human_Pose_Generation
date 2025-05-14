@@ -88,9 +88,6 @@ def plot_generated_curves_grid_2D(
 
 def plot_generated_curves_3D(H_t, data, z_in, num_samples=15, num_points=576, zdim=3, pos_enc_L=0, device='cpu', save_dir='default'):
 
-    #H_t: generator
-    #z_in: pos_enc
-
 
     xdim = 2
     # Initialize storage for latent representations
@@ -121,8 +118,8 @@ def plot_generated_curves_3D(H_t, data, z_in, num_samples=15, num_points=576, zd
         
         for j, (elev, azim) in enumerate([(20, 30), (40, -60), (60, 120), (90,-60)]):
             ax = axs[j]
-            ax.scatter(xg, yg, zg, marker='o', label='Generated', s=0.5)
-            #ax.scatter(x_real, y_real, z_real, marker='x', alpha=1, s = 0.02, label='Real data')
+            ax.scatter(xg, yg, zg, marker='o', label='Generated', s=0.75)
+            ax.scatter(x_real, y_real, z_real, marker='x', alpha=0.05, s = 0.05, label='Real data')
             ax.set_title(f'Sample {i + 1} - View {j + 1}')
             ax.view_init(elev=elev, azim=azim)
             ax.set_xlabel('X')
