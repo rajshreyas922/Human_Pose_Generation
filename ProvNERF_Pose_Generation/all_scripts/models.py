@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class H_theta_Res(nn.Module):
-    def __init__(self, input_dim, output_dim=3, hidden_dim=1024, dropout_rate=0.2):
+    def __init__(self, input_dim, output_dim=3, hidden_dim=1024, num_blocks = 8, dropout_rate=0.2):
         super().__init__()
         self.input_layer = nn.Sequential(
             nn.Linear(input_dim, hidden_dim),
@@ -20,7 +20,7 @@ class H_theta_Res(nn.Module):
                 nn.Dropout(dropout_rate),  # Add dropout within the block
                 nn.Linear(hidden_dim, hidden_dim),
                 nn.LayerNorm(hidden_dim),
-            ) for _ in range(8) 
+            ) for _ in range(num_blocks) 
         ])
 
         self.res_scales = nn.ParameterList([
