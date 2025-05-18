@@ -39,7 +39,7 @@ def train(
     param_norms = []
     losses = []
     os.makedirs('training_out/' + out_dir, exist_ok=True)
-    batch_size = 700
+    batch_size = 500
     indices = torch.randperm(num_points)
     batches = torch.split(indices, batch_size)  # Automatically handles remainders
     #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size = 2500, gamma = 0.3)
@@ -211,12 +211,12 @@ def plot_results(data, outputs, losses, epoch, total_epochs, out_dir):
 def main():
     print("START")
     parser = argparse.ArgumentParser(description="Train a model with configurable parameters.")
-    parser.add_argument("--filename", type=str, default="profiling_pe_7_decay_10_poses_zdim_10_shallow_model", help="Output directory name")
+    parser.add_argument("--filename", type=str, default="profiling_pe_8_decay_0.5_10_poses_zdim_10_1024_8_model_500_batch_size", help="Output directory name")
     parser.add_argument("--zdim", type=int, default=10, help="Latent dimension size")
     parser.add_argument("--epochs", type=int, default=5000, help="Number of training epochs")
     parser.add_argument("--perturb_scale", type=float, default=0.0, help="Perturbation scale for latent functions")
     parser.add_argument("--threshold", type=float, default=0.0, help="Threshold for nearest neighbor search")
-    parser.add_argument("--pos_enc_L", type=int, default=7, help="Positional encoding parameter L")
+    parser.add_argument("--pos_enc_L", type=int, default=8, help="Positional encoding parameter L")
     parser.add_argument("--lr", type=float, default=(1e-4)/5, help="Learning rate for the optimizer")
     parser.add_argument("--num_Z_samples", type=int, default=100, help="Number of latent function samples")
     parser.add_argument("--xdim", type=int, default=2, help="Number of latent function samples")
@@ -229,12 +229,12 @@ def main():
     output_dim = 3
     xdim = args.xdim
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    #H_t = H_theta_Res(input_dim=args.zdim + int(args.pos_enc_L * 2 * args.xdim), output_dim=output_dim).to(device)
+    H_t = H_theta_Res(input_dim=args.zdim + int(args.pos_enc_L * 2 * args.xdim), output_dim=output_dim).to(device)
     #H_t = H_theta(input_dim=args.zdim + int(args.pos_enc_L * 2 * args.xdim), output_dim=output_dim).to(device)
-    H_t = ResnetRS()
+    #H_t = ResnetRS()
     
     #H_t = H_theta_skip(input_dim=args.zdim + int(args.pos_enc_L * 2 * args.xdim), output_dim=output_dim).to(device)
-    optimizer = torch.optim.AdamW(H_t.parameters(), lr=args.lr, weight_decay = 1e-3)
+    optimizer = torch.optim.AdamW(H_t.parameters(), lr=args.lr, weight_decay = 5e-4)
     save_path = f'Out_{args.filename}/'
     H_t, grad_norms, param_norms, losses = train(
         H_t,

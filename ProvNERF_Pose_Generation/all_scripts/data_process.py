@@ -20,7 +20,7 @@ def pos_encoder(x, L):
     encoded_x = torch.cat(encoding, dim=-1)
     return encoded_x
 
-def pos_encoder_decaying(x, L, decay_factor=0.8):
+def pos_encoder_decaying(x, L, decay_factor=0.5):
 
     _, n = x.shape
     encoding = []
