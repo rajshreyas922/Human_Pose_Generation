@@ -11,3 +11,4 @@ ProvNERF Pose Generation/gif_frames/*
 *.obj
 PAPR/data/nerf_synthetic
 PAPR/data/TanksAndTemple
+Human_Pose_Generation/ProvNERF_Pose_Generation/all_scripts_experiment/

@@ -1,6 +1,4 @@
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 import numpy as np
 import matplotlib.pyplot as plt
 import copy
@@ -8,7 +6,7 @@ from tqdm import tqdm
 import os
 import argparse
 
-from generate import plot_generated_curves_3D, plot_generated_curves_grid_2D
+from generate import plot_generated_curves_3D, plot_generated_curves_grid_2D, plot_interpolated_curves_3D
 from imle import generate_NN_latent_functions, find_nns, f_loss
 from models import *
 from data_process import *
@@ -18,7 +16,6 @@ import trimesh
 import glob
 import time
 
-from torch.cuda.amp import autocast, GradScaler
 
 def train(
         H_t,
@@ -37,15 +34,11 @@ def train(
         threshold=0.0,
         data_dir=None,
         batch_size=500,
-        use_amp=True,  # Use automatic mixed precision
         clip_grad_norm=1.0,  # Gradient clipping value
         lr_scheduler=None
 ):
     # Start measuring total training time
     total_training_start = time.time()
-    
-    # Initialize gradient scaler for mixed precision training
-    scaler = GradScaler() if use_amp and device.type == 'cuda' else None
     
     grad_norms = []
     param_norms = []
@@ -71,7 +64,7 @@ def train(
         else:
             data = []
             obj_files = sorted(glob.glob(os.path.join(data_dir, '*.obj')))
-            for file_path in obj_files[4:14]:
+            for file_path in obj_files[4:24]:
                 mesh = trimesh.load(file_path)
                 vertices = torch.tensor(mesh.vertices, dtype=torch.float32)
                 vertices = vertices - vertices.mean(0)
@@ -181,37 +174,19 @@ def train(
                 reuse_end = time.time()
                 total_time_reuse += reuse_end - reuse_start
             
-            # Forward and backward pass with optional mixed precision
+            # Forward and backward pass - simplified without AMP
             optimizer.zero_grad(set_to_none=True)  # More efficient than just zero_grad()
             
             forward_start = time.time()
-            if use_amp and device.type == 'cuda':
-                with autocast():
-                    outputs = H_t(imle_transformed_points)
-                    loss = f_loss(data_batch, outputs)
-                
-                # Scale loss and do backward pass
-                scaler.scale(loss).backward()
-                
-                # Unscale before gradient clipping
-                scaler.unscale_(optimizer)
-                
-                # Gradient clipping to prevent exploding gradients
-                torch.nn.utils.clip_grad_norm_(H_t.parameters(), clip_grad_norm)
-                
-                # Update weights with gradient scaler
-                scaler.step(optimizer)
-                scaler.update()
-            else:
-                # Standard training path without mixed precision
-                outputs = H_t(imle_transformed_points)
-                loss = f_loss(data_batch, outputs)
-                loss.backward()
-                
-                # Gradient clipping
-                torch.nn.utils.clip_grad_norm_(H_t.parameters(), clip_grad_norm)
-                
-                optimizer.step()
+            # Standard training path
+            outputs = H_t(imle_transformed_points)
+            loss = f_loss(data_batch, outputs)
+            loss.backward()
+            
+            # Gradient clipping
+            torch.nn.utils.clip_grad_norm_(H_t.parameters(), clip_grad_norm)
+            
+            optimizer.step()
             
             forward_end = time.time()
             total_time_forward += forward_end - forward_start
@@ -363,24 +338,25 @@ def log_hyperparameters(args, out_dir, model_info=None):
 def main():
     print("START")
     parser = argparse.ArgumentParser(description="Train a model with configurable parameters.")
-    parser.add_argument("--filename", type=str, default="optimized_training", help="Output directory name")
-    parser.add_argument("--zdim", type=int, default=10, help="Latent dimension size")
-    parser.add_argument("--epochs", type=int, default=5000, help="Number of training epochs")
+    parser.add_argument("--filename", type=str, default="new_model_test_12_convresnet_30_poses", help="Output directory name")
+    parser.add_argument("--zdim", type=int, default=50, help="Latent dimension size")
+    parser.add_argument("--epochs", type=int, default=2000, help="Number of training epochs")
     parser.add_argument("--perturb_scale", type=float, default=0.0, help="Perturbation scale for latent functions")
     parser.add_argument("--threshold", type=float, default=0.0, help="Threshold for nearest neighbor search")
-    parser.add_argument("--pos_enc_L", type=int, default=8, help="Positional encoding parameter L")
-    parser.add_argument("--lr", type=float, default=(1e-4)/5, help="Learning rate for the optimizer")
-    parser.add_argument("--num_Z_samples", type=int, default=100, help="Number of latent function samples")
+    parser.add_argument("--pos_enc_L", type=int, default=7, help="Positional encoding parameter L")
+    parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate for the optimizer")
+    parser.add_argument("--num_Z_samples", type=int, default=50, help="Number of latent function samples")
     parser.add_argument("--xdim", type=int, default=2, help="Input dimension")
     parser.add_argument("--num_points", type=int, default=6889, help="Number of points")
     parser.add_argument("--staleness", type=int, default=5, help="How often to update IMLE samples")
     parser.add_argument("--plot_epoch", type=int, default=250, help="How often to plot results")
-    parser.add_argument("--batch_size", type=int, default=500, help="Batch size for training")
+    parser.add_argument("--batch_size", type=int, default=1000, help="Batch size for training")
     parser.add_argument("--data_dir", type=str, default='/home/rsp8/scratch/Human_Point_Clouds/', help="Data directory path")
-    parser.add_argument("--use_amp", action="store_true", help="Use automatic mixed precision training")
     parser.add_argument("--clip_grad", type=float, default=1.0, help="Gradient clipping norm")
-    parser.add_argument("--scheduler", type=str, default=None, choices=[None, "cosine", "step", "plateau"], 
+    parser.add_argument("--scheduler", type=str, default="cosine", choices=[None, "cosine", "step", "plateau"], 
                         help="Learning rate scheduler type")
+    parser.add_argument("--dropout", type=float, default=0.0, help="Dropout rate for the model")
+    parser.add_argument("--model", type=str, default='new', help="Dropout rate for the model")
     
     args = parser.parse_args()
     num_points = int(int(np.sqrt(args.num_points))**2)
@@ -395,8 +371,15 @@ def main():
         print(f"CUDA Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.2f} GB")
     
     # Create model with efficient initialization
-    H_t = H_theta_Res(input_dim=args.zdim + int(args.pos_enc_L * 2 * args.xdim), output_dim=output_dim).to(device)
-    
+    if args.model == 'old':
+        H_t = H_theta_Res_old(input_dim=args.zdim + int(args.pos_enc_L * 2 * args.xdim), 
+                        output_dim=output_dim,
+                        dropout_rate=args.dropout).to(device)
+    else:
+        H_t = H_theta_ResNet1D(input_channels=args.zdim + int(args.pos_enc_L * 2 * args.xdim), 
+                        output_dim=output_dim,
+                        dropout_rate=args.dropout).to(device)
+
     # Count parameters
     total_params = sum(p.numel() for p in H_t.parameters())
     trainable_params = sum(p.numel() for p in H_t.parameters() if p.requires_grad)
@@ -404,7 +387,7 @@ def main():
     print(f"Trainable parameters: {trainable_params:,}")
     
     # Create optimizer
-    optimizer = torch.optim.AdamW(H_t.parameters(), lr=args.lr, weight_decay=5e-4)
+    optimizer = torch.optim.AdamW(H_t.parameters(), lr=args.lr, weight_decay=1e-4)
     
     # Create scheduler if specified
     scheduler = None
@@ -435,36 +418,35 @@ def main():
     # Log hyperparameters before training
     log_hyperparameters(args, save_path, model_info)
     
-    # Start training with timing
+    #Start training with timing
     print(f"Starting training with {args.epochs} epochs...")
-    training_start = time.time()
+    # training_start = time.time()
     
-    H_t, grad_norms, param_norms, losses = train(
-        H_t,
-        optimizer,
-        out_dir=save_path,
-        device=device,
-        epochs=args.epochs,
-        staleness=args.staleness,
-        perturb_scale=args.perturb_scale,
-        threshold=args.threshold,
-        pos_enc_L=args.pos_enc_L,
-        num_Z_samples=args.num_Z_samples,
-        zdim=args.zdim,
-        xdim=args.xdim,
-        num_points=num_points,
-        plot_epoch=args.plot_epoch,
-        data_dir=args.data_dir,
-        batch_size=args.batch_size,
-        use_amp=args.use_amp,
-        clip_grad_norm=args.clip_grad,
-        lr_scheduler=scheduler
-    )
+    # H_t, grad_norms, param_norms, losses = train(
+    #     H_t,
+    #     optimizer,
+    #     out_dir=save_path,
+    #     device=device,
+    #     epochs=args.epochs,
+    #     staleness=args.staleness,
+    #     perturb_scale=args.perturb_scale,
+    #     threshold=args.threshold,
+    #     pos_enc_L=args.pos_enc_L,
+    #     num_Z_samples=args.num_Z_samples,
+    #     zdim=args.zdim,
+    #     xdim=args.xdim,
+    #     num_points=num_points,
+    #     plot_epoch=args.plot_epoch,
+    #     data_dir=args.data_dir,
+    #     batch_size=args.batch_size,
+    #     clip_grad_norm=args.clip_grad,
+    #     lr_scheduler=scheduler
+    # )
     
-    training_end = time.time()
-    print(f"Training completed in {training_end - training_start:.2f} seconds")
-
-    torch.save(H_t.state_dict(), f"training_out/Out_{args.filename}/H_t_weights.pth")
+    # training_end = time.time()
+    #print(f"Training completed in {training_end - training_start:.2f} seconds")
+    
+    #torch.save(H_t.state_dict(), f"training_out/Out_{args.filename}/H_t_weights.pth")
     num_points = 14400
     file_path = f"training_out/Out_{args.filename}/H_t_weights.pth"
     H_t.load_state_dict(torch.load(file_path))
@@ -485,7 +467,7 @@ def main():
             data = []
             obj_files = sorted(glob.glob(os.path.join(data_dir, '*.obj')))
             #print(obj_files)
-            for file_path in obj_files[4:14]:
+            for file_path in obj_files[4:24]:
                 mesh = trimesh.load(file_path)
                 vertices = torch.tensor(mesh.vertices, dtype=torch.float32)
                 vertices = vertices - vertices.mean(0)
@@ -519,13 +501,12 @@ def main():
             H_t=H_t,
             z_in=z_in,
             num_points=num_points,
-            num_samples=20,
+            num_samples=40,
             device=device,
             zdim=args.zdim,
             pos_enc_L=args.pos_enc_L,
             save_dir=f'Generations_{args.filename}',
             data=data,
-
         )
 
 

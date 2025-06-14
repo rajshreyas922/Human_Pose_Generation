@@ -1,0 +1,31 @@
+==== Training Hyperparameters ====
+filename: new_model_test_11
+zdim: 50
+epochs: 2000
+perturb_scale: 0.0
+threshold: 0.0
+pos_enc_L: 7
+lr: 0.001
+num_Z_samples: 50
+xdim: 2
+num_points: 6889
+staleness: 5
+plot_epoch: 250
+batch_size: 1000
+data_dir: /home/rsp8/scratch/Human_Point_Clouds/
+clip_grad: 1.0
+scheduler: cosine
+dropout: 0.0
+model: new
+Device: cuda
+Timestamp: 2025-06-06 12:29:38
+
+==== Model Information ====
+model_type: H_theta_Res
+input_dim: 78
+output_dim: 3
+optimizer: AdamW
+weight_decay: 0.0005
+total_parameters: 26147083
+trainable_parameters: 26147083
+scheduler: cosine
