@@ -16,6 +16,355 @@ import trimesh
 import glob
 import time
 
+def generate_new_samples_during_training(H_t, z_in, epoch, out_dir, device, zdim, pos_enc_L, xdim, num_samples=20, data=None):
+    """
+    Generate completely new point cloud samples by sampling new latent functions during training.
+    Similar to plot_generated_curves_3D but designed for periodic generation during training.
+    """
+    # Create samples directory
+    samples_dir = f'training_out/{out_dir}/samples'
+    os.makedirs(samples_dir, exist_ok=True)
+    
+    H_t.eval()  # Set to evaluation mode
+    with torch.no_grad():
+        # Initialize storage for latent representations
+        num_points = z_in.shape[0]
+        latent_dim = zdim + int(pos_enc_L * 2 * xdim)
+        Zxs = torch.empty((num_samples, num_points, latent_dim), device=device)
+        
+        # Generate NEW latent functions (this is the key difference from your training loop)
+        Zs = generate_NN_latent_functions(num_samples, xdim=z_in.shape[1], zdim=zdim, bias=1)
+        
+        generated_samples = []
+        
+        # Generate samples from new latent functions
+        for i, model in enumerate(Zs):
+            model = model.to(device)
+            Zxs[i] = model(z_in).to(device)
+            
+            # Generate point cloud from latent representation
+            generated = H_t(Zxs[i].unsqueeze(0))  # Shape: (1, num_points, 3)
+            generated = generated.squeeze(0)      # Shape: (num_points, 3)
+            
+            generated_samples.append(generated.cpu().numpy())
+        
+        
+        # Create visualization if 3D point clouds
+        if generated_samples[0].shape[1] == 3:  # 3D point clouds
+            fig = plt.figure(figsize=(20, 16))
+            
+            # Plot samples in a 4x5 grid
+            for i in range(min(20, len(generated_samples))):
+                ax = fig.add_subplot(4, 5, i+1, projection='3d')
+                points = generated_samples[i]
+                
+                # Plot generated sample
+                ax.scatter(points[:, 0], points[:, 1], points[:, 2], s=1.5, alpha=0.8, c='blue')
+                ax.set_title(f'New Sample {i+1}')
+                ax.set_xlabel('X')
+                ax.set_ylabel('Y') 
+                ax.set_zlabel('Z')
+                
+                # Set equal aspect ratio
+                max_range = np.array([points[:,0].max()-points[:,0].min(),
+                                    points[:,1].max()-points[:,1].min(),
+                                    points[:,2].max()-points[:,2].min()]).max() / 2.0
+                mid_x = (points[:,0].max()+points[:,0].min()) * 0.5
+                mid_y = (points[:,1].max()+points[:,1].min()) * 0.5
+                mid_z = (points[:,2].max()+points[:,2].min()) * 0.5
+                ax.set_xlim(mid_x - max_range, mid_x + max_range)
+                ax.set_ylim(mid_y - max_range, mid_y + max_range)
+                ax.set_zlim(mid_z - max_range, mid_z + max_range)
+                
+                # Set viewing angle
+                ax.view_init(elev=20, azim=30)
+            
+            plt.tight_layout()
+            plt.savefig(f'{samples_dir}/new_samples_epoch_{epoch}.png', dpi=150, bbox_inches='tight')
+            plt.close()
+            
+            
+        print(f"Generated and saved {len(generated_samples)} NEW samples at epoch {epoch}")
+    
+    H_t.train()  # Set back to training mode
+    return generated_samples
+
+
+def create_detailed_sample_plots(generated_samples, real_data, epoch, samples_dir, num_samples=5):
+    """
+    Create detailed plots similar to plot_generated_curves_3D for a few samples.
+    """
+    if real_data is not None:
+        real_data_np = real_data.cpu().detach().numpy()
+    
+    for i in range(min(num_samples, len(generated_samples))):
+        generated_np = generated_samples[i]
+        xg, yg, zg = generated_np[:, 0], generated_np[:, 1], generated_np[:, 2]
+        
+        # Create figure with multiple views
+        fig, axs = plt.subplots(1, 4, figsize=(18, 6), subplot_kw={'projection': '3d'})
+        
+        for j, (elev, azim) in enumerate([(20, 30), (40, -60), (60, 120), (90, -60)]):
+            ax = axs[j]
+            
+            # Plot generated sample (more prominent)
+            ax.scatter(xg, yg, zg, marker='o', label='Generated', s=2.0, alpha=0.9, c='blue')
+            
+            # Plot real samples for comparison if available
+            if real_data is not None:
+                colors = ['red', 'green', 'orange', 'purple', 'brown']
+                for k in range(min(3, real_data_np.shape[0])):  # Show up to 3 real samples
+                    x_real, y_real, z_real = real_data_np[k, :, 0], real_data_np[k, :, 1], real_data_np[k, :, 2]
+                    ax.scatter(x_real, y_real, z_real, marker='x', alpha=0.15, s=0.5, 
+                              c=colors[k % len(colors)], label=f'Real {k+1}' if j == 0 and k < 3 else "")
+            
+            ax.set_title(f'New Sample {i + 1} - View {j + 1} (Epoch {epoch})')
+            ax.view_init(elev=elev, azim=azim)
+            ax.set_xlabel('X')
+            ax.set_ylabel('Y')
+            ax.set_zlabel('Z')
+            
+            if j == 0:
+                ax.legend()
+        
+        plt.tight_layout()
+        plt.savefig(f"{samples_dir}/detailed_new_sample_{i + 1}_epoch_{epoch}.png", dpi=300, bbox_inches="tight")
+        plt.close(fig)
+
+def generate_fixed_latent_functions(z_in, zdim, device, num_samples=10, save_dir='training_out', out_dir=''):
+    """
+    Generate a fixed set of latent functions at the start of training to track learning progression.
+    """
+    # Create directory for fixed latent tracking
+    fixed_latent_dir = f'{save_dir}/{out_dir}/fixed_latent_tracking'
+    os.makedirs(fixed_latent_dir, exist_ok=True)
+    
+    # Generate fixed latent functions
+    print(f"Generating {num_samples} fixed latent functions for tracking...")
+    fixed_Zs = generate_NN_latent_functions(num_samples, xdim=z_in.shape[1], zdim=zdim, bias=1)
+    
+    # Pre-compute latent representations (these will stay constant)
+    num_points = z_in.shape[0]
+    latent_dim = zdim + z_in.shape[1]  # This should match your actual latent dimension
+    fixed_latent_representations = torch.empty((num_samples, num_points, latent_dim), device=device)
+    
+    for i, model in enumerate(fixed_Zs):
+        model = model.to(device)
+        with torch.no_grad():
+            fixed_latent_representations[i] = model(z_in).to(device)
+    
+    # Save the fixed latent representations
+    torch.save(fixed_latent_representations, f'{fixed_latent_dir}/fixed_latent_representations.pt')
+    
+    # Save metadata about the latent functions instead of the models themselves
+    metadata = {
+        'num_samples': num_samples,
+        'zdim': zdim,
+        'num_points': num_points,
+        'latent_dim': latent_dim,
+        'z_in_shape': z_in.shape
+    }
+    torch.save(metadata, f'{fixed_latent_dir}/fixed_latent_metadata.pt')
+    
+    print(f"Fixed latent representations and metadata saved to {fixed_latent_dir}")
+    return fixed_latent_representations
+
+
+def generate_from_fixed_latents(H_t, fixed_latent_representations, epoch, out_dir, data=None):
+    """
+    Generate point clouds from the same fixed latent functions to track learning progression.
+    """
+    # Create directory for this epoch's results
+    fixed_latent_dir = f'training_out/{out_dir}/fixed_latent_tracking'
+    epoch_dir = fixed_latent_dir
+    os.makedirs(epoch_dir, exist_ok=True)
+    
+    H_t.eval()
+    with torch.no_grad():
+        generated_samples = []
+        num_samples = fixed_latent_representations.shape[0]
+        
+        # Generate point clouds from fixed latent representations
+        for i in range(num_samples):
+            # Use the same latent representation as always
+            latent_rep = fixed_latent_representations[i].unsqueeze(0)  # Add batch dimension
+            
+            # Generate point cloud with current H_t model
+            generated = H_t(latent_rep)  # Shape: (1, num_points, 3)
+            generated = generated.squeeze(0)  # Shape: (num_points, 3)
+            
+            generated_samples.append(generated.cpu().numpy())
+        
+
+        # Create visualization
+        if generated_samples[0].shape[1] == 3:  # 3D point clouds
+            fig = plt.figure(figsize=(20, 12))
+            
+            # Calculate grid size
+            n_samples = len(generated_samples)
+            n_cols = min(5, n_samples)
+            n_rows = (n_samples + n_cols - 1) // n_cols
+            
+            for i in range(n_samples):
+                ax = fig.add_subplot(n_rows, n_cols, i+1, projection='3d')
+                points = generated_samples[i]
+                
+                # Plot generated sample
+                ax.scatter(points[:, 0], points[:, 1], points[:, 2], s=1.5, alpha=0.8, c='blue')
+                ax.set_title(f'Fixed Latent {i+1}\nEpoch {epoch}')
+                ax.set_xlabel('X')
+                ax.set_ylabel('Y')
+                ax.set_zlabel('Z')
+                
+                # Set equal aspect ratio
+                max_range = np.array([points[:,0].max()-points[:,0].min(),
+                                    points[:,1].max()-points[:,1].min(),
+                                    points[:,2].max()-points[:,2].min()]).max() / 2.0
+                if max_range > 0:
+                    mid_x = (points[:,0].max()+points[:,0].min()) * 0.5
+                    mid_y = (points[:,1].max()+points[:,1].min()) * 0.5
+                    mid_z = (points[:,2].max()+points[:,2].min()) * 0.5
+                    ax.set_xlim(mid_x - max_range, mid_x + max_range)
+                    ax.set_ylim(mid_y - max_range, mid_y + max_range)
+                    ax.set_zlim(mid_z - max_range, mid_z + max_range)
+                
+                # Set viewing angle
+                ax.view_init(elev=20, azim=30)
+            
+            plt.tight_layout()
+            plt.savefig(f'{epoch_dir}/fixed_latent_samples_epoch_{epoch}.png', dpi=150, bbox_inches='tight')
+            plt.close()
+            
+        print(f"Generated samples from fixed latents at epoch {epoch}")
+    
+    H_t.train()
+    return generated_samples
+
+
+def create_fixed_latent_evolution_video(out_dir, plot_epoch, epochs):
+    """
+    Create a video/GIF showing how the same latent functions evolve over training.
+    """
+    try:
+        from PIL import Image
+        import glob
+        
+        fixed_latent_dir = f'training_out/{out_dir}/fixed_latent_tracking'
+        
+        # Get all epoch directories
+        epoch_dirs = sorted([d for d in os.listdir(fixed_latent_dir) 
+                           if d.startswith('epoch_') and os.path.isdir(f'{fixed_latent_dir}/{d}')])
+        
+        if len(epoch_dirs) < 2:
+            print("Not enough epochs to create evolution video")
+            return
+        
+        images = []
+        for epoch_dir in epoch_dirs:
+            img_path = f'{fixed_latent_dir}/{epoch_dir}/fixed_latent_samples_epoch_*.png'
+            img_files = glob.glob(img_path)
+            if img_files:
+                images.append(Image.open(img_files[0]))
+        
+        if len(images) > 1:
+            # Save as GIF
+            gif_path = f'{fixed_latent_dir}/fixed_latent_evolution.gif'
+            images[0].save(
+                gif_path,
+                save_all=True,
+                append_images=images[1:],
+                duration=800,  # 0.8 seconds per frame
+                loop=0
+            )
+            print(f"Created fixed latent evolution GIF: {gif_path}")
+            
+            # Also create a side-by-side comparison of first vs last
+            if len(images) >= 2:
+                first_img = images[0]
+                last_img = images[-1]
+                
+                # Create side-by-side comparison
+                total_width = first_img.width + last_img.width
+                max_height = max(first_img.height, last_img.height)
+                
+                comparison_img = Image.new('RGB', (total_width, max_height), (255, 255, 255))
+                comparison_img.paste(first_img, (0, 0))
+                comparison_img.paste(last_img, (first_img.width, 0))
+                
+                comparison_img.save(f'{fixed_latent_dir}/first_vs_last_comparison.png')
+                print(f"Created first vs last comparison: {fixed_latent_dir}/first_vs_last_comparison.png")
+                
+    except ImportError:
+        print("PIL not available for creating evolution video")
+    except Exception as e:
+        print(f"Error creating evolution video: {e}")
+
+
+def create_individual_latent_evolution_plots(out_dir, plot_epoch, epochs):
+    """
+    Create individual plots showing how each fixed latent function evolves over training.
+    """
+    fixed_latent_dir = f'training_out/{out_dir}/fixed_latent_tracking'
+    
+    # Load all epoch data
+    epoch_dirs = sorted([d for d in os.listdir(fixed_latent_dir) 
+                        if d.startswith('epoch_') and os.path.isdir(f'{fixed_latent_dir}/{d}')])
+    
+    if len(epoch_dirs) < 2:
+        return
+    
+    # Load data for each epoch
+    all_epoch_data = {}
+    for epoch_dir in epoch_dirs:
+        epoch_num = int(epoch_dir.split('_')[1])
+        npz_files = glob.glob(f'{fixed_latent_dir}/{epoch_dir}/*.npz')
+        if npz_files:
+            data = np.load(npz_files[0])
+            all_epoch_data[epoch_num] = [data[f'arr_{i}'] for i in range(len(data.files))]
+    
+    if not all_epoch_data:
+        return
+    
+    # Create evolution plots for each latent function
+    num_latents = len(next(iter(all_epoch_data.values())))
+    epochs_list = sorted(all_epoch_data.keys())
+    
+    for latent_idx in range(num_latents):
+        fig = plt.figure(figsize=(20, 4))
+        
+        n_epochs_to_show = min(6, len(epochs_list))
+        epoch_indices = np.linspace(0, len(epochs_list)-1, n_epochs_to_show, dtype=int)
+        
+        for i, epoch_idx in enumerate(epoch_indices):
+            epoch = epochs_list[epoch_idx]
+            points = all_epoch_data[epoch][latent_idx]
+            
+            ax = fig.add_subplot(1, n_epochs_to_show, i+1, projection='3d')
+            ax.scatter(points[:, 0], points[:, 1], points[:, 2], s=1.5, alpha=0.8, c='blue')
+            ax.set_title(f'Latent {latent_idx+1}\nEpoch {epoch}')
+            ax.set_xlabel('X')
+            ax.set_ylabel('Y')
+            ax.set_zlabel('Z')
+            ax.view_init(elev=20, azim=30)
+            
+            # Set equal aspect ratio
+            max_range = np.array([points[:,0].max()-points[:,0].min(),
+                                points[:,1].max()-points[:,1].min(),
+                                points[:,2].max()-points[:,2].min()]).max() / 2.0
+            if max_range > 0:
+                mid_x = (points[:,0].max()+points[:,0].min()) * 0.5
+                mid_y = (points[:,1].max()+points[:,1].min()) * 0.5
+                mid_z = (points[:,2].max()+points[:,2].min()) * 0.5
+                ax.set_xlim(mid_x - max_range, mid_x + max_range)
+                ax.set_ylim(mid_y - max_range, mid_y + max_range)
+                ax.set_zlim(mid_z - max_range, mid_z + max_range)
+        
+        plt.tight_layout()
+        plt.savefig(f'{fixed_latent_dir}/latent_{latent_idx+1}_evolution.png', dpi=200, bbox_inches='tight')
+        plt.close()
+    
+    print(f"Created individual latent evolution plots in {fixed_latent_dir}")
+
 
 def train(
         H_t,
@@ -35,7 +384,9 @@ def train(
         data_dir=None,
         batch_size=500,
         clip_grad_norm=1.0,  # Gradient clipping value
-        lr_scheduler=None
+        lr_scheduler=None,
+        track_fixed_latents=True,  # Add this
+        num_fixed_latents=10       # Add this
 ):
     # Start measuring total training time
     total_training_start = time.time()
@@ -99,7 +450,17 @@ def train(
     # Save initial model checkpoint
     initial_model_path = f'training_out/{out_dir}/H_t_initial.pth'
     torch.save(H_t.state_dict(), initial_model_path)
-    
+    fixed_latent_representations = None
+    if track_fixed_latents:
+        fixed_latent_representations = generate_fixed_latent_functions(
+            z_in=z_in,
+            zdim=zdim,
+            device=device,
+            num_samples=num_fixed_latents,
+            save_dir='training_out',
+            out_dir=out_dir
+        )
+
     # Training loop
     for e in tqdm(range(epochs)):
         epoch_start = time.time()
@@ -174,7 +535,7 @@ def train(
                 reuse_end = time.time()
                 total_time_reuse += reuse_end - reuse_start
             
-            # Forward and backward pass - simplified without AMP
+
             optimizer.zero_grad(set_to_none=True)  # More efficient than just zero_grad()
             
             forward_start = time.time()
@@ -184,7 +545,7 @@ def train(
             loss.backward()
             
             # Gradient clipping
-            torch.nn.utils.clip_grad_norm_(H_t.parameters(), clip_grad_norm)
+            # torch.nn.utils.clip_grad_norm_(H_t.parameters(), clip_grad_norm)
             
             optimizer.step()
             
@@ -217,8 +578,7 @@ def train(
         
         # Plot results at specified intervals
         if e % plot_epoch == 0 or e == epochs-1:
-            # Use a separate plotting process to avoid blocking training
-            # or use a lightweight plotting function
+
             with torch.no_grad():  # Ensure we don't track gradients during plotting
                 plot_results(
                     data.cpu().numpy(),
@@ -228,6 +588,29 @@ def train(
                     epochs,
                     out_dir
                 )
+                if e > 0:
+                    generate_new_samples_during_training(
+                        H_t=H_t,
+                        z_in=z_in,
+                        epoch=e,
+                        out_dir=out_dir,
+                        device=device,
+                        zdim=zdim,
+                        pos_enc_L=pos_enc_L,
+                        xdim=xdim,
+                        num_samples=20,
+                        data=data
+                    )
+                
+                # Track how fixed latent functions evolve
+                if track_fixed_latents and fixed_latent_representations is not None:
+                    generate_from_fixed_latents(
+                        H_t=H_t,
+                        fixed_latent_representations=fixed_latent_representations,
+                        epoch=e,
+                        out_dir=out_dir,
+                        data=data
+                    )
         
         # Compute epoch time for logging
         epoch_end = time.time()
@@ -338,9 +721,9 @@ def log_hyperparameters(args, out_dir, model_info=None):
 def main():
     print("START")
     parser = argparse.ArgumentParser(description="Train a model with configurable parameters.")
-    parser.add_argument("--filename", type=str, default="new_model_test_12_convresnet_30_poses", help="Output directory name")
+    parser.add_argument("--filename", type=str, default="old_model_newtraining_30_poses", help="Output directory name")
     parser.add_argument("--zdim", type=int, default=50, help="Latent dimension size")
-    parser.add_argument("--epochs", type=int, default=2000, help="Number of training epochs")
+    parser.add_argument("--epochs", type=int, default=5000, help="Number of training epochs")
     parser.add_argument("--perturb_scale", type=float, default=0.0, help="Perturbation scale for latent functions")
     parser.add_argument("--threshold", type=float, default=0.0, help="Threshold for nearest neighbor search")
     parser.add_argument("--pos_enc_L", type=int, default=7, help="Positional encoding parameter L")
@@ -350,10 +733,10 @@ def main():
     parser.add_argument("--num_points", type=int, default=6889, help="Number of points")
     parser.add_argument("--staleness", type=int, default=5, help="How often to update IMLE samples")
     parser.add_argument("--plot_epoch", type=int, default=250, help="How often to plot results")
-    parser.add_argument("--batch_size", type=int, default=1000, help="Batch size for training")
+    parser.add_argument("--batch_size", type=int, default=250, help="Batch size for training")
     parser.add_argument("--data_dir", type=str, default='/home/rsp8/scratch/Human_Point_Clouds/', help="Data directory path")
     parser.add_argument("--clip_grad", type=float, default=1.0, help="Gradient clipping norm")
-    parser.add_argument("--scheduler", type=str, default="cosine", choices=[None, "cosine", "step", "plateau"], 
+    parser.add_argument("--scheduler", type=str, default=None, choices=[None, "cosine", "step", "plateau"], 
                         help="Learning rate scheduler type")
     parser.add_argument("--dropout", type=float, default=0.0, help="Dropout rate for the model")
     parser.add_argument("--model", type=str, default='new', help="Dropout rate for the model")
@@ -378,7 +761,7 @@ def main():
     else:
         H_t = H_theta_ResNet1D(input_channels=args.zdim + int(args.pos_enc_L * 2 * args.xdim), 
                         output_dim=output_dim,
-                        dropout_rate=args.dropout).to(device)
+                        dropout_rate=0.0).to(device)
 
     # Count parameters
     total_params = sum(p.numel() for p in H_t.parameters())
@@ -420,33 +803,33 @@ def main():
     
     #Start training with timing
     print(f"Starting training with {args.epochs} epochs...")
-    # training_start = time.time()
+    training_start = time.time()
     
-    # H_t, grad_norms, param_norms, losses = train(
-    #     H_t,
-    #     optimizer,
-    #     out_dir=save_path,
-    #     device=device,
-    #     epochs=args.epochs,
-    #     staleness=args.staleness,
-    #     perturb_scale=args.perturb_scale,
-    #     threshold=args.threshold,
-    #     pos_enc_L=args.pos_enc_L,
-    #     num_Z_samples=args.num_Z_samples,
-    #     zdim=args.zdim,
-    #     xdim=args.xdim,
-    #     num_points=num_points,
-    #     plot_epoch=args.plot_epoch,
-    #     data_dir=args.data_dir,
-    #     batch_size=args.batch_size,
-    #     clip_grad_norm=args.clip_grad,
-    #     lr_scheduler=scheduler
-    # )
+    H_t, grad_norms, param_norms, losses = train(
+        H_t,
+        optimizer,
+        out_dir=save_path,
+        device=device,
+        epochs=args.epochs,
+        staleness=args.staleness,
+        perturb_scale=args.perturb_scale,
+        threshold=args.threshold,
+        pos_enc_L=args.pos_enc_L,
+        num_Z_samples=args.num_Z_samples,
+        zdim=args.zdim,
+        xdim=args.xdim,
+        num_points=num_points,
+        plot_epoch=args.plot_epoch,
+        data_dir=args.data_dir,
+        batch_size=args.batch_size,
+        clip_grad_norm=args.clip_grad,
+        lr_scheduler=scheduler
+    )
     
-    # training_end = time.time()
-    #print(f"Training completed in {training_end - training_start:.2f} seconds")
+    training_end = time.time()
+    print(f"Training completed in {training_end - training_start:.2f} seconds")
     
-    #torch.save(H_t.state_dict(), f"training_out/Out_{args.filename}/H_t_weights.pth")
+    torch.save(H_t.state_dict(), f"training_out/Out_{args.filename}/H_t_weights.pth")
     num_points = 14400
     file_path = f"training_out/Out_{args.filename}/H_t_weights.pth"
     H_t.load_state_dict(torch.load(file_path))
