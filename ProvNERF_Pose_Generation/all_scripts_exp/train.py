@@ -355,7 +355,7 @@ def train(
         else:
             data = []
             obj_files = sorted(glob.glob(os.path.join(data_dir, '*.obj')))
-            for file_path in obj_files[4:34]:
+            for file_path in obj_files[4:24]:
                 mesh = trimesh.load(file_path)
                 vertices = torch.tensor(mesh.vertices, dtype=torch.float32)
                 vertices = vertices - vertices.mean(0)
@@ -792,7 +792,7 @@ def main():
             data = []
             obj_files = sorted(glob.glob(os.path.join(data_dir, '*.obj')))
             #print(obj_files)
-            for file_path in obj_files[4:34]:
+            for file_path in obj_files[4:24]:
                 mesh = trimesh.load(file_path)
                 vertices = torch.tensor(mesh.vertices, dtype=torch.float32)
                 vertices = vertices - vertices.mean(0)

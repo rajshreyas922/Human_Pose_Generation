@@ -22,7 +22,7 @@ class BottleneckBlock1D_LayerNorm(nn.Module):
         self.conv3 = nn.Conv1d(bottleneck_channels, out_channels, kernel_size=1, bias=False)
         self.ln3 = LayerNorm1d(out_channels)
         
-        self.relu = nn.ReLU(inplace=True)
+        self.leaky_relu = nn.LeakyReLU(0.2, inplace=True)  # Keep LeakyReLU for now
         self.downsample = downsample
         self.dropout = nn.Dropout(dropout_rate) if dropout_rate > 0 else nn.Identity()
         
@@ -37,11 +37,11 @@ class BottleneckBlock1D_LayerNorm(nn.Module):
         
         out = self.conv1(x)
         out = self.ln1(out)
-        out = self.relu(out)
+        out = self.leaky_relu(out)
         
         out = self.conv2(out)
         out = self.ln2(out)
-        out = self.relu(out)
+        out = self.leaky_relu(out)
         
         out = self.conv3(out)
         out = self.ln3(out)
@@ -57,18 +57,38 @@ class BottleneckBlock1D_LayerNorm(nn.Module):
         
         # Use learnable residual scale
         out = out * self.res_scale + identity
-        out = self.relu(out)
+        out = self.leaky_relu(out)
         
         return out
+
+class LayerNorm1d(nn.Module):
+    def __init__(self, channels, eps=1e-5):
+        super().__init__()
+        self.channels = channels
+        self.eps = eps
+        self.gamma = nn.Parameter(torch.ones(channels))
+        self.beta = nn.Parameter(torch.zeros(channels))
+    
+    def forward(self, x):
+        # x: [batch, channels, length]
+        mean = x.mean(dim=1, keepdim=True)  # [batch, 1, length]
+        var = x.var(dim=1, keepdim=True, unbiased=False)  # [batch, 1, length]
+        x_norm = (x - mean) / torch.sqrt(var + self.eps)
+        
+        # Apply learnable parameters
+        gamma = self.gamma.view(1, -1, 1)  # [1, channels, 1]
+        beta = self.beta.view(1, -1, 1)    # [1, channels, 1]
+        
+        return x_norm * gamma + beta
 
 
 class H_theta_ResNet1D_Like_Old(nn.Module):
     def __init__(self, input_dim, output_dim=3, 
                  hidden_dims=[256, 512, 1024, 2048],
-                 bottleneck_dims=[64, 128, 256, 512],
+                 bottleneck_dims=[64, 128, 256, 512],  # New: bottleneck dimensions
                  blocks_per_dim=[3, 4, 6, 3], 
                  dropout_rate=0.2, seblock=True, reduction_ratio=0.15,
-                 use_bottleneck=True):
+                 use_bottleneck=True):  # Option to toggle bottleneck
         super().__init__()
         self.seblock_enabled = seblock
         self.use_bottleneck = use_bottleneck
@@ -78,16 +98,23 @@ class H_theta_ResNet1D_Like_Old(nn.Module):
         
         # Ensure bottleneck dims match hidden dims
         if use_bottleneck and len(bottleneck_dims) != len(hidden_dims):
+            # Auto-generate bottleneck dims as 1/4 of hidden dims
             bottleneck_dims = [h // 4 for h in hidden_dims]
         
-        # Stem block with ReLU
+        # Input layer
+        # self.input_layer = nn.Sequential(
+        #     nn.Conv1d(input_dim, hidden_dims[0], kernel_size=1),
+        #     LayerNorm1d(hidden_dims[0]),
+        #     nn.LeakyReLU(0.2),
+        #     nn.Dropout(dropout_rate)
+        # )
         self.stem = nn.Sequential(
             nn.Conv1d(input_dim, hidden_dims[0]//2, kernel_size=1),
             LayerNorm1d(hidden_dims[0]//2),
-            nn.ReLU(inplace=True),
+            nn.LeakyReLU(0.2),
             nn.Conv1d(hidden_dims[0]//2, hidden_dims[0], kernel_size=1),
             LayerNorm1d(hidden_dims[0]),
-            nn.ReLU(inplace=True),
+            nn.LeakyReLU(0.2),
             nn.Dropout(dropout_rate)
         )
         
@@ -120,13 +147,14 @@ class H_theta_ResNet1D_Like_Old(nn.Module):
                         dropout_rate=dropout_rate
                     )
                 else:
-                    # Use simple block with ReLU
+                    # Use simple block (your current implementation)
                     if downsample is not None:
+                        # Need to handle dimension change
                         block = nn.ModuleDict({
                             'block': nn.Sequential(
                                 nn.Conv1d(current_dim, next_dim, kernel_size=1),
                                 LayerNorm1d(next_dim),
-                                nn.ReLU(inplace=True),
+                                nn.LeakyReLU(0.2),
                                 nn.Dropout(dropout_rate),
                                 nn.Conv1d(next_dim, next_dim, kernel_size=1),
                                 LayerNorm1d(next_dim),
@@ -140,7 +168,7 @@ class H_theta_ResNet1D_Like_Old(nn.Module):
                             'block': nn.Sequential(
                                 nn.Conv1d(next_dim, next_dim, kernel_size=1),
                                 LayerNorm1d(next_dim),
-                                nn.ReLU(inplace=True),
+                                nn.LeakyReLU(0.2),
                                 nn.Dropout(dropout_rate),
                                 nn.Conv1d(next_dim, next_dim, kernel_size=1),
                                 LayerNorm1d(next_dim),
@@ -178,7 +206,7 @@ class H_theta_ResNet1D_Like_Old(nn.Module):
                     if block['se_block'] is not None:
                         out = block['se_block'](out)
                     out = out * block['res_scale'] + residual
-                    x = F.relu(out, inplace=True)
+                    x = F.leaky_relu(out, 0.2)
         
         x = self.dropout(x)
         x = self.final_layer(x)
