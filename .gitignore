@@ -14,3 +14,6 @@ PAPR/data/TanksAndTemple
 Human_Pose_Generation/ProvNERF_Pose_Generation/all_scripts_experiment/
 *.txt
 *.pt
+__pycache__
+leo_bs
+.vscode
