@@ -108,6 +108,7 @@ class H_theta_ResNet1D_Like_Old(nn.Module):
         #     nn.LeakyReLU(0.2),
         #     nn.Dropout(dropout_rate)
         # )
+        
         self.stem = nn.Sequential(
             nn.Conv1d(input_dim, hidden_dims[0]//2, kernel_size=1),
             LayerNorm1d(hidden_dims[0]//2),

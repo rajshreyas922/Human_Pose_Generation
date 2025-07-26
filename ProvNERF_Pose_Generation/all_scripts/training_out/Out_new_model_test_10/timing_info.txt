@@ -1,8 +1,0 @@
-Total training time: 2703.7519 s
-Total time spent generating latent functions (Zs): 748.8814 s
-Total time spent perturbing and selecting IMLE points: 65.4203 s
-Total time spent reusing stored IMLE points: 0.0168 s
-Total time spent in forward/backward passes: 1789.1429 s
-Average time per epoch: 1.3519 s
-Final loss value: -1.9065503737517622
-Best loss value: -1.9581639522158925
