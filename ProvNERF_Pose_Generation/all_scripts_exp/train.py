@@ -438,7 +438,9 @@ def train(
                         Zxs[i] = z
                     
                     # Generate and find nearest neighbors
+                    print("INPUT TO GEN", Zxs.shape) #Leo : [1, 750, 48]
                     generated = H_t(Zxs)
+                    print("GEN SHAPE", generated.shape) #Leo : [750, 3]
                     imle_nns = [find_nns(d, generated, threshold=threshold) for d in data_batch]
                 
                 z_gen_end = time.time()
@@ -662,7 +664,7 @@ def main():
     print("START")
     parser = argparse.ArgumentParser(description="Train a model with configurable parameters.")
     parser.add_argument("--filename", type=str, default="old_with_1D", help="Output directory name")
-    parser.add_argument("--zdim", type=int, default=20, help="Latent dimension size")
+    parser.add_argument("--zdim", type=int, default=10, help="Latent dimension size")
     parser.add_argument("--epochs", type=int, default=5000, help="Number of training epochs")
     parser.add_argument("--perturb_scale", type=float, default=0.0, help="Perturbation scale for latent functions")
     parser.add_argument("--threshold", type=float, default=0.0, help="Threshold for nearest neighbor search")
