@@ -3,10 +3,7 @@ dataset:
   path: "./data/nerf_synthetic/chair/"
 geoms:
   points:
-    init_num: 10000
-training:
-  add_start: 10000
-  add_stop: 50000
+    init_num: 576
 eval:
   dataset:
     path: "./data/nerf_synthetic/chair/"

@@ -1,7 +1,7 @@
 index: "body_01"
 dataset:
   type: "humbi"
-  path: "./data/humbi/body_01"
+  path: "./data/body/00000001"
 geoms:
   points:
     init_num: 10000
@@ -11,11 +11,11 @@ training:
 eval:
   dataset:
     type: "humbi"
-    path: "./data/humbi/body_01"
+    path: "./data/body/00000001"
   img_idx: 0
 test:
   # load_path: "checkpoints/chair.pth"
   datasets:
     - name: "testset"
       type: "humbi"
-      path: "./data/humbi/body_01"
+      path: "./data/body/00000001"

@@ -270,44 +270,39 @@ def create_learning_rate_fn(optimizer, max_steps, args, debug=False):
     warmup_fn = lr_scheduler.LinearLR(optimizer,
                                       start_factor=warmup_start_factor,
                                       end_factor=1.0,
-                                      total_iters=args.warmup,
-                                      verbose=debug)
+                                      total_iters=args.warmup)
 
     if args.type == "linear":
         decay_fn = lr_scheduler.LinearLR(optimizer,
                                          start_factor=1.0,
                                          end_factor=0.,
-                                         total_iters=max_steps - args.warmup,
-                                         verbose=debug)
+                                         total_iters=max_steps - args.warmup)
         schedulers = [warmup_fn, decay_fn]
         milestones = [args.warmup]
 
     elif args.type == "cosine":
         cosine_steps = max(max_steps - args.warmup, 1)
         decay_fn = lr_scheduler.CosineAnnealingLR(optimizer,
-                                                  T_max=cosine_steps,
-                                                  verbose=debug)
+                                                  T_max=cosine_steps)
         schedulers = [warmup_fn, decay_fn]
         milestones = [args.warmup]
 
     elif args.type == "cosine-hlfperiod":
         cosine_steps = max(max_steps - args.warmup, 1) * 2
         decay_fn = lr_scheduler.CosineAnnealingLR(optimizer,
-                                                  T_max=cosine_steps,
-                                                  verbose=debug)
+                                                  T_max=cosine_steps)
         schedulers = [warmup_fn, decay_fn]
         milestones = [args.warmup]
 
     elif args.type == "exp":
         decay_fn = lr_scheduler.ExponentialLR(optimizer,
-                                              gamma=args.gamma,
-                                              verbose=debug)
+                                              gamma=args.gamma)
         schedulers = [warmup_fn, decay_fn]
         milestones = [args.warmup]
 
     elif args.type == "stop":
         decay_fn = lr_scheduler.StepLR(
-            optimizer, step_size=1, gamma=0.0, verbose=debug)
+            optimizer, step_size=1, gamma=0.0)
         schedulers = [warmup_fn, decay_fn]
         milestones = [args.warmup]
 
@@ -316,8 +311,7 @@ def create_learning_rate_fn(optimizer, max_steps, args, debug=False):
 
     schedule_fn = lr_scheduler.SequentialLR(optimizer,
                                             schedulers=schedulers,
-                                            milestones=milestones,
-                                            verbose=debug)
+                                            milestones=milestones)
 
     return schedule_fn
 

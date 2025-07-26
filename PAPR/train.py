@@ -19,6 +19,7 @@ from dataset import get_dataset, get_loader
 from models import get_model, get_loss
 
 
+
 def parse_args():
     parser = argparse.ArgumentParser(description="PAPR")
     parser.add_argument('--opt', type=str, default="", help='Option file path')
@@ -158,6 +159,15 @@ def train_step(step, model, device, dataset, batch, loss_fn, args):
     tgt = tgt.to(device)
     c2w = c2w.to(device)
 
+    # rayo.shape
+    # torch.Size([1, 3])
+    # rayd.shape
+    # torch.Size([1, 160, 160, 3])
+    # tgt.shape
+    # torch.Size([1, 160, 160, 3])
+    # c2w.shape
+    # torch.Size([4, 4])
+
     model.clear_grad()
     out = model(rayo, rayd, c2w, step)
     out = model.last_act(out)
@@ -202,7 +212,7 @@ def train_and_eval(start_step, model, device, dataset, eval_dataset, losses, arg
                     cur_prune_thresh = args.training.prune_thresh_list[bisect.bisect_left(args.training.prune_steps_list, step)]
                     model.clear_optimizer()
                     model.clear_scheduler()
-                    num_pruned = model.prune_points(cur_prune_thresh)
+                    # num_pruned = model.prune_points(cur_prune_thresh)
                     model.init_optimizers(step)
                     pruned = True
                     print("Step %d: Pruned %d points, prune threshold %f" % (step, num_pruned, cur_prune_thresh))
@@ -210,7 +220,7 @@ def train_and_eval(start_step, model, device, dataset, eval_dataset, losses, arg
                 elif step % args.training.prune_steps == 0:
                     model.clear_optimizer()
                     model.clear_scheduler()
-                    num_pruned = model.prune_points(args.training.prune_thresh)
+                    # num_pruned = model.prune_points(args.training.prune_thresh)
                     model.init_optimizers(step)
                     pruned = True
                     print("Step %d: Pruned %d points" % (step, num_pruned))
@@ -224,7 +234,7 @@ def train_and_eval(start_step, model, device, dataset, eval_dataset, losses, arg
                     if cur_add_num > 0:
                         model.clear_optimizer()
                         model.clear_scheduler()
-                        num_added = model.add_points(cur_add_num)
+                        # num_added = model.add_points(cur_add_num)
                         model.init_optimizers(step)
                         model.added_points = True
                         print("Step %d: Added %d points" % (step, num_added))
@@ -237,7 +247,7 @@ def train_and_eval(start_step, model, device, dataset, eval_dataset, losses, arg
                 if cur_add_num > 0:
                     model.clear_optimizer()
                     model.clear_scheduler()
-                    num_added = model.add_points(args.training.add_num)
+                    # num_added = model.add_points(args.training.add_num)
                     model.init_optimizers(step)
                     model.added_points = True
                     print("Step %d: Added %d points" % (step, num_added))
@@ -296,7 +306,7 @@ def main(args, eval_args, resume):
     log_dir = os.path.join(args.save_dir, args.index)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    model = get_model(args, device)
+    model = get_model(args)
     dataset = get_dataset(args.dataset, mode="train")
     eval_dataset = get_dataset(eval_args.dataset, mode="test")
     model = model.to(device)
