@@ -13,3 +13,5 @@ PAPR/data/nerf_synthetic
 PAPR/data/TanksAndTemple
 **/leo_bs/
 __pycache__
+*.txt
+*.pt
