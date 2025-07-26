@@ -8,103 +8,11 @@ from .utils import normalize_vector, create_learning_rate_fn, add_points_knn, ac
 from .mlp import get_mapping_mlp
 from .attn import get_proximity_attention_layer
 from .renderer import get_generator
-from .Provmodels import H_theta_ResNet1D_Like_Old
 
-
-class H_theta_Res(nn.Module):
-    def __init__(self, input_dim, output_dim=3, hidden_dim=1024):
-        super().__init__()
-        self.input_layer = nn.Sequential(
-            nn.Linear(input_dim, hidden_dim),
-            nn.LayerNorm(hidden_dim),
-            nn.LeakyReLU(0.2) 
-        )
-        
-        self.res_blocks = nn.ModuleList([
-            nn.Sequential(
-                nn.Linear(hidden_dim, hidden_dim),
-                nn.LayerNorm(hidden_dim),
-                nn.LeakyReLU(0.2),  
-                nn.Linear(hidden_dim, hidden_dim),
-                nn.LayerNorm(hidden_dim),
-            ) for _ in range(12) 
-        ])
-
-        self.res_scales = nn.ParameterList([
-            nn.Parameter(torch.tensor(0.5)) for _ in range(len(self.res_blocks))  # Scale factors for residual connections
-        ])
-        
-        self.final_layer = nn.Linear(hidden_dim, output_dim)
-
-    def forward(self, x):
-        x = self.input_layer(x)
-
-        for i, block in enumerate(self.res_blocks):
-            residual = x
-            x = block(x)
-            x = x * self.res_scales[i] + residual
-            x = F.leaky_relu(x, 0.2)  
-        
-        return self.final_layer(x)
-
-
-def generate_NN_latent_function(xdim=1, zdim=2, bias=0):
-    class NN(nn.Module):
-        def __init__(self, input_dim, output_dim):
-            super(NN, self).__init__()
-            self.fc1 = nn.Linear(input_dim, 10)
-            self.fc2 = nn.Linear(10, 10)
-            self.fc3 = nn.Linear(10, 10)
-            #self.fc4 = nn.Linear(10, 10)
-            self.fc5 = nn.Linear(10, output_dim)
-
-
-            for param in self.parameters():
-                param.requires_grad = True
-
-        def forward(self, x):
-            inp = x
-            x1 = torch.relu(self.fc1(x))
-            #print("x1:", x1.norm(p = 2, dim = 1))
-            x2 = torch.relu(self.fc2(x1))
-            #print("x2:", x2.norm(p = 2, dim = 1))
-            x3 = torch.relu(self.fc3(x2))
-            #print("x3:", x3.norm(p = 2, dim = 1))
-            #print("--"*100)
-            #x4 = torch.relu(self.fc4(x3))
-            x5 = self.fc5(x3+x2+x1)
-            x = torch.cat((x5/100, inp), dim = 1)
-            return x
-
-    def weights_init_normal(m):
-        if isinstance(m, nn.Linear):
-            nn.init.normal_(m.weight, mean=0, std=1)
-            if m.bias is not None:
-                nn.init.constant_(m.bias, val=1)
-
-    net = NN(xdim, zdim)
-    net.apply(weights_init_normal)
-
-    return net
-
-def pos_encoder(x, L):
-
-    _, n = x.shape
-
-    encoding = []
-    alpha = 1.0
-
-    for i in range(n):
-        for l in range(L):
-            if l > 6:
-                alpha = 0.5
-            encoding.append(alpha*torch.sin(1.1*(2**l) * torch.pi * x[:, i:i+1]))
-            encoding.append(alpha*torch.cos(1.1*(2**l) * torch.pi * x[:, i:i+1]))
-    encoded_x = torch.cat(encoding, dim=-1)
-    return encoded_x
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
 
 class PAPR(nn.Module):
     def __init__(self, args, device='cuda'):
@@ -112,59 +20,6 @@ class PAPR(nn.Module):
         self.args = args
         self.eps = args.eps
         self.device = device
-
-        num_points = 576
-        # zdim = 3
-        # xdim = 2
-        # pos_enc_L = 11
-
-        zdim = 10
-        xdim = 2
-        pos_enc_L = 7
-
-        # Load the pre-trained H_t network
-        self.H_t = H_theta_ResNet1D_Like_Old(input_dim=zdim + int(pos_enc_L * 2 * xdim), 
-                        output_dim=3,
-                        dropout_rate=0.0,
-                        hidden_dims=[256, 512, 1024, 2048],
-                        blocks_per_dim=[3, 4, 6, 3],
-                        seblock = True,
-                        use_bottleneck = True).to(device)
-        # self.H_t = H_theta_Res(input_dim=zdim + int(pos_enc_L * 2 * xdim)).to(device)
-
-        file_path = f"H_t_weights_new.pth"
-        state_dict = torch.load(file_path, map_location=device)  # Use device variable
-        self.H_t.load_state_dict(state_dict)
-        self.H_t.eval()
-
-        x1 = torch.linspace(-0.05, 0.05, int(np.sqrt(num_points)))
-        x2 = torch.linspace(-0.05, 0.05, int(np.sqrt(num_points)))
-        grid_x1, grid_x2 = torch.meshgrid(x1, x2, indexing='ij')
-        x = torch.stack((grid_x1, grid_x2), dim=-1).reshape(-1, 2).to(device)
-        z_in = pos_encoder(x, L=pos_enc_L).to(device)
-
-        self.register_buffer('x_coords', x)
-        self.register_buffer('z_in', z_in)
-
-        # The learnable latent function network
-        self.zs = generate_NN_latent_function(xdim=z_in.shape[1], zdim=zdim, bias=1).to(device)
-        self.inital_in = nn.Parameter(z_in, requires_grad=False)
-
-        for param in self.zs.parameters():
-            param.requires_grad = True
-
-
-        print("=== Checking if Zs parameters are trainable ===")
-        for name, param in self.zs.named_parameters():
-            print(f"{name}: requires_grad={param.requires_grad}, shape={param.shape}")
-
-        
-        total_params = sum(p.numel() for p in self.zs.parameters() if p.requires_grad)
-        print(f"Total trainable parameters in z: {total_params}")
-        print("===============================================")
-
-        for param in self.H_t.parameters():
-            param.requires_grad = False
 
         self.use_amp = args.use_amp
         self.amp_dtype = torch.float16 if args.amp_dtype == 'float16' else torch.bfloat16
@@ -181,31 +36,27 @@ class PAPR(nn.Module):
 
         self.coord_scale = args.dataset.coord_scale
 
-        # if point_opt.load_path:
-        #     if point_opt.load_path.endswith('.pth') or point_opt.load_path.endswith('.pt'):
-        #         points = torch.load(point_opt.load_path, map_location='cpu')
-        #         points = np.asarray(points).astype(np.float32)
-        #         np.random.shuffle(points)
-        #         points = points[:args.max_num_pts, :]
-        #         points = torch.from_numpy(points).float()
-        #     print("Loaded points from {}, shape: {}, dtype {}".format(point_opt.load_path, points.shape, points.dtype))
-        #     print("Loaded points scale: ", points[:, 0].min(), points[:, 0].max(), points[:, 1].min(), points[:, 1].max(), points[:, 2].min(), points[:, 2].max())
-        # else:
-        #     # Initialize point positions
-        #     pt_init_center = [i * self.coord_scale for i in point_opt.init_center]
-        #     pt_init_scale = [i * self.coord_scale for i in point_opt.init_scale]
-        #     if point_opt.init_type == 'sphere': # initial points on a sphere
-        #         points = self._sphere_pc(pt_init_center, point_opt.init_num, pt_init_scale)
-        #     elif point_opt.init_type == 'cube': # initial points in a cube
-        #         points = self._cube_normal_pc(pt_init_center, point_opt.init_num, pt_init_scale)
-        #     else:
-        #         raise NotImplementedError("Point init type [{:s}] is not found".format(point_opt.init_type))
-        #     print("Initialized points scale: ", points[:, 0].min(), points[:, 0].max(), points[:, 1].min(), points[:, 1].max(), points[:, 2].min(), points[:, 2].max())
-        
-        points = self.H_t(self.zs(self.inital_in).unsqueeze(0)).to(device)
-        self.points = points * 10
-        # # points not learnable, learnable parameters are z, modify later
-        # self.points = torch.nn.Parameter(points, requires_grad=True)
+        if point_opt.load_path:
+            if point_opt.load_path.endswith('.pth') or point_opt.load_path.endswith('.pt'):
+                points = torch.load(point_opt.load_path, map_location='cpu')
+                points = np.asarray(points).astype(np.float32)
+                np.random.shuffle(points)
+                points = points[:args.max_num_pts, :]
+                points = torch.from_numpy(points).float()
+            print("Loaded points from {}, shape: {}, dtype {}".format(point_opt.load_path, points.shape, points.dtype))
+            print("Loaded points scale: ", points[:, 0].min(), points[:, 0].max(), points[:, 1].min(), points[:, 1].max(), points[:, 2].min(), points[:, 2].max())
+        else:
+            # Initialize point positions
+            pt_init_center = [i * self.coord_scale for i in point_opt.init_center]
+            pt_init_scale = [i * self.coord_scale for i in point_opt.init_scale]
+            if point_opt.init_type == 'sphere': # initial points on a sphere
+                points = self._sphere_pc(pt_init_center, point_opt.init_num, pt_init_scale)
+            elif point_opt.init_type == 'cube': # initial points in a cube
+                points = self._cube_normal_pc(pt_init_center, point_opt.init_num, pt_init_scale)
+            else:
+                raise NotImplementedError("Point init type [{:s}] is not found".format(point_opt.init_type))
+            print("Initialized points scale: ", points[:, 0].min(), points[:, 0].max(), points[:, 1].min(), points[:, 1].max(), points[:, 2].min(), points[:, 2].max())
+        self.points = torch.nn.Parameter(points, requires_grad=True)
 
         # Initialize point influence scores
         self.points_influ_scores = torch.nn.Parameter(torch.ones(
@@ -266,29 +117,23 @@ class PAPR(nn.Module):
     def init_optimizers(self, total_steps):
         lr_opt = self.args.training.lr
         print("LR factor: ", lr_opt.lr_factor)
-        # optimizer_points = torch.optim.Adam([self.points], lr=lr_opt.points.base_lr * lr_opt.lr_factor)
+        optimizer_points = torch.optim.Adam([self.points], lr=lr_opt.points.base_lr * lr_opt.lr_factor)
         optimizer_attn = torch.optim.Adam(self.proximity_attn.parameters(), lr=lr_opt.attn.base_lr * lr_opt.lr_factor, weight_decay=lr_opt.attn.weight_decay)
         optimizer_points_influ_scores = torch.optim.Adam([self.points_influ_scores], lr=lr_opt.points_influ_scores.base_lr * lr_opt.lr_factor, weight_decay=lr_opt.points_influ_scores.weight_decay)
 
         debug = False
-        # lr_scheduler_points = create_learning_rate_fn(optimizer_points, self.args.training.steps, lr_opt.points, debug=debug)
+        lr_scheduler_points = create_learning_rate_fn(optimizer_points, self.args.training.steps, lr_opt.points, debug=debug)
         lr_scheduler_attn = create_learning_rate_fn(optimizer_attn, self.args.training.steps, lr_opt.attn, debug=debug)
         lr_scheduler_points_influ_scores = create_learning_rate_fn(optimizer_points_influ_scores, self.args.training.steps, lr_opt.points_influ_scores, debug=debug)
 
-
-        optimizer_zs = torch.optim.Adam(self.zs.parameters(), lr=lr_opt.points.base_lr * lr_opt.lr_factor)
-        lr_scheduler_zs = create_learning_rate_fn(optimizer_zs, self.args.training.steps, lr_opt.points, debug=debug)
-
         self.optimizers = {
-            # "points": optimizer_points,
-            "zs": optimizer_zs, 
+            "points": optimizer_points,
             "attn": optimizer_attn,
             "points_influ_scores": optimizer_points_influ_scores,
         }
 
         self.schedulers = {
-            # "points": lr_scheduler_points,
-            "zs": lr_scheduler_zs, 
+            "points": lr_scheduler_points,
             "attn": lr_scheduler_attn,
             "points_influ_scores": lr_scheduler_points_influ_scores,
         }
@@ -464,7 +309,6 @@ class PAPR(nn.Module):
         
         return proj_dists, dists_to_rays, proj, D
 
-    # def _get_points(self, points, rays_o, rays_d, c2w, step=-1):
     def _get_points(self, rays_o, rays_d, c2w, step=-1):
         """
         Select the top-k points with the smallest distance to the rays
@@ -477,20 +321,7 @@ class PAPR(nn.Module):
             selected_points: (N, H, W, select_k, 3)
             select_k_ind: (N, H, W, select_k)
         """
-        # got from parameter
-        # points = self.H_t(self.zs(self.inital_in))
-        points_raw = self.H_t(self.zs(self.inital_in).unsqueeze(0))
-        # points_min = points_raw.min()
-        # points_max = points_raw.max()
-
-        # # Normalize to [-1, 1], then scale to [-10, 10]
-        # points = 2 * (points_raw - points_min) / (points_max - points_min + 1e-8) - 1
-        points = points_raw * 10
-        self.points = points
-
-        
-
-        # points = self.points
+        points = self.points
         N, H, W, _ = rays_d.shape
         if self.select_k >= points.shape[0] or self.select_k < 0:
             select_k_ind = torch.arange(points.shape[0], device=points.device).expand(N, H, W, -1)
@@ -571,7 +402,7 @@ class PAPR(nn.Module):
         k_type = self.args.models.attn.k_type
         k_L = self.args.models.attn.embed.k_L
         if k_type == 1:
-            key = [points, vec_p2o, vec_p2r]
+            key = [points.detach(), vec_p2o, vec_p2r]
         else:
             raise ValueError('Invalid key type')
         assert len(key) == (len(k_L))
@@ -606,17 +437,9 @@ class PAPR(nn.Module):
         return key, query, value, k_extra, q_extra, v_extra
 
     def step(self, step=-1):
-        for name, optimizer in self.optimizers.items():
+        for _, optimizer in self.optimizers.items():
             if optimizer is not None:
-                # Check if any parameter has a non-None grad
-                any_grad = any(p.grad is not None for group in optimizer.param_groups for p in group['params'])
-                if any_grad:
-                    try:
-                        self.scaler.step(optimizer)
-                    except AssertionError as e:
-                        print(f"[AMP Warning] Skipping optimizer '{name}': {e}")
-                else:
-                    print(f"[Skip] No gradients for optimizer '{name}', skipping AMP step.")
+                self.scaler.step(optimizer)
 
         for _, scheduler in self.schedulers.items():
             if scheduler is not None:
@@ -677,8 +500,7 @@ class PAPR(nn.Module):
         
             if step % 200 == 0:
                 print(shading_code.min().item(), shading_code.max().item(), gamma.min().item(), gamma.max().item(), beta.min().item(), beta.max().item())
-        # produce points
-        # pass to get points
+
         points, select_k_ind = self._get_points(rays_o, rays_d, c2w, step)
         key, query, value, k_extra, q_extra, v_extra = self._get_kqv(rays_o, rays_d, points, c2w, select_k_ind, step)
         N, H, W, _ = rays_d.shape

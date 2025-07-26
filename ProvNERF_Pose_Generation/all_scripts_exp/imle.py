@@ -103,6 +103,36 @@ def find_nns(Y, G, threshold=0.0, disp=False):
 
     return min_idx, min_val.item()
 
+def f_loss(Y, G):
+    d = torch.cdist(Y, G, p=2)**2
+    diff = d.min(dim=2)[0].mean(dim=1) + d.min(dim=1)[0].mean(dim=1)
+    return diff.mean()
+
+def interpolation_consistency_loss(model, z1, z2, positional_encoding, alpha=None):
+    """Interpolation loss using Chamfer distance"""
+    # Random interpolation factor if not specified
+    if alpha is None:
+        alpha = torch.rand(1).item()
+    
+    # Generate poses from endpoints
+    with torch.no_grad():  # Don't need gradients for these
+        pose1 = model(torch.cat([positional_encoding, z1], dim=-1))
+        pose2 = model(torch.cat([positional_encoding, z2], dim=-1))
+        
+        # Expected interpolation (reference point cloud Y)
+        expected_pose = alpha * pose1 + (1 - alpha) * pose2  # [batch, n_points, 3]
+    
+    # Generate from interpolated latent (generated point cloud G)
+    z_interp = alpha * z1 + (1 - alpha) * z2
+    pose_interp = model(torch.cat([positional_encoding, z_interp], dim=-1))  # [batch, n_points, 3]
+    
+    # Use your Chamfer distance loss
+    # f_loss expects Y and G to have shape matching your implementation
+    chamfer_loss = f_loss(expected_pose, pose_interp)
+    
+    return chamfer_loss
+
+
 # def find_nns(Y, G, threshold=0.0, disp=False, num_samples=256):
 #     """
 #     Y: (1, N, D) - reference curve
@@ -150,125 +180,3 @@ def find_nns(Y, G, threshold=0.0, disp=False):
 
 #     return min_idx, min_val.item()
 
-
-def f_loss(Y, G):
-    d = torch.cdist(Y, G, p=2)**2
-    diff = d.min(dim=2)[0].mean(dim=1) + d.min(dim=1)[0].mean(dim=1)
-    return diff.mean()
-
-
-# def knn(x, k):
-#     """Find k nearest neighbors for each point in x."""
-#     # x shape: (batch_size, num_points, num_dims)
-#     inner = -2 * torch.matmul(x, x.transpose(2, 1))
-#     xx = torch.sum(x**2, dim=-1, keepdim=True)
-#     # pairwise_distance shape: (batch_size, num_points, num_points)
-#     pairwise_distance = xx + inner + xx.transpose(2, 1)
-#     # Find k+1 neighbors because the point itself is included
-#     # indices shape: (batch_size, num_points, k)
-#     # Exclude self (index 0) which has distance 0
-#     idx = pairwise_distance.topk(k=k+1, dim=-1, largest=False)[1][:, :, 1:]
-#     return idx
-
-# def gather_neighbors(x, idx):
-#     """Gather neighbor points based on indices."""
-#     # x shape: (batch_size, num_points, num_dims)
-#     # idx shape: (batch_size, num_points, k)
-#     batch_size, num_points, k = idx.size()
-#     num_dims = x.size(2)
-
-#     # Create indices for batch dimension
-#     batch_idx = torch.arange(batch_size, device=x.device).view(-1, 1, 1).expand(-1, num_points, k)
-#     # Use advanced indexing to gather neighbors
-#     # neighbors shape: (batch_size, num_points, k, num_dims)
-#     neighbors = x[batch_idx, idx, :]
-#     return neighbors
-
-# def laplacian_loss(point_cloud, k=10):
-#     """
-#     Computes the Laplacian smoothing loss for the input point cloud.
-#     Encourages each point to be near the centroid of its k neighbors within the cloud.
-
-#     Args:
-#         point_cloud (torch.Tensor): The point cloud to smooth (batch_size, num_points, num_dims).
-#         k (int): Number of nearest neighbors to consider.
-
-#     Returns:
-#         torch.Tensor: Laplacian loss scalar.
-#     """
-#     # point_cloud shape: (B, N, D) e.g., (16, 1024, 3)
-#     idx = knn(point_cloud, k) # (B, N, k)
-#     neighbors = gather_neighbors(point_cloud, idx) # (B, N, k, D)
-
-#     # Calculate the centroid of neighbors
-#     centroid = torch.mean(neighbors, dim=2) # (B, N, D)
-
-#     # Calculate the squared distance between each point and its neighbor centroid
-#     laplacian_diff = point_cloud - centroid # (B, N, D)
-#     laplacian_norm_sq = torch.sum(laplacian_diff**2, dim=2) # (B, N)
-
-#     # Average over points and then over batch
-#     loss = torch.mean(laplacian_norm_sq, dim=1) # (B,)
-#     return loss.mean() # scalar
-
-# # --- Original Chamfer Loss (using Y=GT, G=Pred terminology) ---
-# def chamfer_loss_f(Y_gt, G_pred):
-#     """
-#     Computes Chamfer Distance between Y_gt (ground truth) and G_pred (prediction).
-
-#     Args:
-#         Y_gt (torch.Tensor): Ground truth point cloud (B, N_y, D).
-#         G_pred (torch.Tensor): Predicted point cloud (B, N_g, D).
-
-#     Returns:
-#         torch.Tensor: Chamfer distance scalar.
-#     """
-#     # d shape: (B, N_y, N_g)
-#     d = torch.cdist(Y_gt, G_pred, p=2)**2
-#     # Find nearest in G_pred for each point in Y_gt -> how well Y is covered by G
-#     min_dist_y_g = d.min(dim=2)[0] # (B, N_y)
-#     # Find nearest in Y_gt for each point in G_pred -> how well G covers Y
-#     min_dist_g_y = d.min(dim=1)[0] # (B, N_g)
-#     # Original definition sums the means
-#     loss_term1 = min_dist_y_g.mean(dim=1) # (B,)
-#     loss_term2 = min_dist_g_y.mean(dim=1) # (B,)
-#     diff = loss_term1 + loss_term2 # (B,)
-#     return diff.mean() # scalar
-
-# # --- Combined Loss ---
-# def combined_loss_smooth_generated(Y_gt, G_pred, k=10, lambda_laplacian=0.1):
-#     """
-#     Combines Chamfer distance (fidelity) with Laplacian smoothing regularization
-#     applied to the generated point cloud G_pred.
-
-#     Args:
-#         Y_gt (torch.Tensor): Ground truth point cloud (B, N_y, D).
-#         G_pred (torch.Tensor): Generated/Predicted point cloud (B, N_g, D).
-#         k (int): Number of neighbors for Laplacian loss.
-#         lambda_laplacian (float): Weighting factor for the Laplacian loss.
-
-#     Returns:
-#         torch.Tensor: Combined loss scalar.
-#     """
-#     # Fidelity term: How close is the prediction G to the ground truth Y?
-#     fidelity_loss = chamfer_loss_f(Y_gt, G_pred)
-
-#     # Regularization term: How smooth is the prediction G internally?
-#     smoothing_loss = laplacian_loss(G_pred, k) # Apply to G_pred!
-
-#     # Combine the losses
-#     total_loss = fidelity_loss + lambda_laplacian * smoothing_loss
-#     return total_loss
-
-
-# def diffs(Y, G):
-
-#     weighted_diffs = (G - Y)**2
-#     diffs = torch.sum(weighted_diffs, dim=2)
-#     return diffs
-
-# def f_loss(Y, G):
-#     diff = diffs(Y,G)
-#     point_loss_mean = diff.mean(dim=1)
-#     curve_loss_mean = point_loss_mean.mean(dim=0)
-#     return curve_loss_mean
