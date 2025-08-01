@@ -203,7 +203,7 @@ class PAPR(nn.Module):
         #     print("Initialized points scale: ", points[:, 0].min(), points[:, 0].max(), points[:, 1].min(), points[:, 1].max(), points[:, 2].min(), points[:, 2].max())
         
         points = self.H_t(self.zs(self.inital_in).unsqueeze(0)).to(device)
-        self.points = points * 10
+        self.points = points.squeeze(0) * 10
         # # points not learnable, learnable parameters are z, modify later
         # self.points = torch.nn.Parameter(points, requires_grad=True)
 
@@ -485,7 +485,7 @@ class PAPR(nn.Module):
 
         # # Normalize to [-1, 1], then scale to [-10, 10]
         # points = 2 * (points_raw - points_min) / (points_max - points_min + 1e-8) - 1
-        points = points_raw * 10
+        points = points_raw.squeeze(0) * 10
         self.points = points
 
         
